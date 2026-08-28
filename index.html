@@ -46,6 +46,11 @@ window.onerror = function(message, source, lineno, colno, error) {
       box-sizing: border-box
     }
 
+    html, body {
+      overflow-x: hidden;
+      max-width: 100vw;
+    }
+
     body {
       margin: 0;
       background: var(--bg);
@@ -3595,7 +3600,7 @@ window.onerror = function(message, source, lineno, colno, error) {
 
       document.querySelector('.content').innerHTML = `
         <div style="display:flex; justify-content:center; align-items:flex-start; min-height:100vh; padding-top:40px;">
-          <div style="background:var(--card); padding:30px; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.1); width:350px; text-align:center;">
+          <div style="background:var(--card); padding:30px; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.1); width:100%; max-width:350px; text-align:center; box-sizing:border-box;">
             <div style="display:flex;justify-content:center;margin-bottom:15px;color:var(--green)">
               <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
             </div>
