@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <!-- saved from url=(0055)file:///E:/XPREMIUM/DU%20AN%20KQ/quanlykhoquy%20v1.html -->
 <html lang="vi"><head>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -839,7 +839,34 @@ window.onerror = function(message, source, lineno, colno, error) {
       display: none
     }
 
+    .bottom-nav {
+      display: none;
+    }
+
     @media(max-width:860px) {
+      .bottom-nav {
+        display: flex;
+        position: fixed;
+        bottom: 0; left: 0; width: 100%;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-top: 1px solid var(--line);
+        z-index: 50;
+        padding-bottom: env(safe-area-inset-bottom);
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+        justify-content: space-around;
+      }
+      .b-navbtn {
+        flex: 1;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        padding: 10px 4px; background: transparent; border: none; color: var(--gray); gap: 4px; transition: 0.2s;
+        cursor: pointer;
+      }
+      .b-navbtn svg { width: 22px; height: 22px; }
+      .b-navbtn span { font-size: 10.5px; font-weight: 600; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; max-width: 100%; }
+      .b-navbtn.active { color: var(--green); }
+      .b-navbtn.active svg { transform: translateY(-2px); }
+
       aside {
         position: fixed;
         left: 0;
@@ -859,7 +886,7 @@ window.onerror = function(message, source, lineno, colno, error) {
       }
 
       .content {
-        padding: 16px 14px 50px
+        padding: 16px 14px calc(70px + env(safe-area-inset-bottom)) !important
       }
 
       .fgrid {
@@ -1256,6 +1283,9 @@ window.onerror = function(message, source, lineno, colno, error) {
 
     </aside>
 
+    <!-- ================= BOTTOM NAV ================= -->
+    <nav id="bottom-nav" class="bottom-nav"></nav>
+
     <!-- ================= NỘI DUNG ================= -->
     <div class="content">
       <div class="topbar">
@@ -1275,6 +1305,9 @@ window.onerror = function(message, source, lineno, colno, error) {
           <input type="text" id="search" list="unit-list" placeholder="Tìm kiếm hoặc chọn đơn vị..." oninput="onSearch(this.value)" onclick="this.value=''; onSearch('')" autocomplete="off">
           <datalist id="unit-list"></datalist>
         </div>
+        <button class="iconbtn-top" onclick="syncToGist()" title="Đồng bộ đám mây" style="color:var(--green)">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></svg>
+        </button>
         <div class="avatar">KQ</div>
       </div>
 
@@ -2228,25 +2261,28 @@ window.onerror = function(message, source, lineno, colno, error) {
     function renderNav() {
       document.getElementById('nav').innerHTML = TABS.map(t =>
         `<button class="navbtn ${tab === t.id ? 'active' : ''}" onclick="switchTab('${t.id}')">${ICONS[t.icon]}<span>${t.label}</span></button>`).join('');
+      
+      const bNav = document.getElementById('bottom-nav');
+      if (bNav) {
+        const bTabs = [
+           { id: 'tongquan', label: 'T.quan', icon: 'dash' },
+           ...TABS.slice(0, 3),
+           { id: 'saoluu', label: 'Menu', icon: 'redo' }
+        ];
+        bNav.innerHTML = bTabs.map(t => {
+          let cleanLabel = t.label.replace(/^\d\.\s/, '');
+          return `<button class="b-navbtn navbtn-mobile ${tab === t.id ? 'active' : ''}" onclick="switchTab('${t.id}', this)" data-id="${t.id}">${ICONS[t.icon]}<span>${cleanLabel}</span></button>`;
+        }).join('');
+      }
     }
-        function switchTab(id, btnMobile = null) {
+    function switchTab(id, btnMobile = null) {
       tab = id; 
       const sb = document.getElementById('sidebar');
       if (sb) sb.classList.remove('open');
       
-      // Update mobile nav active states
       document.querySelectorAll('.navbtn-mobile').forEach(btn => btn.classList.remove('active'));
-      if (btnMobile) {
-         btnMobile.classList.add('active');
-      } else {
-         // Fallback if switched programmatically
-         const mapping = {'donvi': 0, 'kehoach': 1, 'nhatky': 2, 'sanluong': 3, 'thuvien': 4};
-         const idx = mapping[id];
-         if (idx !== undefined) {
-             const btns = document.querySelectorAll('.navbtn-mobile');
-             if (btns[idx]) btns[idx].classList.add('active');
-         }
-      }
+      const activeBtn = document.querySelector(`.navbtn-mobile[data-id="${id}"]`);
+      if (activeBtn) activeBtn.classList.add('active');
       
       render();
     }
@@ -3190,23 +3226,202 @@ window.onerror = function(message, source, lineno, colno, error) {
       }
     }
 
-    function renderSaoluu() {
-      return `${secHead('Sao lưu & Khôi phục dữ liệu', 'Xuất bản sao lưu ra máy tính dưới dạng một thư mục hoặc Khôi phục dữ liệu đã lưu.')}
-  <div class="grid grid-4" style="margin-top: 20px;">
-    <div class="card stat" style="cursor:pointer;border:1px solid var(--line)" onclick="exportBackup()">
-      <div class="stat-ic ic-blue">${ICONS.redo}</div>
-      <div><div class="num" style="font-size:16px">Tạo bản Sao lưu</div><div class="lbl">Xuất ra thư mục máy tính</div></div>
-    </div>
-    <div class="card stat" style="cursor:pointer;border:1px solid var(--line)" onclick="importBackup()">
-      <div class="stat-ic ic-amber">${ICONS.box}</div>
-      <div><div class="num" style="font-size:16px">Khôi phục Dữ liệu</div><div class="lbl">Chọn thư mục Backup</div></div>
-    </div>
-  </div>
-  <p class="note" style="margin-top: 24px;line-height:1.6">
-    <b>Lưu ý:</b> Tính năng sao lưu thư mục sử dụng API File System Access, tương thích tốt nhất với Google Chrome, Microsoft Edge, Brave, Cốc Cốc.<br>
-    Hệ thống sẽ tạo ra một thư mục với định dạng <code>Backup-YYYY-MM-DD-HHMMSS</code> chứa toàn bộ số liệu và các tệp đính kèm.
-  </p>`;
+    async function generateFullBackupBlob() {
+      // Create a Blob directly instead of a massive string to prevent Out of Memory
+      const parts = [];
+      parts.push('{"data":' + JSON.stringify(data) + ',"files":[');
+      
+      const files = await dbGetAllFiles();
+      const activeFileIds = new Set();
+      for (const k in data) {
+        if (Array.isArray(data[k])) {
+          data[k].forEach(item => {
+            if (item.fileId) activeFileIds.add(item.fileId);
+          });
+        }
+      }
+
+      let first = true;
+      for (const f of files) {
+        if (!activeFileIds.has(f.id)) continue;
+        const b64 = await new Promise((res) => {
+          const r = new FileReader();
+          r.readAsDataURL(f.file);
+          r.onload = () => res(r.result);
+        });
+        
+        if (!first) parts.push(',');
+        parts.push(JSON.stringify({ id: f.id, name: f.file.name, type: f.file.type, data: b64 }));
+        first = false;
+      }
+      parts.push(']}');
+      return new Blob(parts, { type: 'application/json' });
     }
+    
+    async function restoreFromJsonObj(obj) {
+      if (!obj.data) throw new Error("File không hợp lệ");
+      data = obj.data;
+      saveData();
+      if (obj.files && obj.files.length > 0) {
+        for (const f of obj.files) {
+          const res = await fetch(f.data);
+          const blob = await res.blob();
+          const fileObj = new File([blob], f.name, {type: f.type});
+          await dbPut('store_files', f.id, fileObj);
+        }
+      }
+      alert('Khôi phục thành công!');
+      location.reload();
+    }
+
+    async function exportJson() {
+      try {
+        const blob = await generateFullBackupBlob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+        a.download = 'Backup-' + d.toISOString().replace(/[:.]/g, '-').slice(0, 19) + '.json';
+        a.href = url;
+        a.click();
+        URL.revokeObjectURL(url);
+      } catch (e) {
+        alert('Lỗi: ' + e.message);
+      }
+    }
+
+    function importJson() {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json';
+      input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = async (ev) => {
+          try {
+            const obj = JSON.parse(ev.target.result);
+            await restoreFromJsonObj(obj);
+          } catch(err) {
+            alert('Lỗi khôi phục: ' + err.message);
+          }
+        };
+        reader.readAsText(file);
+      };
+      input.click();
+    }
+
+    async function syncToGist() {
+      const token = localStorage.getItem('gist_token');
+      if (!token) return alert('Vui lòng nhập GitHub Token trong mục Sao lưu!');
+      let gistId = localStorage.getItem('gist_id');
+      try {
+        // Chỉ lưu text data để tránh quá tải Gist và lỗi bộ nhớ
+        const jsonStr = JSON.stringify({ data: data, files: [] });
+        const payload = {
+          description: "Sổ tay 3633 Backup (Data Only)",
+          files: { "backup.json": { content: jsonStr } }
+        };
+        const method = gistId ? 'PATCH' : 'POST';
+        const url = gistId ? `https://api.github.com/gists/${gistId}` : 'https://api.github.com/gists';
+        
+        const res = await fetch(url, {
+          method,
+          headers: {
+            'Authorization': 'token ' + token,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+        const resData = await res.json();
+        if (res.ok) {
+           if (!gistId) {
+             gistId = resData.id;
+             localStorage.setItem('gist_id', gistId);
+             if (document.getElementById('gist_id_inp')) document.getElementById('gist_id_inp').value = gistId;
+           }
+           alert('Đồng bộ Gist thành công (Chỉ dữ liệu text)!');
+        } else {
+           alert('Lỗi Gist: ' + resData.message);
+        }
+      } catch(e) {
+        alert('Lỗi mạng: ' + e.message);
+      }
+    }
+
+
+    async function restoreFromGist() {
+      const token = localStorage.getItem('gist_token');
+      const gistId = localStorage.getItem('gist_id');
+      if (!gistId) return alert('Chưa có Gist ID!');
+      try {
+        const res = await fetch(`https://api.github.com/gists/${gistId}`, {
+          headers: token ? { 'Authorization': 'token ' + token } : {}
+        });
+        const resData = await res.json();
+        if (res.ok) {
+           const content = resData.files['backup.json'].content;
+           await restoreFromJsonObj(JSON.parse(content));
+        } else {
+           alert('Lỗi Gist: ' + resData.message);
+        }
+      } catch(e) {
+        alert('Lỗi mạng: ' + e.message);
+      }
+    }
+
+    window.saveGistSettings = function() {
+      localStorage.setItem('gist_token', document.getElementById('gist_token_inp').value.trim());
+      localStorage.setItem('gist_id', document.getElementById('gist_id_inp').value.trim());
+      alert('Đã lưu cấu hình Gist!');
+    }
+
+    function renderSaoluu() {
+      const gTok = localStorage.getItem('gist_token') || '';
+      const gId = localStorage.getItem('gist_id') || '';
+      
+      return `${secHead('Đồng bộ GitHub Gist (Khuyên dùng)', 'Lưu trữ đám mây tự động, khôi phục mọi nơi kể cả trên iPhone.')}
+      <div class="card" style="margin-bottom:24px">
+        <div class="fgrid">
+          <label class="f span"><span>GitHub Personal Access Token</span>
+            <input type="password" id="gist_token_inp" value="${gTok}" placeholder="ghp_...">
+          </label>
+          <label class="f span"><span>Gist ID (Để trống nếu tạo mới)</span>
+            <input type="text" id="gist_id_inp" value="${gId}" placeholder="Sao chép Gist ID nếu đã có">
+          </label>
+          <div class="span" style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap">
+            <button class="btn" onclick="saveGistSettings()">Lưu Cấu Hình</button>
+            <button class="btn" style="background:var(--blue)" onclick="syncToGist()">Đồng bộ Lên</button>
+            <button class="btn" style="background:var(--amber)" onclick="restoreFromGist()">Khôi phục Về</button>
+          </div>
+        </div>
+      </div>
+
+      ${secHead('Sao lưu File tĩnh (Dành cho iPhone/iPad)', 'Lưu vào iCloud hoặc Tệp (Files).')}
+      <div class="grid grid-4" style="margin-bottom: 24px;">
+        <div class="card stat" style="cursor:pointer;border:1px solid var(--line)" onclick="exportJson()">
+          <div class="stat-ic ic-blue">${ICONS.redo}</div>
+          <div><div class="num" style="font-size:16px">Tải .json</div><div class="lbl">Lưu vào Tệp</div></div>
+        </div>
+        <div class="card stat" style="cursor:pointer;border:1px solid var(--line)" onclick="importJson()">
+          <div class="stat-ic ic-amber">${ICONS.box}</div>
+          <div><div class="num" style="font-size:16px">Nhập .json</div><div class="lbl">Khôi phục từ Tệp</div></div>
+        </div>
+      </div>
+
+      ${secHead('Sao lưu Thư mục (Dành cho Máy tính)', 'Sử dụng File System API (Chỉ Chrome/Edge).')}
+      <div class="grid grid-4">
+        <div class="card stat" style="cursor:pointer;border:1px solid var(--line)" onclick="exportBackup()">
+          <div class="stat-ic ic-blue">${ICONS.redo}</div>
+          <div><div class="num" style="font-size:16px">Tạo thư mục</div><div class="lbl">Lưu nhiều file</div></div>
+        </div>
+        <div class="card stat" style="cursor:pointer;border:1px solid var(--line)" onclick="importBackup()">
+          <div class="stat-ic ic-amber">${ICONS.box}</div>
+          <div><div class="num" style="font-size:16px">Nhập thư mục</div><div class="lbl">Khôi phục nhiều file</div></div>
+        </div>
+      </div>
+      `;
+    }
+
 
     /* ================= RENDER ================= */
     function render() {
@@ -3661,6 +3876,9 @@ window.onerror = function(message, source, lineno, colno, error) {
 
 
 </body></html>
+
+
+
 
 
 
