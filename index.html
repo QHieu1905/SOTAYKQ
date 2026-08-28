@@ -43,13 +43,16 @@ window.onerror = function(message, source, lineno, colno, error) {
     }
 
     * {
-      box-sizing: border-box
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
     }
 
-    html, body {
-      overflow-x: hidden;
-      max-width: 100vw;
+    button:active, .card:active, .recent-item:active {
+      transform: scale(0.98);
+      opacity: 0.9;
     }
+
+    html, body { overflow-x: hidden; width: 100%; max-width: 100vw; }
 
     body {
       margin: 0;
@@ -70,7 +73,7 @@ window.onerror = function(message, source, lineno, colno, error) {
     select,
     textarea {
       font-family: inherit;
-      font-size: 14px;
+      font-size: 16px;
       color: var(--ink);
       border: 1px solid var(--line);
       border-radius: 10px;
@@ -80,6 +83,7 @@ window.onerror = function(message, source, lineno, colno, error) {
       outline: none;
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02) inset;
+      min-height: 44px;
     }
 
     input:focus,
@@ -108,11 +112,39 @@ window.onerror = function(message, source, lineno, colno, error) {
       display: block
     }
 
-    /* ============ BỐ CỤC ============ */
-    .app {
-      display: flex;
-      min-height: 100vh
+    
+    .custom-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      margin-top: 8px;
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      max-height: 240px;
+      overflow-y: auto;
+      z-index: 1000;
     }
+    .dropdown-item {
+      padding: 12px 18px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+      cursor: pointer;
+      border-bottom: 1px solid var(--line);
+      transition: background 0.2s;
+    }
+    .dropdown-item:last-child {
+      border-bottom: none;
+    }
+    .dropdown-item:hover {
+      background: var(--hover);
+      color: var(--green-dark);
+    }
+/* ============ BỐ CỤC ============ */
+    .app { display: flex; min-height: 100vh; width: 100%; overflow-x: hidden; }
 
     /* --- Thanh bên --- */
     aside {
@@ -257,11 +289,7 @@ window.onerror = function(message, source, lineno, colno, error) {
     }
 
     /* --- Nội dung --- */
-    .content {
-      flex: 1;
-      min-width: 0;
-      padding: 22px 26px 60px
-    }
+    .content { flex: 1; min-width: 0; padding: 22px 26px 60px; overflow-x: hidden; width: 100%; }
 
     .topbar {
       display: flex;
@@ -541,7 +569,7 @@ window.onerror = function(message, source, lineno, colno, error) {
       width: 100%;
       border-collapse: collapse;
       font-size: 13.5px;
-      min-width: 660px;
+      
     }
 
     th {
@@ -636,8 +664,8 @@ window.onerror = function(message, source, lineno, colno, error) {
     }
 
     .row-act button {
-      width: 32px;
-      height: 32px;
+      width: 40px;
+      height: 40px;
       border-radius: 8px;
       border: 1px solid var(--line);
       background: #fff;
@@ -839,34 +867,9 @@ window.onerror = function(message, source, lineno, colno, error) {
       display: none
     }
 
-    .bottom-nav {
-      display: none;
-    }
+
 
     @media(max-width:860px) {
-      .bottom-nav {
-        display: flex;
-        position: fixed;
-        bottom: 0; left: 0; width: 100%;
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-        border-top: 1px solid var(--line);
-        z-index: 50;
-        padding-bottom: env(safe-area-inset-bottom);
-        box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-        justify-content: space-around;
-      }
-      .b-navbtn {
-        flex: 1;
-        display: flex; flex-direction: column; align-items: center; justify-content: center;
-        padding: 10px 4px; background: transparent; border: none; color: var(--gray); gap: 4px; transition: 0.2s;
-        cursor: pointer;
-      }
-      .b-navbtn svg { width: 22px; height: 22px; }
-      .b-navbtn span { font-size: 10.5px; font-weight: 600; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; max-width: 100%; }
-      .b-navbtn.active { color: var(--green); }
-      .b-navbtn.active svg { transform: translateY(-2px); }
-
       aside {
         position: fixed;
         left: 0;
@@ -885,15 +888,35 @@ window.onerror = function(message, source, lineno, colno, error) {
         display: flex
       }
 
-      .content {
-        padding: 16px 14px calc(70px + env(safe-area-inset-bottom)) !important
-      }
+      .content { flex: 1; min-width: 0; padding: 22px 26px 60px; overflow-x: hidden; width: 100%; }
 
       .fgrid {
         grid-template-columns: 1fr
       }
     }
 
+
+      .modal {
+        max-width: 100% !important;
+        height: 95vh;
+        border-radius: 22px 22px 0 0;
+        margin-top: 5vh;
+        display: flex;
+        flex-direction: column;
+      }
+      .modal-body {
+        flex: 1;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      .overlay {
+        padding: 0;
+        align-items: flex-end;
+      }
+      .iconbtn-top, .menu-toggle {
+        width: 44px !important;
+        height: 44px !important;
+      }
     /* --- DASHBOARD PREMIUM CSS --- */
     .dash-header {
       margin-bottom: 25px;
@@ -1154,7 +1177,18 @@ window.onerror = function(message, source, lineno, colno, error) {
       background: var(--amber);
     }
   
-    /* ============ RESPONSIVE (MOBILE) ============ */
+    
+    .dash-panel ul {
+      padding-left: 20px;
+      margin: 10px 0;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+    }
+    .dash-panel li {
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+    }
+/* ============ RESPONSIVE (MOBILE) ============ */
     @media (max-width: 768px) {
       .topbar {
         flex-wrap: wrap !important;
@@ -1184,9 +1218,7 @@ window.onerror = function(message, source, lineno, colno, error) {
       .dash-panel {
         grid-column: span 1 !important;
       }
-      .content {
-        padding: 15px !important;
-      }
+      .content { flex: 1; min-width: 0; padding: 22px 26px 60px; overflow-x: hidden; width: 100%; }
       #page-title {
         font-size: 1.2rem !important;
       }
@@ -1202,7 +1234,39 @@ window.onerror = function(message, source, lineno, colno, error) {
         overflow-x: auto !important;
         -webkit-overflow-scrolling: touch;
       }
-      /* CARD VIEW FOR MOBILE TABLES */
+      
+      .unit-cell {
+        min-width: 0 !important;
+        width: 100%;
+        display: block !important;
+      }
+      .row-act {
+        white-space: normal !important;
+      }
+      .pill {
+        white-space: normal !important;
+        height: auto !important;
+      }
+
+      .filter > div::-webkit-scrollbar {
+        display: none;
+      }
+      .filter > div {
+        scrollbar-width: none;
+      }
+
+      .filter {
+        flex-wrap: nowrap !important;
+      }
+      .filter > span {
+        flex-shrink: 0;
+        white-space: nowrap;
+      }
+      .filter > div, .filter > select {
+        flex: 1;
+        min-width: 0;
+      }
+/* CARD VIEW FOR MOBILE TABLES */
       .tbl-card table, .tbl-card thead, .tbl-card tbody, .tbl-card th, .tbl-card td, .tbl-card tr {
         display: block !important;
         min-width: 0 !important;
@@ -1223,7 +1287,7 @@ window.onerror = function(message, source, lineno, colno, error) {
         border: none !important;
         border-bottom: 1px dashed var(--line) !important;
         position: relative;
-        padding: 12px 0 12px 40% !important;
+        padding: 12px 15px 12px 40% !important;
         text-align: right !important;
         white-space: normal !important;
         word-break: break-word !important;
@@ -1239,10 +1303,10 @@ window.onerror = function(message, source, lineno, colno, error) {
       .tbl-card td::before {
         content: attr(data-label);
         position: absolute;
-        left: 0;
+        left: 15px;
         top: 50%;
         transform: translateY(-50%);
-        width: 35%;
+        width: calc(40% - 20px);
         text-align: left;
         font-weight: 600;
         color: var(--gray);
@@ -1259,8 +1323,25 @@ window.onerror = function(message, source, lineno, colno, error) {
       }
       .recent-title {
         white-space: normal !important;
-        text-overflow: clip !important;
+        display: block !important;
         max-width: 100% !important;
+        font-size: 0.82rem !important;
+        line-height: 1.35 !important;
+      }
+      .recent-sub {
+        font-size: 0.75rem !important;
+      }
+      .recent-right {
+        font-size: 0.85rem !important;
+      }
+      .dash-panel-title {
+        font-size: 1rem !important;
+      }
+      .kpi-val {
+        font-size: 1.4rem !important;
+      }
+      .kpi-lbl {
+        font-size: 0.7rem !important;
       }
     }
   </style>
@@ -1283,8 +1364,6 @@ window.onerror = function(message, source, lineno, colno, error) {
 
     </aside>
 
-    <!-- ================= BOTTOM NAV ================= -->
-    <nav id="bottom-nav" class="bottom-nav"></nav>
 
     <!-- ================= NỘI DUNG ================= -->
     <div class="content">
@@ -1302,8 +1381,8 @@ window.onerror = function(message, source, lineno, colno, error) {
             <circle cx="11" cy="11" r="7"></circle>
             <path d="m20 20-3.5-3.5"></path>
           </svg>
-          <input type="text" id="search" list="unit-list" placeholder="Tìm kiếm hoặc chọn đơn vị..." oninput="onSearch(this.value)" onclick="this.value=''; onSearch('')" autocomplete="off">
-          <datalist id="unit-list"></datalist>
+          <input type="text" id="search" onfocus="showSearchDropdown()" placeholder="Tìm kiếm hoặc chọn đơn vị..." oninput="onSearchInput(this.value)" onclick="this.value=''; onSearch('')" autocomplete="off">
+          <div id="search-dropdown" class="custom-dropdown" style="display:none;"></div>
         </div>
         <button class="iconbtn-top" onclick="syncToGist()" title="Đồng bộ đám mây" style="color:var(--green)">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></svg>
@@ -1333,7 +1412,7 @@ window.onerror = function(message, source, lineno, colno, error) {
           <div class="kpi-icon amber"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="3"></rect><circle cx="12" cy="12" r="2.6"></circle><path d="M6 12h.01M18 12h.01"></path></svg></div>
           <div class="kpi-info">
             <div class="kpi-val">102</div>
-            <div class="kpi-lbl">Lượt kiểm tra ( 4 lượt vi phạm )</div>
+            <div class="kpi-lbl">Lượt kiểm tra (4 lượt vi phạm)</div>
           </div>
         </div>
         <div class="kpi-card" onclick="switchTab('sanluong')">
@@ -1358,10 +1437,10 @@ window.onerror = function(message, source, lineno, colno, error) {
           <div class="recent-item" style="cursor:default;">
             <div class="recent-ic success">1</div>
             <div class="recent-main">
-              <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 250px;" title="NH TMCP Nam Á - CN Đà Nẵng">NH TMCP Nam Á - CN Đà Nẵng</div>
+              <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; " title="NH TMCP Nam Á - CN Đà Nẵng">NH TMCP Nam Á - CN Đà Nẵng</div>
               <div class="recent-sub">Đã kiểm tra: 1,4 tỷ</div>
             </div>
-            <div class="recent-right" style="color: var(--green); font-weight: 700; width: 60px; text-align: right;">
+            <div class="recent-right" style="color: var(--green); font-weight: 700;  text-align: right;">
               0.45%
             </div>
           </div>
@@ -1369,10 +1448,10 @@ window.onerror = function(message, source, lineno, colno, error) {
           <div class="recent-item" style="cursor:default;">
             <div class="recent-ic success">2</div>
             <div class="recent-main">
-              <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 250px;" title="NH TNHH MTV HSBC (Việt Nam) - CN Đà Nẵng">NH TNHH MTV HSBC (Việt Nam) - CN Đà Nẵng</div>
+              <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; " title="NH TNHH MTV HSBC (Việt Nam) - CN Đà Nẵng">NH TNHH MTV HSBC (Việt Nam) - CN Đà Nẵng</div>
               <div class="recent-sub">Đã kiểm tra: 0,6 tỷ</div>
             </div>
-            <div class="recent-right" style="color: var(--green); font-weight: 700; width: 60px; text-align: right;">
+            <div class="recent-right" style="color: var(--green); font-weight: 700;  text-align: right;">
               0.48%
             </div>
           </div>
@@ -1380,10 +1459,10 @@ window.onerror = function(message, source, lineno, colno, error) {
           <div class="recent-item" style="cursor:default;">
             <div class="recent-ic success">3</div>
             <div class="recent-main">
-              <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 250px;" title="NH TNHH MTV  PUBLIC Việt Nam - CN Đà Nẵng">NH TNHH MTV  PUBLIC Việt Nam - CN Đà Nẵng</div>
+              <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; " title="NH TNHH MTV  PUBLIC Việt Nam - CN Đà Nẵng">NH TNHH MTV  PUBLIC Việt Nam - CN Đà Nẵng</div>
               <div class="recent-sub">Đã kiểm tra: 1 tỷ</div>
             </div>
-            <div class="recent-right" style="color: var(--green); font-weight: 700; width: 60px; text-align: right;">
+            <div class="recent-right" style="color: var(--green); font-weight: 700;  text-align: right;">
               0.55%
             </div>
           </div>
@@ -1391,10 +1470,10 @@ window.onerror = function(message, source, lineno, colno, error) {
           <div class="recent-item" style="cursor:default;">
             <div class="recent-ic success">4</div>
             <div class="recent-main">
-              <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 250px;" title="NH TMCP Quốc Dân - CN Đà Nẵng">NH TMCP Quốc Dân - CN Đà Nẵng</div>
+              <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; " title="NH TMCP Quốc Dân - CN Đà Nẵng">NH TMCP Quốc Dân - CN Đà Nẵng</div>
               <div class="recent-sub">Đã kiểm tra: 0,2 tỷ</div>
             </div>
-            <div class="recent-right" style="color: var(--green); font-weight: 700; width: 60px; text-align: right;">
+            <div class="recent-right" style="color: var(--green); font-weight: 700;  text-align: right;">
               0.70%
             </div>
           </div>
@@ -1402,10 +1481,10 @@ window.onerror = function(message, source, lineno, colno, error) {
           <div class="recent-item" style="cursor:default;">
             <div class="recent-ic success">5</div>
             <div class="recent-main">
-              <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 250px;" title="NH Nông nghiệp và Phát triển NTVN - CN Đà Nẵng">NH Nông nghiệp và Phát triển NTVN - CN Đà Nẵng</div>
+              <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; " title="NH Nông nghiệp và Phát triển NTVN - CN Đà Nẵng">NH Nông nghiệp và Phát triển NTVN - CN Đà Nẵng</div>
               <div class="recent-sub">Đã kiểm tra: 1 tỷ</div>
             </div>
-            <div class="recent-right" style="color: var(--green); font-weight: 700; width: 60px; text-align: right;">
+            <div class="recent-right" style="color: var(--green); font-weight: 700;  text-align: right;">
               0.75%
             </div>
           </div>
@@ -1413,10 +1492,10 @@ window.onerror = function(message, source, lineno, colno, error) {
           <div class="recent-item" style="cursor:default;">
             <div class="recent-ic success">6</div>
             <div class="recent-main">
-              <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 250px;" title="NH TMCP Quân Đội - CN Đà Nẵng">NH TMCP Quân Đội - CN Đà Nẵng</div>
+              <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; " title="NH TMCP Quân Đội - CN Đà Nẵng">NH TMCP Quân Đội - CN Đà Nẵng</div>
               <div class="recent-sub">Đã kiểm tra: 1,2 tỷ</div>
             </div>
-            <div class="recent-right" style="color: var(--green); font-weight: 700; width: 60px; text-align: right;">
+            <div class="recent-right" style="color: var(--green); font-weight: 700;  text-align: right;">
               0.77%
             </div>
           </div>
@@ -1424,10 +1503,10 @@ window.onerror = function(message, source, lineno, colno, error) {
           <div class="recent-item" style="cursor:default;">
             <div class="recent-ic success">7</div>
             <div class="recent-main">
-              <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 250px;" title="NH TNHH Indovina - CN Đà Nẵng">NH TNHH Indovina - CN Đà Nẵng</div>
+              <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; " title="NH TNHH Indovina - CN Đà Nẵng">NH TNHH Indovina - CN Đà Nẵng</div>
               <div class="recent-sub">Đã kiểm tra: 0,3 tỷ</div>
             </div>
-            <div class="recent-right" style="color: var(--green); font-weight: 700; width: 60px; text-align: right;">
+            <div class="recent-right" style="color: var(--green); font-weight: 700;  text-align: right;">
               0.83%
             </div>
           </div>
@@ -1435,10 +1514,10 @@ window.onerror = function(message, source, lineno, colno, error) {
           <div class="recent-item" style="cursor:default;">
             <div class="recent-ic success">8</div>
             <div class="recent-main">
-              <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 250px;" title="NH TMCP  Phát triển TPHCM - CN Đà Nẵng">NH TMCP  Phát triển TPHCM - CN Đà Nẵng</div>
+              <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; " title="NH TMCP  Phát triển TPHCM - CN Đà Nẵng">NH TMCP  Phát triển TPHCM - CN Đà Nẵng</div>
               <div class="recent-sub">Đã kiểm tra: 1,9 tỷ</div>
             </div>
-            <div class="recent-right" style="color: var(--green); font-weight: 700; width: 60px; text-align: right;">
+            <div class="recent-right" style="color: var(--green); font-weight: 700;  text-align: right;">
               0.95%
             </div>
           </div>
@@ -1446,10 +1525,10 @@ window.onerror = function(message, source, lineno, colno, error) {
           <div class="recent-item" style="cursor:default;">
             <div class="recent-ic success">9</div>
             <div class="recent-main">
-              <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 250px;" title="NH TNHH MTV Số Vikki - CN Đà Nẵng">NH TNHH MTV Số Vikki - CN Đà Nẵng</div>
+              <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; " title="NH TNHH MTV Số Vikki - CN Đà Nẵng">NH TNHH MTV Số Vikki - CN Đà Nẵng</div>
               <div class="recent-sub">Đã kiểm tra: 2,5 tỷ</div>
             </div>
-            <div class="recent-right" style="color: var(--green); font-weight: 700; width: 60px; text-align: right;">
+            <div class="recent-right" style="color: var(--green); font-weight: 700;  text-align: right;">
               0.96%
             </div>
           </div>
@@ -1457,10 +1536,10 @@ window.onerror = function(message, source, lineno, colno, error) {
           <div class="recent-item" style="cursor:default;">
             <div class="recent-ic success">10</div>
             <div class="recent-main">
-              <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 250px;" title="NH TMCP Bảo Việt - CN Đà Nẵng">NH TMCP Bảo Việt - CN Đà Nẵng</div>
+              <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; " title="NH TMCP Bảo Việt - CN Đà Nẵng">NH TMCP Bảo Việt - CN Đà Nẵng</div>
               <div class="recent-sub">Đã kiểm tra: 1,1 tỷ</div>
             </div>
-            <div class="recent-right" style="color: var(--green); font-weight: 700; width: 60px; text-align: right;">
+            <div class="recent-right" style="color: var(--green); font-weight: 700;  text-align: right;">
               1.04%
             </div>
           </div>
@@ -1481,10 +1560,10 @@ window.onerror = function(message, source, lineno, colno, error) {
           <div class="recent-item" style="cursor:default;">
             <div class="recent-ic danger">1</div>
             <div class="recent-main">
-              <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 250px;" title="NH TMCP Kỹ Thương Việt Nam - CN Đà Nẵng">NH TMCP Kỹ Thương Việt Nam - CN Đà Nẵng</div>
+              <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; " title="NH TMCP Kỹ Thương Việt Nam - CN Đà Nẵng">NH TMCP Kỹ Thương Việt Nam - CN Đà Nẵng</div>
               <div class="recent-sub">Đã kiểm tra: 1,6 tỷ</div>
             </div>
-            <div class="recent-right" style="color: #ef4444; font-weight: 700; width: 60px; text-align: right;">
+            <div class="recent-right" style="color: #ef4444; font-weight: 700;  text-align: right;">
               8.05%
             </div>
           </div>
@@ -1492,10 +1571,10 @@ window.onerror = function(message, source, lineno, colno, error) {
           <div class="recent-item" style="cursor:default;">
             <div class="recent-ic danger">2</div>
             <div class="recent-main">
-              <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 250px;" title="NH TMCP Lộc Phát Việt Nam - CN Đà Nẵng">NH TMCP Lộc Phát Việt Nam - CN Đà Nẵng</div>
+              <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; " title="NH TMCP Lộc Phát Việt Nam - CN Đà Nẵng">NH TMCP Lộc Phát Việt Nam - CN Đà Nẵng</div>
               <div class="recent-sub">Đã kiểm tra: 0,1 tỷ</div>
             </div>
-            <div class="recent-right" style="color: #ef4444; font-weight: 700; width: 60px; text-align: right;">
+            <div class="recent-right" style="color: #ef4444; font-weight: 700;  text-align: right;">
               7.18%
             </div>
           </div>
@@ -1503,10 +1582,10 @@ window.onerror = function(message, source, lineno, colno, error) {
           <div class="recent-item" style="cursor:default;">
             <div class="recent-ic danger">3</div>
             <div class="recent-main">
-              <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 250px;" title="NH TMCP Đầu tư và Phát triển Việt Nam - CN Đà Nẵng">NH TMCP Đầu tư và Phát triển Việt Nam - CN Đà Nẵng</div>
+              <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; " title="NH TMCP Đầu tư và Phát triển Việt Nam - CN Đà Nẵng">NH TMCP Đầu tư và Phát triển Việt Nam - CN Đà Nẵng</div>
               <div class="recent-sub">Đã kiểm tra: 0,5 tỷ</div>
             </div>
-            <div class="recent-right" style="color: #ef4444; font-weight: 700; width: 60px; text-align: right;">
+            <div class="recent-right" style="color: #ef4444; font-weight: 700;  text-align: right;">
               6.94%
             </div>
           </div>
@@ -1514,10 +1593,10 @@ window.onerror = function(message, source, lineno, colno, error) {
           <div class="recent-item" style="cursor:default;">
             <div class="recent-ic danger">4</div>
             <div class="recent-main">
-              <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 250px;" title="NH TMCP Á Châu - CN Đà Nẵng">NH TMCP Á Châu - CN Đà Nẵng</div>
+              <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; " title="NH TMCP Á Châu - CN Đà Nẵng">NH TMCP Á Châu - CN Đà Nẵng</div>
               <div class="recent-sub">Đã kiểm tra: 0,8 tỷ</div>
             </div>
-            <div class="recent-right" style="color: #ef4444; font-weight: 700; width: 60px; text-align: right;">
+            <div class="recent-right" style="color: #ef4444; font-weight: 700;  text-align: right;">
               6.49%
             </div>
           </div>
@@ -1525,10 +1604,10 @@ window.onerror = function(message, source, lineno, colno, error) {
           <div class="recent-item" style="cursor:default;">
             <div class="recent-ic danger">5</div>
             <div class="recent-main">
-              <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 250px;" title="NH TMCP Đầu tư và Phát triển Việt Nam - CN Sông Hàn">NH TMCP Đầu tư và Phát triển Việt Nam - CN Sông Hàn</div>
+              <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; " title="NH TMCP Đầu tư và Phát triển Việt Nam - CN Sông Hàn">NH TMCP Đầu tư và Phát triển Việt Nam - CN Sông Hàn</div>
               <div class="recent-sub">Đã kiểm tra: 1 tỷ</div>
             </div>
-            <div class="recent-right" style="color: #ef4444; font-weight: 700; width: 60px; text-align: right;">
+            <div class="recent-right" style="color: #ef4444; font-weight: 700;  text-align: right;">
               6.43%
             </div>
           </div>
@@ -1536,10 +1615,10 @@ window.onerror = function(message, source, lineno, colno, error) {
           <div class="recent-item" style="cursor:default;">
             <div class="recent-ic danger">6</div>
             <div class="recent-main">
-              <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 250px;" title="NH TMTNHH MTV VCB Công nghệ số - CN Đà Nẵng">NH TMTNHH MTV VCB Công nghệ số - CN Đà Nẵng</div>
+              <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; " title="NH TMTNHH MTV VCB Công nghệ số - CN Đà Nẵng">NH TMTNHH MTV VCB Công nghệ số - CN Đà Nẵng</div>
               <div class="recent-sub">Đã kiểm tra: 0,2 tỷ</div>
             </div>
-            <div class="recent-right" style="color: #ef4444; font-weight: 700; width: 60px; text-align: right;">
+            <div class="recent-right" style="color: #ef4444; font-weight: 700;  text-align: right;">
               5.83%
             </div>
           </div>
@@ -1547,10 +1626,10 @@ window.onerror = function(message, source, lineno, colno, error) {
           <div class="recent-item" style="cursor:default;">
             <div class="recent-ic danger">7</div>
             <div class="recent-main">
-              <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 250px;" title="NH TMCP Bản Việt - CN Nam Đà Nẵng">NH TMCP Bản Việt - CN Nam Đà Nẵng</div>
+              <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; " title="NH TMCP Bản Việt - CN Nam Đà Nẵng">NH TMCP Bản Việt - CN Nam Đà Nẵng</div>
               <div class="recent-sub">Đã kiểm tra: 0,3 tỷ</div>
             </div>
-            <div class="recent-right" style="color: #ef4444; font-weight: 700; width: 60px; text-align: right;">
+            <div class="recent-right" style="color: #ef4444; font-weight: 700;  text-align: right;">
               5.63%
             </div>
           </div>
@@ -1558,10 +1637,10 @@ window.onerror = function(message, source, lineno, colno, error) {
           <div class="recent-item" style="cursor:default;">
             <div class="recent-ic success">8</div>
             <div class="recent-main">
-              <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 250px;" title="NH Liên doanh Việt - Nga  CN Đà Nẵng">NH Liên doanh Việt - Nga  CN Đà Nẵng</div>
+              <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; " title="NH Liên doanh Việt - Nga  CN Đà Nẵng">NH Liên doanh Việt - Nga  CN Đà Nẵng</div>
               <div class="recent-sub">Đã kiểm tra: 0,6 tỷ</div>
             </div>
-            <div class="recent-right" style="color: var(--green); font-weight: 700; width: 60px; text-align: right;">
+            <div class="recent-right" style="color: var(--green); font-weight: 700;  text-align: right;">
               4.12%
             </div>
           </div>
@@ -1569,10 +1648,10 @@ window.onerror = function(message, source, lineno, colno, error) {
           <div class="recent-item" style="cursor:default;">
             <div class="recent-ic success">9</div>
             <div class="recent-main">
-              <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 250px;" title="NH TMCP Tiên Phong - CN Đà Nẵng">NH TMCP Tiên Phong - CN Đà Nẵng</div>
+              <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; " title="NH TMCP Tiên Phong - CN Đà Nẵng">NH TMCP Tiên Phong - CN Đà Nẵng</div>
               <div class="recent-sub">Đã kiểm tra: 0,2 tỷ</div>
             </div>
-            <div class="recent-right" style="color: var(--green); font-weight: 700; width: 60px; text-align: right;">
+            <div class="recent-right" style="color: var(--green); font-weight: 700;  text-align: right;">
               3.42%
             </div>
           </div>
@@ -1580,10 +1659,10 @@ window.onerror = function(message, source, lineno, colno, error) {
           <div class="recent-item" style="cursor:default;">
             <div class="recent-ic success">10</div>
             <div class="recent-main">
-              <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 250px;" title="NH TMCP Hàng Hải Việt Nam - CN Đà Nẵng">NH TMCP Hàng Hải Việt Nam - CN Đà Nẵng</div>
+              <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; " title="NH TMCP Hàng Hải Việt Nam - CN Đà Nẵng">NH TMCP Hàng Hải Việt Nam - CN Đà Nẵng</div>
               <div class="recent-sub">Đã kiểm tra: 0,5 tỷ</div>
             </div>
-            <div class="recent-right" style="color: var(--green); font-weight: 700; width: 60px; text-align: right;">
+            <div class="recent-right" style="color: var(--green); font-weight: 700;  text-align: right;">
               3.37%
             </div>
           </div>
@@ -1597,6 +1676,7 @@ window.onerror = function(message, source, lineno, colno, error) {
       <div class="page" id="pg-nhatky"></div>
       <div class="page" id="pg-sanluong"></div>
       <div class="page" id="pg-thuvien"></div>
+      <div class="page" id="pg-users"></div>
       <div class="page" id="pg-saoluu"></div>
     </div>
   </div>
@@ -1626,6 +1706,8 @@ window.onerror = function(message, source, lineno, colno, error) {
       seal: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>',
       edit: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17v3z"/></svg>',
       trash: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13a2 2 0 0 0 2 1.8h6A2 2 0 0 0 17 20l1-13M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>',
+      users: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>',
+      users: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>',
       plus: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>',
       book: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>'
     };
@@ -2188,7 +2270,7 @@ window.onerror = function(message, source, lineno, colno, error) {
              </button>
           </div>
         </div>
-        <div style="flex:1; background:#f4f5f7; position:relative; overflow:hidden; display:flex; flex-direction:column;">
+        <div style="flex:1; background:#f4f5f7; position:relative; overflow-y:auto; -webkit-overflow-scrolling:touch; display:flex; flex-direction:column;">
           <iframe src="${url}#toolbar=0" style="width:100%; height:100%; border:none; flex:1;"></iframe>
           
         </div>
@@ -2262,27 +2344,13 @@ window.onerror = function(message, source, lineno, colno, error) {
       document.getElementById('nav').innerHTML = TABS.map(t =>
         `<button class="navbtn ${tab === t.id ? 'active' : ''}" onclick="switchTab('${t.id}')">${ICONS[t.icon]}<span>${t.label}</span></button>`).join('');
       
-      const bNav = document.getElementById('bottom-nav');
-      if (bNav) {
-        const bTabs = [
-           { id: 'tongquan', label: 'T.quan', icon: 'dash' },
-           ...TABS.slice(0, 3),
-           { id: 'saoluu', label: 'Menu', icon: 'redo' }
-        ];
-        bNav.innerHTML = bTabs.map(t => {
-          let cleanLabel = t.label.replace(/^\d\.\s/, '');
-          return `<button class="b-navbtn navbtn-mobile ${tab === t.id ? 'active' : ''}" onclick="switchTab('${t.id}', this)" data-id="${t.id}">${ICONS[t.icon]}<span>${cleanLabel}</span></button>`;
-        }).join('');
-      }
     }
     function switchTab(id, btnMobile = null) {
       tab = id; 
       const sb = document.getElementById('sidebar');
       if (sb) sb.classList.remove('open');
       
-      document.querySelectorAll('.navbtn-mobile').forEach(btn => btn.classList.remove('active'));
-      const activeBtn = document.querySelector(`.navbtn-mobile[data-id="${id}"]`);
-      if (activeBtn) activeBtn.classList.add('active');
+
       
       render();
     }
@@ -2304,7 +2372,46 @@ window.onerror = function(message, source, lineno, colno, error) {
       render();
     }
     function setFilter(v) { filterUnit = v; render(); window.scrollTo({top: 0, behavior: 'smooth'}); }
-    function onSearch(v) {
+    
+    function showSearchDropdown() {
+      const d = document.getElementById("search-dropdown");
+      if (d) { d.style.display = "block"; renderSearchDropdown(document.getElementById("search").value); }
+    }
+    function onSearchInput(v) {
+      renderSearchDropdown(v);
+      onSearch(v);
+    }
+    function selectSearchItem(unitId, unitName) {
+      const inp = document.getElementById("search");
+      if(unitId === "all") {
+        inp.value = "";
+        onSearch("");
+      } else {
+        inp.value = unitName;
+        onSearch(unitName);
+      }
+      document.getElementById("search-dropdown").style.display = "none";
+    }
+    function renderSearchDropdown(v) {
+      const dl = document.getElementById("search-dropdown");
+      if(!dl || !data || !data.units) return;
+      const vt = removeAccents(v.trim()).toLowerCase();
+      let html = `<div class="dropdown-item" onclick="selectSearchItem('all', '')">Tất cả đơn vị</div>`;
+      data.units.forEach(u => {
+         if (vt === "" || removeAccents(u.name).toLowerCase().includes(vt)) {
+             html += `<div class="dropdown-item" onclick="selectSearchItem('${u.id}', '${esc(u.name)}')">${esc(u.name)}</div>`;
+         }
+      });
+      dl.innerHTML = html;
+    }
+    document.addEventListener("click", function(e) {
+      const sb = document.querySelector(".searchbox");
+      if(sb && !sb.contains(e.target)) {
+        const d = document.getElementById("search-dropdown");
+        if(d) d.style.display = "none";
+      }
+    });
+function onSearch(v) {
       const vt = v.trim();
       if (vt === 'Tất cả đơn vị' || vt === '') {
         filterUnit = 'all';
@@ -2483,7 +2590,7 @@ window.onerror = function(message, source, lineno, colno, error) {
                   <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${esc(t.name)}">${esc(t.name)}</div>
                   <div class="recent-sub">Đã kiểm tra: ${formatTy(t.checkedMoney)} tỷ</div>
                 </div>
-                <div class="recent-right" style="color: ${isBad ? '#ef4444' : 'var(--green)'}; font-weight: 700; width: 60px; text-align: right;">
+                <div class="recent-right" style="color: ${isBad ? '#ef4444' : 'var(--green)'}; font-weight: 700;  text-align: right;">
                   ${ratePct}
                 </div>
             </div>
@@ -2537,7 +2644,7 @@ window.onerror = function(message, source, lineno, colno, error) {
           <div class="kpi-icon amber">${ICONS['cash']}</div>
           <div class="kpi-info">
             <div class="kpi-val">${totalLogs}</div>
-            <div class="kpi-lbl">Lượt kiểm tra ( ${violationsCount} lượt vi phạm )</div>
+            <div class="kpi-lbl">Lượt kiểm tra (${violationsCount} lượt vi phạm)</div>
           </div>
         </div>
         <div class="kpi-card" onclick="switchTab('sanluong')">
@@ -2885,7 +2992,7 @@ window.onerror = function(message, source, lineno, colno, error) {
       const monthFilterHtml = `
         <div style="display:flex; align-items:center; gap:10px; margin-left: 6px;">
           <span>Lọc theo tháng</span>
-          <div style="display:inline-flex; gap:2px; background:#fff; padding:4px; border-radius:999px; border:1px solid var(--line);">
+          <div style="display:inline-flex; gap:2px; background:#fff; padding:4px; border-radius:999px; border:1px solid var(--line); max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;">
             ${allMonths.map(m => {
         const mStr = m.split('-')[1];
         const active = filterMonthSL.includes(m)
@@ -3375,7 +3482,62 @@ window.onerror = function(message, source, lineno, colno, error) {
       alert('Đã lưu cấu hình Gist!');
     }
 
-    function renderSaoluu() {
+    
+    function resetUserPassword(username) {
+      if (!confirm(`Khôi phục mật khẩu cho tài khoản "${username}" về mặc định "123456"?`)) return;
+      const u = data.users.find(x => x.username === username);
+      if (u) {
+        u.password = "123456";
+        saveData();
+        alert("Khôi phục thành công! Mật khẩu mới là 123456");
+        render();
+      }
+    }
+    function deleteUser(username) {
+      if (!confirm(`Bạn có chắc muốn xóa vĩnh viễn tài khoản "${username}"?`)) return;
+      data.users = data.users.filter(x => x.username !== username);
+      saveData();
+      render();
+    }
+    function renderUsers() {
+      const users = (data.users || []).filter(u => u.role === "viewer");
+      const listHtml = users.length === 0 ? `<div style="padding:20px; text-align:center; color:var(--gray)">Chưa có tài khoản nào đăng ký</div>` :
+        users.map(u => `
+          <div style="background:#fff; border:1px solid var(--line); border-radius:12px; padding:15px; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+            <div>
+              <div style="font-weight:600; font-size:15px; color:var(--primary); margin-bottom:4px;">${esc(u.username)}</div>
+              <div style="font-size:13px; color:var(--gray);">Quyền: Người xem (Viewer)</div>
+            </div>
+            <div style="display:flex; gap:10px;">
+              <button class="btn" style="padding:6px 12px; background:var(--mint); color:var(--green-dark); font-size:12px; border-radius:6px; font-weight:600;" onclick="resetUserPassword('${u.username}')">🔄 Khôi phục MK</button>
+              <button class="btn" style="padding:6px 12px; background:#fee2e2; color:#ef4444; font-size:12px; border-radius:6px; font-weight:600;" onclick="deleteUser('${u.username}')">❌ Xóa</button>
+            </div>
+          </div>
+        `).join("");
+
+      return `
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom: 24px;">
+            <div style="width:48px;height:48px;background:var(--mint);border-radius:14px;display:flex;align-items:center;justify-content:center;color:var(--green-dark)">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            </div>
+            <div>
+                <h1 style="font-size:1.4rem; color:var(--text); margin-bottom:4px; letter-spacing:-0.5px">Quản lý Tài khoản</h1>
+                <p style="color:var(--gray); font-size:0.9rem">Quản lý người dùng đăng ký ứng dụng</p>
+            </div>
+        </div>
+        <div class="dash-grid" style="margin-bottom: 20px;">
+          <div class="dash-panel" style="grid-column: 1 / -1; display:flex; justify-content:space-between; align-items:center;">
+             <div class="dash-panel-title">Tổng số tài khoản Viewer</div>
+             <div style="font-size:24px; font-weight:700; color:var(--green)">${users.length}</div>
+          </div>
+        </div>
+        <div>
+          <div class="dash-panel-title" style="margin-bottom:15px;">Danh sách tài khoản</div>
+          ${listHtml}
+        </div>
+      `;
+    }
+function renderSaoluu() {
       const gTok = localStorage.getItem('gist_token') || '';
       const gId = localStorage.getItem('gist_id') || '';
       
@@ -3438,7 +3600,7 @@ window.onerror = function(message, source, lineno, colno, error) {
       }
       const map = {
         tongquan: renderTongquan, donvi: renderDonvi, kehoach: renderKehoach, nhatky: renderNhatky,
-        sanluong: renderSanluong, thuvien: renderThuvien, saoluu: renderSaoluu
+        sanluong: renderSanluong, thuvien: renderThuvien, saoluu: renderSaoluu, users: renderUsers
       };
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
       const pg = document.getElementById('pg-' + tab);
@@ -3876,7 +4038,6 @@ window.onerror = function(message, source, lineno, colno, error) {
 
 
 </body></html>
-
 
 
 
