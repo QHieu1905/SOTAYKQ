@@ -1289,40 +1289,55 @@ window.onerror = function(message, source, lineno, colno, error) {
         border: 1px solid var(--line);
         border-radius: 8px;
         background: #fff;
-        padding: 5px 15px;
+        padding: 0;
         box-shadow: 0 2px 4px rgba(0,0,0,0.02);
       }
       .tbl-card td {
         border: none !important;
         border-bottom: 1px dashed var(--line) !important;
         position: relative;
-        padding: 12px 15px 12px 40% !important;
-        text-align: right !important;
+        padding: 12px 15px !important;
+        text-align: left !important;
         white-space: normal !important;
         word-break: break-word !important;
-        font-size: 13px !important;
+        font-size: 13.5px !important;
         display: flex;
-        justify-content: flex-end;
-        align-items: center;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
         min-height: 40px;
+        gap: 6px;
       }
       .tbl-card td:last-child {
         border-bottom: 0 !important;
+        flex-direction: row;
+        justify-content: flex-end;
       }
       .tbl-card td::before {
         content: attr(data-label);
-        position: absolute;
-        left: 15px;
-        top: 50%;
-        transform: translateY(-50%);
-        width: calc(40% - 20px);
+        position: static;
+        width: 100%;
+        transform: none;
         text-align: left;
-        font-weight: 600;
+        font-weight: 700;
         color: var(--gray);
-        font-size: 11.5px;
+        font-size: 11px;
         text-transform: uppercase;
-        white-space: normal;
-        line-height: 1.3;
+        line-height: 1.2;
+      }
+      .tbl-card td[data-label=""]::before, .tbl-card td:empty::before {
+        display: none;
+      }
+      .tbl-card td:first-child {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        background: #f8fafc;
+        border-radius: 8px 8px 0 0;
+        border-bottom: 1px solid var(--line) !important;
+      }
+      .tbl-card td:first-child::before {
+        width: auto;
       }
       .grid-4, .grid-main {
         grid-template-columns: 1fr !important;
@@ -2224,15 +2239,18 @@ window.onerror = function(message, source, lineno, colno, error) {
           });
         };
 
-        if (saved) {
+        const hasFirebaseConfig = !!localStorage.getItem("firebase_config");
+        if (saved && hasFirebaseConfig) {
           mergeData(saved);
-        } else {
+        } else if (hasFirebaseConfig) {
           // Di chuyển từ localStorage sang IndexedDB lần đầu
           const s = localStorage.getItem(STORAGE_KEY);
           if (s) {
             mergeData(JSON.parse(s));
             await dbPut('store_data', 'default', data);
           }
+        } else {
+          mergeData({});
         }
       } catch (e) { console.error('Lỗi load DB', e); }
     }
@@ -2274,6 +2292,13 @@ window.onerror = function(message, source, lineno, colno, error) {
            fileName = f.name || fileName;
         } else if (fileUrl && fileUrl !== 'undefined') {
            url = fileUrl;
+        } else if (typeof fbStorage !== 'undefined' && fbStorage) {
+           try {
+              url = await fbStorage.ref('store_files/' + source).getDownloadURL();
+           } catch (e) {
+              alert('Không tìm thấy file trong cơ sở dữ liệu và máy chủ!');
+              return;
+           }
         } else {
            alert('Không tìm thấy file trong cơ sở dữ liệu!');
            return;
@@ -2881,16 +2906,30 @@ function onSearch(v) {
             const hasDenom2 = r.denom2 && r.denom2 !== 'none';
             const hasData2 = amt2Val > 0;
 
-            const isPass = isPass1 && (!hasDenom2 || !hasData2 || isPass2) && (!r.diff || r.diff === 'khop') && (!hasDenom2 || !hasData2 || !r.diff2 || r.diff2 === 'khop');
+            const totalAmt = amt1 + (hasData2 ? amt2Val : 0);
+            const totalInv = inv1 + (hasData2 ? inv2 : 0);
+            const totalRatio = (totalInv / totalAmt) * 100;
+            const totalRatioPass = totalRatio <= 5.0;
 
-            let ratioPass = isPass1 && (!hasDenom2 || !hasData2 || isPass2);
+            const hasLan = (r.diff === 'lan') || (hasData2 && r.diff2 === 'lan');
             let d = (r.diff && r.diff !== 'khop') ? r.diff : (hasData2 ? r.diff2 : 'khop');
 
-            if (filterResultNK === 'pass') return isPass;
-            if (filterResultNK === 'fail_ratio') return !ratioPass;
-            if (filterResultNK === 'fail_lan') return d === 'lan';
-            if (filterResultNK === 'fail_thieu') return d === 'thieu';
-            if (filterResultNK === 'fail_thua') return d === 'thua';
+            let conclusion = 'pass';
+            if (hasLan) {
+                conclusion = 'fail_lan';
+            } else if (!totalRatioPass) {
+                conclusion = 'fail_ratio';
+            } else if (d === 'thieu') {
+                conclusion = 'fail_thieu';
+            } else if (d === 'thua') {
+                conclusion = 'fail_thua';
+            }
+
+            if (filterResultNK === 'pass') return conclusion === 'pass';
+            if (filterResultNK === 'fail_ratio') return conclusion === 'fail_ratio';
+            if (filterResultNK === 'fail_lan') return conclusion === 'fail_lan';
+            if (filterResultNK === 'fail_thieu') return conclusion === 'fail_thieu';
+            if (filterResultNK === 'fail_thua') return conclusion === 'fail_thua';
             return true;
          });
       }
@@ -2929,6 +2968,14 @@ function onSearch(v) {
               const hasDenom2 = r.denom2 && r.denom2 !== 'none';
               const hasData2 = amt2Val > 0;
 
+              const totalAmt = amt1 + (hasData2 ? amt2Val : 0);
+              const totalInv = inv1 + (hasData2 ? inv2 : 0);
+              const totalRatio = (totalInv / totalAmt) * 100;
+              const totalRatioPass = totalRatio <= 5.0;
+
+              const hasLan = (r.diff === 'lan') || (hasData2 && r.diff2 === 'lan');
+              let d = (r.diff && r.diff !== 'khop') ? r.diff : (hasData2 ? r.diff2 : 'khop');
+
               const denom1Text = (r.denom1 || '').replace(/đ$/, 'đ') || '500.000đ';
               const denom2Text = (r.denom2 || '').replace(/đ$/, 'đ');
               const denom2Badge = hasData2 ? pill('p-amber', denom2Text) : pill('p-gray', 'Không kiểm tra');
@@ -2953,7 +3000,7 @@ function onSearch(v) {
               const diff2Pill = (hasDenom2 && hasData2) ? getDiffPill(r.diff2, r.diffQty2) : '';
               let diffStr = hasDenom2 ? `${diff1Pill}<br><div style="height:4px"></div>${diff2Pill}` : diff1Pill;
 
-              const isPass = isPass1 && (!hasDenom2 || !hasData2 || isPass2) && (!r.diff || r.diff === 'khop') && (!hasDenom2 || !hasData2 || !r.diff2 || r.diff2 === 'khop');
+
 
               let files = r.files || [];
               if (r.fileName && !files.find(f => f.fileId === r.fileId)) {
@@ -2974,14 +3021,11 @@ function onSearch(v) {
               return [`<div style="text-align:center">${idx + 1}</div>`, fmtDate(r.date), unitCell(r.unitId), denomStr, amountStr, invStr, ratioStr,
                 diffStr,
               (function() {
-                  let ratioPass = isPass1 && (!hasDenom2 || !hasData2 || isPass2);
-                  if (!ratioPass) return pill('p-red', 'Không đạt (>5%)');
-                  if (isPass) return pill('p-green', 'Đạt (≤5%)');
-                  let d = (r.diff && r.diff !== 'khop') ? r.diff : (hasData2 ? r.diff2 : 'khop');
-                  if (d === 'lan') return pill('p-purple', 'Lẫn tiền đủ TCLT');
+                  if (hasLan) return pill('p-purple', 'Lẫn tiền đủ TCLT');
+                  if (!totalRatioPass) return pill('p-red', 'Không đạt (>5%)');
                   if (d === 'thieu') return pill('p-red', 'Thiếu');
                   if (d === 'thua') return pill('p-blue', 'Thừa');
-                  return pill('p-red', 'Không đạt');
+                  return pill('p-green', 'Đạt (≤5%)');
                 })(),
                 fileHtml,
               rowActs(`openForm('log','${r.id}')`, `removeRec('logs','${r.id}')`)]
@@ -3130,10 +3174,11 @@ function onSearch(v) {
               let act = '';
               if (files.length > 0) {
                  act = `<div style="display:flex; flex-direction:column; gap:4px;">` + files.map(f => {
-                    return `<a href="javascript:void(0)" onclick="openLocalFile('${f.fileId}', '${f.fileUrl || ''}')" style="color:var(--green);text-decoration:none;font-weight:600;font-size:13px;margin-right:15px">Xem: ${esc(f.fileName)}</a>`;
+                    let safeName = encodeURIComponent(f.fileName || 'Tài liệu đính kèm').replace(/'/g, "%27");
+                    return `<a href="javascript:void(0)" onclick="showPdfModal('${f.fileId}', true, decodeURIComponent('${safeName}'), '${f.fileUrl || ''}'); return false;" style="color:var(--green);text-decoration:none;font-weight:600;font-size:13px;margin-right:15px">${esc(f.fileName)}</a>`;
                  }).join('') + `</div>`;
               } else if (r.url) {
-                 act = `<a href="${r.url}" target="_blank" style="color:var(--green);text-decoration:none;font-weight:600;font-size:13px;margin-right:15px">Xem File</a>`;
+                 act = `<a href="${r.url}" target="_blank" style="color:var(--green);text-decoration:none;font-weight:600;font-size:13px;margin-right:15px">${r.url}</a>`;
               }
               
               let fileNamesHtml = files.length > 0 ? files.map(f => `<div style="font-size:11px;color:var(--gray);margin-top:4px">${esc(f.fileName)}</div>`).join('') : '';
@@ -4171,8 +4216,13 @@ function renderSaoluu() {
             <p style="color:var(--gray); margin-bottom:20px; font-size:13px">S\u1ED5 tay Kho Qu\u1EF9 \u0111i\u1EC7n t\u1EED 3633</p>
             <input type="text" id="login-username" class="inp" placeholder="T\u00EAn \u0111\u0103ng nh\u1EADp" style="width:100%; margin-bottom:15px; box-sizing:border-box">
             <input type="password" id="login-password" class="inp" placeholder="M\u1EADt kh\u1EA9u" style="width:100%; margin-bottom:20px; box-sizing:border-box">
-            <button class="btn" style="background:var(--green);color:white;width:100%; padding:10px; font-size:15px; margin-bottom:15px; justify-content:center; border:none; border-radius:4px; cursor:pointer;" onclick="doLogin()">\u0110\u0103ng nh\u1EADp</button>
-            <div style="font-size:13px; color:var(--gray)">Ch\u01B0a c\u00F3 t\u00E0i kho\u1EA3n? <a href="#" style="color:var(--green)" onclick="renderLogin('register')">\u0110\u0103ng k\u00FD (Ng\u01B0\u1EDDi xem)</a></div>
+            <button class="btn" style="background:var(--green);color:white;width:100%; padding:10px; font-size:15px; margin-bottom:15px; justify-content:center; border:none; border-radius:4px; cursor:pointer;" onclick="doLogin()">Đăng nhập</button>
+            <div style="font-size:13px; color:var(--gray)">Chưa có tài khoản? <a href="#" style="color:var(--green)" onclick="renderLogin('register')">Đăng ký (Người xem)</a></div>
+            <div style="font-size:12px; color:var(--gray); margin-top:20px; border-top:1px solid var(--line); padding-top:15px;">
+              <a href="#" style="color:var(--gray); text-decoration:none; display:flex; align-items:center; justify-content:center; gap:5px;" onclick="promptFirebaseConfig(); return false;">
+                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg> Cấu hình Máy chủ
+              </a>
+            </div>
         `;
       } else {
         formHtml = `
@@ -4180,8 +4230,13 @@ function renderSaoluu() {
             <p style="color:var(--gray); margin-bottom:20px; font-size:13px">Ch\u1EC9 c\u00F3 quy\u1EC1n xem d\u1EEF li\u1EC7u</p>
             <input type="text" id="reg-username" class="inp" placeholder="T\u00EAn \u0111\u0103ng nh\u1EADp" style="width:100%; margin-bottom:15px; box-sizing:border-box">
             <input type="password" id="reg-password" class="inp" placeholder="M\u1EADt kh\u1EA9u" style="width:100%; margin-bottom:20px; box-sizing:border-box">
-            <button class="btn" style="background:var(--green);color:white;width:100%; padding:10px; font-size:15px; margin-bottom:15px; justify-content:center; border:none; border-radius:4px; cursor:pointer;" onclick="doRegister()">\u0110\u0103ng k\u00FD</button>
-            <div style="font-size:13px; color:var(--gray)">\u0110\u00E3 c\u00F3 t\u00E0i kho\u1EA3n? <a href="#" style="color:var(--green)" onclick="renderLogin('login')">\u0110\u0103ng nh\u1EADp</a></div>
+            <button class="btn" style="background:var(--green);color:white;width:100%; padding:10px; font-size:15px; margin-bottom:15px; justify-content:center; border:none; border-radius:4px; cursor:pointer;" onclick="doRegister()">Đăng ký</button>
+            <div style="font-size:13px; color:var(--gray)">Đã có tài khoản? <a href="#" style="color:var(--green)" onclick="renderLogin('login')">Đăng nhập</a></div>
+            <div style="font-size:12px; color:var(--gray); margin-top:20px; border-top:1px solid var(--line); padding-top:15px;">
+              <a href="#" style="color:var(--gray); text-decoration:none; display:flex; align-items:center; justify-content:center; gap:5px;" onclick="promptFirebaseConfig(); return false;">
+                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg> Cấu hình Máy chủ
+              </a>
+            </div>
         `;
       }
 
@@ -4195,6 +4250,27 @@ function renderSaoluu() {
           </div>
         </div>
       `;
+    };
+    
+    window.promptFirebaseConfig = function() {
+      const current = localStorage.getItem("firebase_config") || "";
+      const input = prompt("Nhập cấu hình Firebase (JSON) để kết nối máy chủ:", current);
+      if (input !== null) {
+        if (input.trim() === "") {
+           localStorage.removeItem("firebase_config");
+           alert("Đã xóa cấu hình máy chủ. Ứng dụng sẽ hoạt động ngoại tuyến.");
+           location.reload();
+        } else {
+           try {
+             JSON.parse(input); // Validate JSON
+             localStorage.setItem("firebase_config", input.trim());
+             alert("Đã lưu cấu hình! Hệ thống sẽ tải lại để kết nối.");
+             location.reload();
+           } catch(e) {
+             alert("Cấu hình không hợp lệ. Vui lòng nhập đúng định dạng JSON.");
+           }
+        }
+      }
     };
 
     window.doRegister = async function() {
