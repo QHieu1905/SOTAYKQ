@@ -2964,7 +2964,8 @@ function onSearch(v) {
                  fileHtml = `<div style="display:flex; flex-direction:column; gap:4px;">` + files.map(f => {
                     let onclick = '';
                     if (f.fileId) {
-                      onclick = `onclick="showPdfModal('${f.fileId}', true, 'Tài liệu đính kèm', '${f.fileUrl || ''}'); return false;"`;
+                      let safeName = encodeURIComponent(f.fileName || 'Tài liệu đính kèm').replace(/'/g, "%27");
+                      onclick = `onclick="showPdfModal('${f.fileId}', true, decodeURIComponent('${safeName}'), '${f.fileUrl || ''}'); return false;"`;
                     }
                     return `<div style="font-size:11px;color:var(--green-dark);background:var(--mint);padding:4px 8px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;border:1px solid #bce1ce;font-weight:600;white-space:nowrap;transition:0.2s;max-width:150px;overflow:hidden;text-overflow:ellipsis" onmouseover="this.style.background='#c5e8d6'" onmouseout="this.style.background='var(--mint)'" ${onclick} title="${esc(f.fileName)}"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg><span style="overflow:hidden;text-overflow:ellipsis">${esc(f.fileName)}</span></div>`;
                  }).join('') + `</div>`;
@@ -3173,11 +3174,13 @@ function onSearch(v) {
 
                 let onclick = '', onenter = '', onleave = '';
                 if (r.fileId) {
-                  onclick = `onclick="showPdfModal('${r.fileId}', true, 'Tài liệu đính kèm', '${r.fileUrl || ''}'); return false;"`;
+                  let safeName = encodeURIComponent(r.fileName || r.title || r.name || 'Tài liệu đính kèm').replace(/'/g, "%27");
+                  onclick = `onclick="showPdfModal('${r.fileId}', true, decodeURIComponent('${safeName}'), '${r.fileUrl || ''}'); return false;"`;
                   onenter = '';
                 } else {
                   const filePath = esc('MAU NIEM PHONG BO TIEN TCTD/' + r.fileName);
-                  onclick = `onclick="showPdfModal('${filePath}', false, 'Tài liệu'); return false;"`;
+                  let safeName = encodeURIComponent(r.fileName || r.title || r.name || 'Tài liệu').replace(/'/g, "%27");
+                  onclick = `onclick="showPdfModal('${filePath}', false, decodeURIComponent('${safeName}')); return false;"`;
                 onenter = '';
                 }
                 if (isInvalid) { onclick = ''; onenter = ''; onleave = ''; }
@@ -3239,11 +3242,13 @@ function onSearch(v) {
 
               let onclick = '', onenter = '', onleave = '';
               if (r.fileId) {
-                onclick = `onclick="showPdfModal('${r.fileId}', true, 'Tài liệu đính kèm', '${r.fileUrl || ''}'); return false;"`;
+                let safeName = encodeURIComponent(r.fileName || r.title || r.name || 'Tài liệu đính kèm').replace(/'/g, "%27");
+                onclick = `onclick="showPdfModal('${r.fileId}', true, decodeURIComponent('${safeName}'), '${r.fileUrl || ''}'); return false;"`;
                   onenter = '';
               } else {
                 const filePath = esc('BANG DANG KY CHU KY MAU TCTD/' + r.fileName);
-                onclick = `onclick="showPdfModal('${filePath}', false, 'Tài liệu'); return false;"`;
+                let safeName = encodeURIComponent(r.fileName || r.title || r.name || 'Tài liệu').replace(/'/g, "%27");
+                onclick = `onclick="showPdfModal('${filePath}', false, decodeURIComponent('${safeName}')); return false;"`;
                 onenter = '';
               }
               if (isInvalid) { onclick = ''; onenter = ''; onleave = ''; }
