@@ -1,6 +1,9 @@
 <!DOCTYPE html>
-<!-- saved from url=(0055)file:///E:/XPREMIUM/DU%20AN%20KQ/quanlykhoquy%20v1.html -->
 <html lang="vi"><head>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script>
 window.onerror = function(message, source, lineno, colno, error) {
@@ -10,8 +13,7 @@ window.onerror = function(message, source, lineno, colno, error) {
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sổ tay điện tử 3633</title>
-  <link href="./SO TAY KHO QUY_files/css2" rel="stylesheet">
-  <style>
+    <style>
         :root {
       --green: #059669;
       --green-dark: #047857;
@@ -219,18 +221,27 @@ window.onerror = function(message, source, lineno, colno, error) {
       position: relative;
       box-shadow: 0 4px 10px rgba(0, 86, 179, 0.1);
       white-space: nowrap;
-      overflow: hidden;
-      z-index: 1;
-      cursor: pointer;
+      z-index: 1; cursor: pointer;
     }
 
-    .navbtn span {
-      display: inline-block;
+        .navbtn span {
+      position: absolute;
+      left: 100%;
+      top: 50%;
+      transform: translateY(-50%);
+      margin-left: 10px;
+      background: #1e293b;
+      color: #ffffff;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      white-space: nowrap;
       opacity: 0;
-      margin-left: 12px;
-      font-size: 14.5px;
-      letter-spacing: 0.3px;
-      transition: opacity 0.3s;
+      visibility: hidden;
+      pointer-events: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
     .navbtn svg {
@@ -238,17 +249,17 @@ window.onerror = function(message, source, lineno, colno, error) {
       transition: transform 0.2s;
     }
 
-    .navbtn:hover {
-      width: 230px;
+        .navbtn:hover {
       background: #007bff;
       color: #ffffff;
-      border-radius: 24px;
       box-shadow: 0 8px 24px rgba(0, 86, 179, 0.4);
       z-index: 100;
     }
 
-    .navbtn:hover span {
+        .navbtn:hover span {
       opacity: 1;
+      visibility: visible;
+      margin-left: 15px;
     }
 
     .navbtn.active {
@@ -870,7 +881,7 @@ window.onerror = function(message, source, lineno, colno, error) {
 
 
     @media(max-width:860px) {
-      aside {
+                  aside {
         position: fixed;
         left: 0;
         top: 0;
@@ -1196,9 +1207,7 @@ window.onerror = function(message, source, lineno, colno, error) {
         padding: 15px 20px !important;
         gap: 10px !important;
       }
-      .titles {
-        flex: 1;
-      }
+      .titles { display: none !important; }
       .searchbox {
         order: 3;
         width: 100% !important;
@@ -1384,9 +1393,6 @@ window.onerror = function(message, source, lineno, colno, error) {
           <input type="text" id="search" onfocus="showSearchDropdown()" placeholder="Tìm kiếm hoặc chọn đơn vị..." oninput="onSearchInput(this.value)" onclick="this.value=''; onSearch('')" autocomplete="off">
           <div id="search-dropdown" class="custom-dropdown" style="display:none;"></div>
         </div>
-        <button class="iconbtn-top" onclick="syncToGist()" title="Đồng bộ đám mây" style="color:var(--green)">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></svg>
-        </button>
         <button class="iconbtn-top" onclick="doLogout()" title="Đăng xuất" style="color:var(--red)">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
         </button>
@@ -1398,7 +1404,7 @@ window.onerror = function(message, source, lineno, colno, error) {
         <div style="display:flex; align-items:center; gap:10px; margin-bottom: 20px;">
           <span style="font-weight: 600; color: var(--gray);">Tháng</span>
           <div style="display:inline-flex; gap:2px; background:#fff; padding:4px; border-radius:999px; border:1px solid var(--line); flex-wrap: wrap;">
-            <button style="padding:4px 14px; border:none; border-radius:999px; cursor:pointer; font-size:12.5px; transition:0.2s; background:transparent; color:var(--gray); font-weight:600;" onclick="toggleMonthTQ('2026-08')">08</button><button style="padding:4px 14px; border:none; border-radius:999px; cursor:pointer; font-size:12.5px; transition:0.2s; background:transparent; color:var(--gray); font-weight:600;" onclick="toggleMonthTQ('2026-07')">07</button><button style="padding:4px 14px; border:none; border-radius:999px; cursor:pointer; font-size:12.5px; transition:0.2s; background:transparent; color:var(--gray); font-weight:600;" onclick="toggleMonthTQ('2026-06')">06</button><button style="padding:4px 14px; border:none; border-radius:999px; cursor:pointer; font-size:12.5px; transition:0.2s; background:transparent; color:var(--gray); font-weight:600;" onclick="toggleMonthTQ('2026-05')">05</button><button style="padding:4px 14px; border:none; border-radius:999px; cursor:pointer; font-size:12.5px; transition:0.2s; background:transparent; color:var(--gray); font-weight:600;" onclick="toggleMonthTQ('2026-04')">04</button><button style="padding:4px 14px; border:none; border-radius:999px; cursor:pointer; font-size:12.5px; transition:0.2s; background:transparent; color:var(--gray); font-weight:600;" onclick="toggleMonthTQ('2026-03')">03</button><button style="padding:4px 14px; border:none; border-radius:999px; cursor:pointer; font-size:12.5px; transition:0.2s; background:transparent; color:var(--gray); font-weight:600;" onclick="toggleMonthTQ('2026-02')">02</button><button style="padding:4px 14px; border:none; border-radius:999px; cursor:pointer; font-size:12.5px; transition:0.2s; background:transparent; color:var(--gray); font-weight:600;" onclick="toggleMonthTQ('2026-01')">01</button>
+            <button style="padding:4px 14px; border:none; border-radius:999px; cursor:pointer; font-size:12.5px; transition:0.2s; background:transparent; color:var(--gray); font-weight:600;" onclick="toggleMonthTQ('2026-01')">01</button><button style="padding:4px 14px; border:none; border-radius:999px; cursor:pointer; font-size:12.5px; transition:0.2s; background:transparent; color:var(--gray); font-weight:600;" onclick="toggleMonthTQ('2026-02')">02</button><button style="padding:4px 14px; border:none; border-radius:999px; cursor:pointer; font-size:12.5px; transition:0.2s; background:transparent; color:var(--gray); font-weight:600;" onclick="toggleMonthTQ('2026-03')">03</button><button style="padding:4px 14px; border:none; border-radius:999px; cursor:pointer; font-size:12.5px; transition:0.2s; background:transparent; color:var(--gray); font-weight:600;" onclick="toggleMonthTQ('2026-04')">04</button><button style="padding:4px 14px; border:none; border-radius:999px; cursor:pointer; font-size:12.5px; transition:0.2s; background:transparent; color:var(--gray); font-weight:600;" onclick="toggleMonthTQ('2026-05')">05</button><button style="padding:4px 14px; border:none; border-radius:999px; cursor:pointer; font-size:12.5px; transition:0.2s; background:transparent; color:var(--gray); font-weight:600;" onclick="toggleMonthTQ('2026-06')">06</button><button style="padding:4px 14px; border:none; border-radius:999px; cursor:pointer; font-size:12.5px; transition:0.2s; background:transparent; color:var(--gray); font-weight:600;" onclick="toggleMonthTQ('2026-07')">07</button><button style="padding:4px 14px; border:none; border-radius:999px; cursor:pointer; font-size:12.5px; transition:0.2s; background:transparent; color:var(--gray); font-weight:600;" onclick="toggleMonthTQ('2026-08')">08</button>
           </div>
         </div>
       
@@ -2234,6 +2240,7 @@ window.onerror = function(message, source, lineno, colno, error) {
         let saveTimer = null;
     let autoSyncTimer = null;
     function saveData() {
+      if (typeof fbSyncing !== 'undefined' && fbSyncing) return;
       try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch (e) { } // Giữ lại backup nhẹ ngay lập tức
       clearTimeout(saveTimer);
       saveTimer = setTimeout(async () => {
@@ -2242,24 +2249,31 @@ window.onerror = function(message, source, lineno, colno, error) {
       
       clearTimeout(autoSyncTimer);
       autoSyncTimer = setTimeout(() => {
-        if (typeof doAutoBackups === 'function') doAutoBackups(true);
-      }, 2000);
+        if (typeof pushToFirestore === 'function') pushToFirestore();
+      }, 1500);
     }
 
-    async function openLocalFile(fileId) {
+    async function openLocalFile(fileId, fileUrl) {
       const f = await dbGet('store_files', fileId);
-      if (!f) return alert('Không tìm thấy tệp đính kèm.');
-      const url = URL.createObjectURL(f);
-      window.open(url, '_blank');
+      if (f) {
+        const url = URL.createObjectURL(f);
+        window.open(url, '_blank');
+      } else if (fileUrl && fileUrl !== 'undefined') {
+        window.open(fileUrl, '_blank');
+      } else {
+        alert('Không tìm thấy tệp đính kèm.');
+      }
     }
 
-            async function showPdfModal(source, isDbFile = false, fileName = 'Tài liệu đính kèm') {
+            async function showPdfModal(source, isDbFile = false, fileName = 'Tài liệu đính kèm', fileUrl = '') {
       let url = source;
       if (isDbFile) {
         const f = await dbGet('store_files', source);
         if (f) {
            url = URL.createObjectURL(f);
            fileName = f.name || fileName;
+        } else if (fileUrl && fileUrl !== 'undefined') {
+           url = fileUrl;
         } else {
            alert('Không tìm thấy file trong cơ sở dữ liệu!');
            return;
@@ -2505,7 +2519,7 @@ function onSearch(v) {
       const allMonthsSet = new Set();
       (data.logs || []).forEach(log => { if (log.date) allMonthsSet.add(log.date.slice(0, 7)); });
       (data.recoveries || []).forEach(r => { if (r.month) allMonthsSet.add(r.month); });
-      const allMonths = [...allMonthsSet].sort((a, b) => b.localeCompare(a));
+      const allMonths = [...allMonthsSet].sort((a, b) => a.localeCompare(b));
 
       const filteredLogs = (data.logs || []).filter(log => {
         if (!log.date) return false;
@@ -2928,7 +2942,7 @@ function onSearch(v) {
               if (r.fileName) {
                 let onclick = '', onenter = '', onleave = '';
                 if (r.fileId) {
-                  onclick = `onclick="showPdfModal('${r.fileId}', true, 'Tài liệu đính kèm'); return false;"`;
+                  onclick = `onclick="showPdfModal('${r.fileId}', true, 'Tài liệu đính kèm', '${r.fileUrl || ''}'); return false;"`;
                   onenter = '';
                 }
                 fileHtml = `<div style="font-size:11px;color:var(--green-dark);background:var(--mint);padding:4px 8px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;border:1px solid #bce1ce;font-weight:600;white-space:nowrap;transition:0.2s" onmouseover="this.style.background='#c5e8d6'" onmouseout="this.style.background='var(--mint)'" ${onclick} ${onenter} ${onleave}><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg><span>${esc(r.fileName)}</span></div>`;
@@ -3002,7 +3016,7 @@ function onSearch(v) {
         if (r.id) agg[key].manualIds.push(r.id);
       });
 
-      const allMonths = [...new Set(Object.values(agg).map(r => r.month))].sort((a, b) => b.localeCompare(a));
+      const allMonths = [...new Set(Object.values(agg).map(r => r.month))].sort((a, b) => a.localeCompare(b));
 
       const monthFilterHtml = `
         <div style="display:flex; align-items:center; gap:10px; margin-left: 6px;">
@@ -3087,7 +3101,7 @@ function onSearch(v) {
           : tbl(['STT', 'Tài liệu', 'Ngày ban hành', 'File', ''],
             list_docs.map((r, i) => {
               let act = r.fileId
-                ? `<a href="javascript:void(0)" onclick="openLocalFile('${r.fileId}')" style="color:var(--green);text-decoration:none;font-weight:600;font-size:13px;margin-right:15px">Xem Tệp</a>`
+                ? `<a href="javascript:void(0)" onclick="openLocalFile('${r.fileId}', '${r.fileUrl || ''}')" style="color:var(--green);text-decoration:none;font-weight:600;font-size:13px;margin-right:15px">Xem Tệp</a>`
                 : `<a href="${r.url || '#'}" target="_blank" style="color:var(--green);text-decoration:none;font-weight:600;font-size:13px;margin-right:15px">Xem File</a>`;
               return [
                 i + 1,
@@ -3125,7 +3139,7 @@ function onSearch(v) {
 
                 let onclick = '', onenter = '', onleave = '';
                 if (r.fileId) {
-                  onclick = `onclick="showPdfModal('${r.fileId}', true, 'Tài liệu đính kèm'); return false;"`;
+                  onclick = `onclick="showPdfModal('${r.fileId}', true, 'Tài liệu đính kèm', '${r.fileUrl || ''}'); return false;"`;
                   onenter = '';
                 } else {
                   const filePath = esc('MAU NIEM PHONG BO TIEN TCTD/' + r.fileName);
@@ -3191,7 +3205,7 @@ function onSearch(v) {
 
               let onclick = '', onenter = '', onleave = '';
               if (r.fileId) {
-                onclick = `onclick="showPdfModal('${r.fileId}', true, 'Tài liệu đính kèm'); return false;"`;
+                onclick = `onclick="showPdfModal('${r.fileId}', true, 'Tài liệu đính kèm', '${r.fileUrl || ''}'); return false;"`;
                   onenter = '';
               } else {
                 const filePath = esc('BANG DANG KY CHU KY MAU TCTD/' + r.fileName);
@@ -3238,115 +3252,6 @@ function onSearch(v) {
 
 
     /* ================= 8. SAO LƯU VÀ KHÔI PHỤC ================= */
-    async function exportBackup() {
-      try {
-        const dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
-        const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-        const folderName = 'Backup-' + d.toISOString().replace(/[:.]/g, '-').slice(0, 19);
-        const backupHandle = await dirHandle.getDirectoryHandle(folderName, { create: true });
-
-        // Lưu file JSON Data
-        const manifest = await backupHandle.getFileHandle('manifest.json', { create: true });
-        const w = await manifest.createWritable();
-        await w.write(JSON.stringify(data, null, 2));
-        await w.close();
-
-        // Luu cac file dinh kem hien tai (loai bo cac file da xoa)
-        const files = await dbGetAllFiles();
-        const activeFileIds = new Set();
-        for (const k in data) {
-          if (Array.isArray(data[k])) {
-            data[k].forEach(item => {
-              if (item.fileId) activeFileIds.add(item.fileId);
-            });
-          }
-        }
-
-        if (files.length > 0) {
-          const filesDir = await backupHandle.getDirectoryHandle('files', { create: true });
-          for (const f of files) {
-            if (!activeFileIds.has(f.id)) continue; // chi backup file dang su dung
-            let fw;
-            try {
-              const originalName = f.file && f.file.name ? f.file.name : 'unknown';
-              let safeName = f.id;
-              if (originalName !== 'unknown') {
-                const extMatch = originalName.match(/\.[0-9a-z]+$/i);
-                safeName = f.id + '___' + originalName.replace(/[\\/:*?"<>|]/g, '_');
-              }
-              const fh = await filesDir.getFileHandle(safeName, { create: true });
-              fw = await fh.createWritable();
-              await fw.write(f.file);
-            } catch (err) {
-              console.warn(`L\u1ED7i sao l\u01B0u file \u0111\u00EDnh k\u00E8m ${f.id}:`, err);
-            } finally {
-              if (fw) {
-                try { await fw.close(); } catch (e) { }
-              }
-            }
-          }
-        }
-        alert('Đã xuất sao lưu thành công vào thư mục:\\n' + folderName);
-      } catch (e) {
-        if (e.name !== 'AbortError') alert('Lỗi khi sao lưu: ' + e.message);
-      }
-    }
-
-    async function importBackup() {
-      try {
-        const dirHandle = await window.showDirectoryPicker({ mode: 'read' });
-
-        // Đọc manifest.json
-        const manifestHandle = await dirHandle.getFileHandle('manifest.json');
-        const manifestFile = await manifestHandle.getFile();
-        const text = await manifestFile.text();
-        const parsed = JSON.parse(text);
-
-        if (!parsed || !parsed.units) throw new Error("Thư mục không hợp lệ (không chứa manifest.json hợp lệ).");
-
-        // Đọc tệp đính kèm trong thư mục files/
-        try {
-          const filesDir = await dirHandle.getDirectoryHandle('files');
-          for await (const entry of filesDir.values()) {
-            if (entry.kind === 'file') {
-              const fileHandle = await filesDir.getFileHandle(entry.name);
-                const f = await fileHandle.getFile();
-                let fileId = entry.name;
-                if (entry.name.includes('___')) {
-                  fileId = entry.name.split('___')[0];
-                }
-                await dbPut('store_files', fileId, f);
-            }
-          }
-        } catch (err) {
-          console.log('Không có thư mục files đính kèm.', err);
-        }
-
-        for (const key of Object.keys(parsed)) {
-          if (Array.isArray(parsed[key])) {
-            if (!data[key]) data[key] = [];
-            for (const item of parsed[key]) {
-              if (item && item.id) {
-                const existingIdx = data[key].findIndex(x => x.id === item.id);
-                if (existingIdx !== -1) {
-                  data[key][existingIdx] = item;
-                } else {
-                  data[key].push(item);
-                }
-              }
-            }
-          } else {
-            data[key] = parsed[key];
-          }
-        }
-
-        saveData();
-        render();
-        alert('Đã khôi phục dữ liệu thành công!');
-      } catch (e) {
-        if (e.name !== 'AbortError') alert('Lỗi khi khôi phục: ' + e.message);
-      }
-    }
 
     async function generateFullBackupBlob() {
       // Create a Blob directly instead of a massive string to prevent Out of Memory
@@ -3432,70 +3337,125 @@ function onSearch(v) {
       input.click();
     }
 
-    async function syncToGist(isSilent = false) {
-      const token = localStorage.getItem('gist_token');
-      if (!token) { if (!isSilent) alert('Vui lòng nhập GitHub Token trong mục Sao lưu!'); return; }
-      let gistId = localStorage.getItem('gist_id');
+
+
+
+        async function uploadToFirebaseStorage(file, fileId) {
+      if (typeof fbStorage !== 'undefined' && fbStorage) {
+        try {
+          const storageRef = fbStorage.ref('files/' + fileId);
+          const snapshot = await storageRef.put(file);
+          const downloadUrl = await snapshot.ref.getDownloadURL();
+          return downloadUrl;
+        } catch (e) {
+          console.error("Firebase Storage Upload Error:", e);
+          return null;
+        }
+      }
+      return null;
+    }
+
+    window.saveFirebaseSettings = function() {
+      let val = document.getElementById('fb_config_inp').value.trim();
+      if (!val) return alert('Vui lòng nhập cấu hình');
       try {
-        // Chỉ lưu text data để tránh quá tải Gist và lỗi bộ nhớ
-        const jsonStr = JSON.stringify({ data: data, files: [] });
-        const payload = {
-          description: "Sổ tay 3633 Backup (Data Only)",
-          files: { "backup.json": { content: jsonStr } }
-        };
-        const method = gistId ? 'PATCH' : 'POST';
-        const url = gistId ? `https://api.github.com/gists/${gistId}` : 'https://api.github.com/gists';
+        val = val.replace(/^const\s+firebaseConfig\s*=\s*/, '');
+        val = val.replace(/;$/, '');
+        const obj = new Function('return ' + val)();
+        if (!obj.apiKey) throw new Error("Missing apiKey");
+        localStorage.setItem('firebase_config', JSON.stringify(obj));
+        alert('Đã lưu cấu hình Firebase! Ứng dụng sẽ tải lại.');
+        window.location.reload();
+      } catch (e) {
+        console.error(e);
+        alert('Lỗi: Cấu hình Firebase không hợp lệ! Đảm bảo bạn copy đúng phần nội dung trong dấu { }');
+      }
+    } 
+
+    let fbApp = null;
+    let fbDb = null;
+    let fbStorage = null;
+    let fbFirestore = null;
+    let fbSyncing = false;
+    let isRemoteUpdating = false;
+    let pendingData = null;
+
+    async function pushToFirestore() {
+      if (!window.fbFirestore) return;
+      if (isRemoteUpdating) return; 
+      try {
+        const topBtn = document.getElementById("sync-status-btn");
+        if (topBtn) { topBtn.style.color = "var(--amber)"; topBtn.title = "Đang đồng bộ..."; }
         
-        const res = await fetch(url, {
-          method,
-          headers: {
-            'Authorization': 'token ' + token,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(payload)
-        });
-        const resData = await res.json();
-        if (res.ok) {
-           if (!gistId) {
-             gistId = resData.id;
-             localStorage.setItem('gist_id', gistId);
-             if (document.getElementById('gist_id_inp')) document.getElementById('gist_id_inp').value = gistId;
-           }
-           alert('Đồng bộ Gist thành công (Chỉ dữ liệu text)!');
-        } else {
-           alert('Lỗi Gist: ' + resData.message);
-        }
-      } catch(e) {
-        alert('Lỗi mạng: ' + e.message);
+        const clone = JSON.parse(JSON.stringify(data));
+        await window.fbFirestore.collection("app_data").doc("main").set(clone);
+        
+        if (topBtn) { topBtn.style.color = "var(--green)"; topBtn.title = "Đã đồng bộ thời gian thực"; }
+      } catch (err) {
+        console.error("Lỗi đồng bộ Firestore", err);
+        const topBtn = document.getElementById("sync-status-btn");
+        if (topBtn) { topBtn.style.color = "var(--red)"; topBtn.title = "Lỗi đồng bộ"; }
       }
     }
 
+    function showToast(msg, color="green") {
+      let t = document.getElementById("rt-toast");
+      if (!t) {
+        t = document.createElement("div");
+        t.id = "rt-toast";
+        t.style.cssText = "position:fixed;bottom:20px;left:50%;transform:translateX(-50%);padding:10px 20px;border-radius:20px;color:#fff;font-size:14px;z-index:9999;transition:0.3s;opacity:0;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,0.15);";
+        document.body.appendChild(t);
+      }
+      t.style.background = color === "green" ? "var(--green)" : "var(--amber)";
+      t.textContent = msg;
+      t.style.opacity = "1";
+      setTimeout(() => { t.style.opacity = "0"; }, 3000);
+    }
 
-    async function restoreFromGist() {
-      const token = localStorage.getItem('gist_token');
-      const gistId = localStorage.getItem('gist_id');
-      if (!gistId) return alert('Chưa có Gist ID!');
-      try {
-        const res = await fetch(`https://api.github.com/gists/${gistId}`, {
-          headers: token ? { 'Authorization': 'token ' + token } : {}
-        });
-        const resData = await res.json();
-        if (res.ok) {
-           const content = resData.files['backup.json'].content;
-           await restoreFromJsonObj(JSON.parse(content));
-        } else {
-           alert('Lỗi Gist: ' + resData.message);
+    function setupRealtimeListener() {
+      if (!window.fbFirestore) return;
+      window.fbFirestore.collection("app_data").doc("main").onSnapshot((doc) => {
+        if (doc.exists) {
+          const newData = doc.data();
+          const isModalOpen = document.getElementById("overlay").classList.contains("open") || document.querySelector(".modal.open");
+          
+          if (isModalOpen || (typeof editing !== "undefined" && editing !== null)) {
+             pendingData = newData;
+             showToast("Có dữ liệu mới từ máy khác. Sẽ cập nhật sau khi đóng cửa sổ này.", "orange");
+          } else {
+             isRemoteUpdating = true;
+             data = newData;
+             localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+             dbPut("store_data", "default", data).catch(e=>{});
+             render();
+             showToast("Dữ liệu đã tự động cập nhật.", "green");
+             setTimeout(() => { isRemoteUpdating = false; }, 500);
+          }
         }
-      } catch(e) {
-        alert('Lỗi mạng: ' + e.message);
+      });
+    }
+
+    window.initFirebase = function() {
+      const fbConfigStr = localStorage.getItem("firebase_config");
+      if (fbConfigStr) {
+        try {
+          const config = JSON.parse(fbConfigStr);
+          if (!firebase.apps.length) {
+            fbApp = firebase.initializeApp(config);
+          } else {
+            fbApp = firebase.app();
+          }
+          fbDb = firebase.database();
+          fbStorage = firebase.storage();
+          fbFirestore = firebase.firestore();
+          console.log("Firebase initialized");
+          setupRealtimeListener();
+        } catch (e) {
+          console.error("Firebase init error", e);
+        }
       }
     }
 
-    window.saveGistSettings = function() {
-      localStorage.setItem('gist_token', document.getElementById('gist_token_inp').value.trim());
-      localStorage.setItem('gist_id', document.getElementById('gist_id_inp').value.trim());
-      alert('Đã lưu cấu hình Gist!');
-    }
 
     
     function resetUserPassword(username) {
@@ -3584,23 +3544,17 @@ function onSearch(v) {
     }
 
 function renderSaoluu() {
-      const gTok = localStorage.getItem('gist_token') || '';
-      const gId = localStorage.getItem('gist_id') || '';
-      
-      return `${secHead('Đồng bộ GitHub Gist (Khuyên dùng)', 'Lưu trữ đám mây tự động, khôi phục mọi nơi kể cả trên iPhone.')}
+      const fbConfig = localStorage.getItem('firebase_config') || '';
+      return `${secHead('Đồng bộ Firebase Storage', 'Lưu trữ đám mây toàn bộ dữ liệu (Text & File Đính kèm).')}
       <div class="card" style="margin-bottom:24px">
         <div class="fgrid">
-          <label class="f span"><span>GitHub Personal Access Token</span>
-            <input type="password" id="gist_token_inp" value="${gTok}" placeholder="ghp_...">
+          <label class="f span"><span>Firebase Config JSON</span>
+            <textarea id="fb_config_inp" rows="5" style="width:100%; border:1px solid var(--line); border-radius: 8px; padding: 10px; font-family: monospace; resize: vertical;" placeholder='{"apiKey": "...", "authDomain": "...", "databaseURL": "...", "projectId": "...", "storageBucket": "...", "messagingSenderId": "...", "appId": "..."}'>${fbConfig}</textarea>
           </label>
-          <label class="f span"><span>Gist ID (Để trống nếu tạo mới)</span>
-            <input type="text" id="gist_id_inp" value="${gId}" placeholder="Sao chép Gist ID nếu đã có">
-          </label>
-          <div class="span" style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap">
-            <button class="btn" onclick="saveGistSettings()">Lưu Cấu Hình</button>
-            <button class="btn" style="background:var(--blue)" onclick="syncToGist()">Đồng bộ Lên</button>
-            <button class="btn" style="background:var(--amber)" onclick="restoreFromGist()">Khôi phục Về</button>
-          </div>
+        </div>
+        <div class="span" style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;align-items:center;">
+          <button class="btn primary" onclick="saveFirebaseSettings()">Lưu cấu hình</button>
+          <span style="display:flex;align-items:center;padding:0 10px;font-size:13px;color:var(--green);font-weight:600;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Đang tự động đồng bộ thời gian thực (Real-time)</span>
         </div>
       </div>
 
@@ -3615,21 +3569,8 @@ function renderSaoluu() {
           <div><div class="num" style="font-size:16px">Nhập .json</div><div class="lbl">Khôi phục từ Tệp</div></div>
         </div>
       </div>
-
-      ${secHead('Sao lưu Thư mục (Dành cho Máy tính)', 'Sử dụng File System API (Chỉ Chrome/Edge).')}
-      <div class="grid grid-4">
-        <div class="card stat" style="cursor:pointer;border:1px solid var(--line)" onclick="exportBackup()">
-          <div class="stat-ic ic-blue">${ICONS.redo}</div>
-          <div><div class="num" style="font-size:16px">Tạo thư mục</div><div class="lbl">Lưu nhiều file</div></div>
-        </div>
-        <div class="card stat" style="cursor:pointer;border:1px solid var(--line)" onclick="importBackup()">
-          <div class="stat-ic ic-amber">${ICONS.box}</div>
-          <div><div class="num" style="font-size:16px">Nhập thư mục</div><div class="lbl">Khôi phục nhiều file</div></div>
-        </div>
-      </div>
       `;
     }
-
 
     /* ================= RENDER ================= */
     function render() {
@@ -3639,7 +3580,7 @@ function renderSaoluu() {
         if (dl.innerHTML !== newHtml) dl.innerHTML = newHtml;
       }
       renderNav();
-      let t = TABS.find(x => x.id === tab);
+      let t = [...TABS, {id:'users', label:'Quản lý Tài khoản'}, {id:'audit', label:'Lịch sử hoạt động'}].find(x => x.id === tab);
       if (!t && tab === 'tongquan') t = { label: 'Tổng quan địa bàn KV01' };
       if (t) {
         document.getElementById('page-title').textContent = t.label.replace(/^\d+\.\s*/, '');
@@ -3723,7 +3664,19 @@ function renderSaoluu() {
       document.getElementById('modal-body').innerHTML = body;
       document.getElementById('overlay').classList.add('open');
     }
-    function closeModal() { document.getElementById('overlay').classList.remove('open'); }
+    function closeModal() { 
+      document.getElementById('overlay').classList.remove('open'); 
+      if (typeof pendingData !== 'undefined' && pendingData !== null) {
+          isRemoteUpdating = true;
+          data = pendingData;
+          pendingData = null;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+          dbPut('store_data', 'default', data).catch(e=>{});
+          render();
+          if(typeof showToast === 'function') showToast("Đã cập nhật dữ liệu mới từ máy khác.", "green");
+          setTimeout(() => { isRemoteUpdating = false; }, 500);
+      }
+    }
     document.getElementById('overlay').addEventListener('click', e => { if (e.target.id === 'overlay') closeModal(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
@@ -4157,7 +4110,8 @@ function renderSaoluu() {
       }
     };
 
-    (async () => { 
+    (async () => {
+      initFirebase();
       await loadData(); 
       if (!sessionStorage.getItem('currentUser')) {
         renderLogin();
@@ -4166,48 +4120,4 @@ function renderSaoluu() {
       }
     })();
   </script>
-
-
 </body></html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
