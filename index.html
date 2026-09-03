@@ -2280,6 +2280,24 @@ window.onerror = function(message, source, lineno, colno, error) {
         }
       }
       
+      const isPdf = fileName.toLowerCase().endsWith('.pdf');
+      let contentHtml = '';
+      if (isPdf) {
+         contentHtml = `
+            <div class="mobile-pdf-fallback" style="background:#fff3cd; color:#856404; padding:10px 15px; text-align:center; font-size:13px; border-bottom:1px solid #ffeeba; display:none; flex-shrink:0;">
+                <span style="display:block; margin-bottom:5px;">Trình duyệt trên điện thoại có thể chỉ xem được trang 1.</span>
+                <button onclick="window.open('${url}', '_blank')" style="background:var(--green); color:#fff; border:none; padding:6px 12px; border-radius:6px; font-weight:600; font-size:12px; cursor:pointer;">Mở tab mới để xem toàn bộ</button>
+            </div>
+            <iframe src="${url}#toolbar=0" style="width:100%; height:100%; border:none; flex:1;"></iframe>
+         `;
+      } else {
+         contentHtml = `
+            <div style="flex:1; display:flex; align-items:center; justify-content:center; padding:15px; overflow:auto;">
+                <img src="${url}" style="max-width:100%; height:auto; box-shadow:0 2px 10px rgba(0,0,0,0.15); border-radius:8px;" />
+            </div>
+         `;
+      }
+      
       const modalHtml = `
       <div style="display:flex; flex-direction:column;" class="modal" id="pdf-modal-container">
         <div class="modal-head" style="padding:15px 20px; background:var(--card); border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:center;">
@@ -2297,8 +2315,7 @@ window.onerror = function(message, source, lineno, colno, error) {
           </div>
         </div>
         <div style="flex:1; background:#f4f5f7; position:relative; overflow-y:auto; -webkit-overflow-scrolling:touch; display:flex; flex-direction:column;">
-          <iframe src="${url}#toolbar=0" style="width:100%; height:100%; border:none; flex:1;"></iframe>
-          
+          ${contentHtml}
         </div>
       </div>
       <style>
@@ -2938,14 +2955,19 @@ function onSearch(v) {
 
               const isPass = isPass1 && (!hasDenom2 || !hasData2 || isPass2) && (!r.diff || r.diff === 'khop') && (!hasDenom2 || !hasData2 || !r.diff2 || r.diff2 === 'khop');
 
+              let files = r.files || [];
+              if (r.fileName && !files.find(f => f.fileId === r.fileId)) {
+                 files = [{fileId: r.fileId, fileName: r.fileName, fileUrl: r.fileUrl}].concat(files);
+              }
               let fileHtml = '<span style="color:var(--gray);font-style:italic">Không có</span>';
-              if (r.fileName) {
-                let onclick = '', onenter = '', onleave = '';
-                if (r.fileId) {
-                  onclick = `onclick="showPdfModal('${r.fileId}', true, 'Tài liệu đính kèm', '${r.fileUrl || ''}'); return false;"`;
-                  onenter = '';
-                }
-                fileHtml = `<div style="font-size:11px;color:var(--green-dark);background:var(--mint);padding:4px 8px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;border:1px solid #bce1ce;font-weight:600;white-space:nowrap;transition:0.2s" onmouseover="this.style.background='#c5e8d6'" onmouseout="this.style.background='var(--mint)'" ${onclick} ${onenter} ${onleave}><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg><span>${esc(r.fileName)}</span></div>`;
+              if (files.length > 0) {
+                 fileHtml = `<div style="display:flex; flex-direction:column; gap:4px;">` + files.map(f => {
+                    let onclick = '';
+                    if (f.fileId) {
+                      onclick = `onclick="showPdfModal('${f.fileId}', true, 'Tài liệu đính kèm', '${f.fileUrl || ''}'); return false;"`;
+                    }
+                    return `<div style="font-size:11px;color:var(--green-dark);background:var(--mint);padding:4px 8px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;border:1px solid #bce1ce;font-weight:600;white-space:nowrap;transition:0.2s;max-width:150px;overflow:hidden;text-overflow:ellipsis" onmouseover="this.style.background='#c5e8d6'" onmouseout="this.style.background='var(--mint)'" ${onclick} title="${esc(f.fileName)}"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg><span style="overflow:hidden;text-overflow:ellipsis">${esc(f.fileName)}</span></div>`;
+                 }).join('') + `</div>`;
               }
 
               return [`<div style="text-align:center">${idx + 1}</div>`, fmtDate(r.date), unitCell(r.unitId), denomStr, amountStr, invStr, ratioStr,
@@ -3100,12 +3122,24 @@ function onSearch(v) {
           ? emptyBox('box', 'Chưa có tài liệu', 'Bấm thêm tài liệu để lưu trữ.')
           : tbl(['STT', 'Tài liệu', 'Ngày ban hành', 'File', ''],
             list_docs.map((r, i) => {
-              let act = r.fileId
-                ? `<a href="javascript:void(0)" onclick="openLocalFile('${r.fileId}', '${r.fileUrl || ''}')" style="color:var(--green);text-decoration:none;font-weight:600;font-size:13px;margin-right:15px">Xem Tệp</a>`
-                : `<a href="${r.url || '#'}" target="_blank" style="color:var(--green);text-decoration:none;font-weight:600;font-size:13px;margin-right:15px">Xem File</a>`;
+              let files = r.files || [];
+              if (r.fileName && !files.find(f => f.fileId === r.fileId)) {
+                 files = [{fileId: r.fileId, fileName: r.fileName, fileUrl: r.fileUrl}].concat(files);
+              }
+              let act = '';
+              if (files.length > 0) {
+                 act = `<div style="display:flex; flex-direction:column; gap:4px;">` + files.map(f => {
+                    return `<a href="javascript:void(0)" onclick="openLocalFile('${f.fileId}', '${f.fileUrl || ''}')" style="color:var(--green);text-decoration:none;font-weight:600;font-size:13px;margin-right:15px">Xem: ${esc(f.fileName)}</a>`;
+                 }).join('') + `</div>`;
+              } else if (r.url) {
+                 act = `<a href="${r.url}" target="_blank" style="color:var(--green);text-decoration:none;font-weight:600;font-size:13px;margin-right:15px">Xem File</a>`;
+              }
+              
+              let fileNamesHtml = files.length > 0 ? files.map(f => `<div style="font-size:11px;color:var(--gray);margin-top:4px">${esc(f.fileName)}</div>`).join('') : '';
+
               return [
                 i + 1,
-                `<b>${esc(r.title)}</b>${r.fileName ? `<div style="font-size:11px;color:var(--gray);margin-top:4px">${esc(r.fileName)}</div>` : ''}`,
+                `<b>${esc(r.title)}</b>${fileNamesHtml}`,
                 fmtDate(r.issueDate),
                 act,
                 rowActs(`openForm('doc','${r.id}')`, `removeRec('docs','${r.id}')`)
@@ -3417,6 +3451,7 @@ function onSearch(v) {
       fbFirestore.collection("app_data").doc("main").onSnapshot((doc) => {
         if (doc.exists) {
           const newData = doc.data();
+          if (!newData.users) newData.users = [];
           const isModalOpen = document.getElementById("overlay").classList.contains("open") || document.querySelector(".modal.open");
           
           if (isModalOpen || (typeof editing !== "undefined" && editing !== null)) {
@@ -3583,7 +3618,8 @@ function renderSaoluu() {
       let t = [...TABS, {id:'users', label:'Quản lý Tài khoản'}, {id:'audit', label:'Lịch sử hoạt động'}].find(x => x.id === tab);
       if (!t && tab === 'tongquan') t = { label: 'Tổng quan địa bàn KV01' };
       if (t) {
-        document.getElementById('page-title').textContent = t.label.replace(/^\d+\.\s*/, '');
+        let pageTitleEl = document.getElementById('page-title');
+        if (pageTitleEl) pageTitleEl.textContent = t.label.replace(/^\d+\.\s*/, '');
       }
       const map = {
         tongquan: renderTongquan, donvi: renderDonvi, kehoach: renderKehoach, nhatky: renderNhatky,
@@ -3641,6 +3677,38 @@ function renderSaoluu() {
       const remaining = unitId ? data.seals.filter(x => x.unitId === unitId) : [];
       if (remaining.length > 0) openForm('seal', remaining[0].id);
       else { closeModal(); render(); }
+    };
+    window.removeAttachedLogFile = function (logId, fileId) {
+      if (!confirm('Bạn có chắc muốn xoá file này?')) return;
+      const rec = data.logs.find(x => x.id === logId);
+      if (rec) {
+          if (rec.files) {
+              rec.files = rec.files.filter(f => f.fileId !== fileId);
+          }
+          if (rec.fileId === fileId) {
+              rec.fileId = null;
+              rec.fileName = null;
+              rec.fileUrl = null;
+          }
+          saveData();
+          openForm('log', logId);
+      }
+    };
+    window.removeAttachedDocFile = function (docId, fileId) {
+      if (!confirm('Bạn có chắc muốn xoá file này?')) return;
+      const rec = data.docs.find(x => x.id === docId);
+      if (rec) {
+          if (rec.files) {
+              rec.files = rec.files.filter(f => f.fileId !== fileId);
+          }
+          if (rec.fileId === fileId) {
+              rec.fileId = null;
+              rec.fileName = null;
+              rec.fileUrl = null;
+          }
+          saveData();
+          openForm('doc', docId);
+      }
     };
 
     /* ================= BIỂU MẪU ================= */
@@ -3723,8 +3791,25 @@ function renderSaoluu() {
       ${F.field('Số tờ KĐTCLT (MG 2)', F.num('f-inv2', r.invalidAmount2, 'VD: 10'))}
       ${F.field('Trạng thái Mệnh giá 2', F.select('f-diff2', diffOpts, r.diff2 || 'khop'))}
       <div class="span" style="font-weight:700;border-bottom:1px solid var(--line);padding-bottom:5px;margin-top:10px;color:var(--main)">Đính kèm</div>
-      ${F.field('Đính kèm file (PDF/Ảnh)', `<input type="file" id="f-file" accept=".pdf,image/*">`, true)}
-      ${r.fileName ? `<div class="span note" style="margin-top:-5px">Đang đính kèm: <b>${esc(r.fileName)}</b></div>` : ''}
+      ${F.field('Đính kèm thêm (PDF/Ảnh)', `<input type="file" id="f-file" accept=".pdf,image/*" multiple>`, true)}
+      ${(function(){
+          let files = r.files || [];
+          if (r.fileName && !files.find(f => f.fileId === r.fileId)) {
+             files = [{fileId: r.fileId, fileName: r.fileName, fileUrl: r.fileUrl}].concat(files);
+          }
+          if (files.length === 0) return '';
+          return `<div class="span" style="margin-top:-5px">
+              <div style="font-size:11.5px; font-weight:700; color:var(--gray); margin-bottom: 6px;">Các tệp đang đính kèm:</div>
+              <div style="display:flex; flex-direction:column; gap:6px;">
+                  ${files.map(f => `
+                      <div style="display:flex; justify-content:space-between; align-items:center; background:var(--mint); padding:6px 10px; border-radius:8px; border:1px solid #bce1ce;">
+                          <span style="font-size:12px; font-weight:600; color:var(--green-dark);">${esc(f.fileName)}</span>
+                          <button type="button" title="Xoá file này" style="background:none; border:none; color:var(--red); cursor:pointer; font-weight:bold; font-size:14px; padding:0 4px;" onclick="removeAttachedLogFile('${r.id}', '${f.fileId}')">✕</button>
+                      </div>
+                  `).join('')}
+              </div>
+          </div>`;
+      })()}
     </div>${F.foot("saveLog()")}`);
       }
       if (type === 'inspection') {
@@ -3759,8 +3844,25 @@ function renderSaoluu() {
       ${F.field('Tên văn bản', F.text('f-title', r.title, ''), true)}
       ${F.field('Ngày ban hành', F.date('f-issueDate', r.issueDate || ''))}
       ${F.field('Đường dẫn (URL)', F.text('f-url', r.url, 'https://...'))}
-      ${F.field('Đính kèm tệp (Thay thế URL)', `<input type="file" id="f-file" accept=".pdf,image/*">`, true)}
-      ${r.fileName ? `<div class="span note" style="margin-top:-5px">Đang đính kèm: <b>${esc(r.fileName)}</b></div>` : ''}
+      ${F.field('Đính kèm thêm (Thay thế URL)', `<input type="file" id="f-file" accept=".pdf,image/*" multiple>`, true)}
+      ${(function(){
+          let files = r.files || [];
+          if (r.fileName && !files.find(f => f.fileId === r.fileId)) {
+             files = [{fileId: r.fileId, fileName: r.fileName, fileUrl: r.fileUrl}].concat(files);
+          }
+          if (files.length === 0) return '';
+          return `<div class="span" style="margin-top:-5px">
+              <div style="font-size:11.5px; font-weight:700; color:var(--gray); margin-bottom: 6px;">Các tệp đang đính kèm:</div>
+              <div style="display:flex; flex-direction:column; gap:6px;">
+                  ${files.map(f => `
+                      <div style="display:flex; justify-content:space-between; align-items:center; background:var(--mint); padding:6px 10px; border-radius:8px; border:1px solid #bce1ce;">
+                          <span style="font-size:12px; font-weight:600; color:var(--green-dark);">${esc(f.fileName)}</span>
+                          <button type="button" title="Xoá file này" style="background:none; border:none; color:var(--red); cursor:pointer; font-weight:bold; font-size:14px; padding:0 4px;" onclick="removeAttachedDocFile('${r.id}', '${f.fileId}')">✕</button>
+                      </div>
+                  `).join('')}
+              </div>
+          </div>`;
+      })()}
     </div>${F.foot("saveDoc()")}`);
       }
       if (type === 'seal') {
@@ -3895,18 +3997,27 @@ function renderSaoluu() {
       if (!gv('f-unit')) return alert('Chọn đơn vị');
       const rec = { id: editing || uid(), date: gv('f-date'), unitId: gv('f-unit'), denom1: gv('f-denom1'), amount1: gv('f-amount1'), invalidAmount1: gv('f-inv1'), denom2: gv('f-denom2'), amount2: gv('f-amount2'), invalidAmount2: gv('f-inv2'), diff: gv('f-diff'), diff2: gv('f-diff2'),  };
 
+      if (editing) {
+        const old = data.logs.find(x => x.id === editing);
+        if (old) {
+          if (old.fileId) { rec.fileId = old.fileId; rec.fileName = old.fileName; rec.fileUrl = old.fileUrl; }
+          if (old.files) { rec.files = [...old.files]; }
+        }
+      }
+
       const fileInp = document.getElementById('f-file');
       if (fileInp && fileInp.files.length > 0) {
-        const f = fileInp.files[0];
-        const fileId = 'file_' + uid();
-        await dbPut('store_files', fileId, f);
-        rec.fileId = fileId;
-        rec.fileName = f.name;
-      } else if (editing) {
-        const old = data.logs.find(x => x.id === editing);
-        if (old && old.fileId) {
-          rec.fileId = old.fileId;
-          rec.fileName = old.fileName;
+        if (!rec.files) rec.files = [];
+        for (let i = 0; i < fileInp.files.length; i++) {
+          const f = fileInp.files[i];
+          const fileId = 'file_' + uid();
+          await dbPut('store_files', fileId, f);
+          const newFile = { fileId: fileId, fileName: f.name };
+          if (typeof fbStorage !== 'undefined' && fbStorage) {
+             const url = await uploadToFirebaseStorage(f, fileId);
+             if (url) newFile.fileUrl = url;
+          }
+          rec.files.push(newFile);
         }
       }
       upsert('logs', rec);
@@ -3927,20 +4038,29 @@ function renderSaoluu() {
       const title = gv('f-title').trim(); if (!title) return alert('Nhập tên văn bản');
       const rec = { id: editing || uid(), title, issueDate: gv('f-issueDate'), url: gv('f-url').trim() };
 
+      if (editing) {
+        const old = data.docs.find(x => x.id === editing);
+        if (old) {
+          if (old.fileId) { rec.fileId = old.fileId; rec.fileName = old.fileName; rec.fileUrl = old.fileUrl; }
+          if (old.files) { rec.files = [...old.files]; }
+        }
+      }
+
       const fileInp = document.getElementById('f-file');
       if (fileInp && fileInp.files.length > 0) {
-        const f = fileInp.files[0];
-        const fileId = 'file_' + uid();
-        await dbPut('store_files', fileId, f);
-        rec.fileId = fileId;
-        rec.fileName = f.name;
-        rec.url = '';
-      } else if (editing) {
-        const old = data.docs.find(x => x.id === editing);
-        if (old && old.fileId) {
-          rec.fileId = old.fileId;
-          rec.fileName = old.fileName;
+        if (!rec.files) rec.files = [];
+        for (let i = 0; i < fileInp.files.length; i++) {
+          const f = fileInp.files[i];
+          const fileId = 'file_' + uid();
+          await dbPut('store_files', fileId, f);
+          const newFile = { fileId: fileId, fileName: f.name };
+          if (typeof fbStorage !== 'undefined' && fbStorage) {
+             const url = await uploadToFirebaseStorage(f, fileId);
+             if (url) newFile.fileUrl = url;
+          }
+          rec.files.push(newFile);
         }
+        rec.url = '';
       }
       upsert('docs', rec);
     }
@@ -3975,6 +4095,10 @@ function renderSaoluu() {
             fileId: fileId,
             fileName: f.name
           };
+          if (typeof fbStorage !== 'undefined' && fbStorage) {
+             const url = await uploadToFirebaseStorage(f, fileId);
+             if (url) rec.fileUrl = url;
+          }
           data.seals.push(rec);
         }
       } else if (!editing) {
@@ -4015,6 +4139,10 @@ function renderSaoluu() {
             fileId: fileId,
             fileName: f.name
           };
+          if (typeof fbStorage !== 'undefined' && fbStorage) {
+             const url = await uploadToFirebaseStorage(f, fileId);
+             if (url) rec.fileUrl = url;
+          }
           data.signatures.push(rec);
         }
       } else if (!editing) {
@@ -4064,7 +4192,7 @@ function renderSaoluu() {
       `;
     };
 
-    window.doRegister = function() {
+    window.doRegister = async function() {
       const u = document.getElementById('reg-username').value.trim();
       const p = document.getElementById('reg-password').value;
       if (!u || !p) { alert('Vui l\u00F2ng nh\u1EADp \u0111\u1EE7 th\u00F4ng tin!'); return; }
@@ -4076,7 +4204,13 @@ function renderSaoluu() {
       }
       
       data.users.push({username: u, password: p, role: 'viewer'});
-      saveData();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch (e) { }
+      try { await dbPut('store_data', 'default', data); } catch(e){}
+      
+      if (typeof pushToFirestore === 'function') {
+         await pushToFirestore();
+      }
+      
       alert('\u0110\u0103ng k\u00FD th\u00E0nh c\u00F4ng! Vui l\u00F2ng \u0111\u0103ng nh\u1EADp.');
       renderLogin('login');
     };
