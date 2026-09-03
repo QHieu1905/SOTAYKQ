@@ -3381,14 +3381,14 @@ function onSearch(v) {
     let pendingData = null;
 
     async function pushToFirestore() {
-      if (!window.fbFirestore) return;
+      if (!fbFirestore) return;
       if (isRemoteUpdating) return; 
       try {
         const topBtn = document.getElementById("sync-status-btn");
         if (topBtn) { topBtn.style.color = "var(--amber)"; topBtn.title = "Đang đồng bộ..."; }
         
         const clone = JSON.parse(JSON.stringify(data));
-        await window.fbFirestore.collection("app_data").doc("main").set(clone);
+        await fbFirestore.collection("app_data").doc("main").set(clone);
         
         if (topBtn) { topBtn.style.color = "var(--green)"; topBtn.title = "Đã đồng bộ thời gian thực"; }
       } catch (err) {
@@ -3413,8 +3413,8 @@ function onSearch(v) {
     }
 
     function setupRealtimeListener() {
-      if (!window.fbFirestore) return;
-      window.fbFirestore.collection("app_data").doc("main").onSnapshot((doc) => {
+      if (!fbFirestore) return;
+      fbFirestore.collection("app_data").doc("main").onSnapshot((doc) => {
         if (doc.exists) {
           const newData = doc.data();
           const isModalOpen = document.getElementById("overlay").classList.contains("open") || document.querySelector(".modal.open");
