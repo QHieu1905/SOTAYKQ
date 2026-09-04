@@ -14,35 +14,40 @@ window.onerror = function(message, source, lineno, colno, error) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sổ tay điện tử 3633</title>
     <style>
-        :root {
-      --green: #059669;
-      --green-dark: #047857;
-      --green-deep: #006838;
-      --mint: #D1FAE5;
-      --mint-2: #ECFDF5;
-      --bg: #F8FAFC;
-      --bg2: #FFFFFF;
-      --ink: #0F172A;
+    :root {
+      /* Hoi An Theme */
+      --green: #d97706; /* Hoi An Amber */
+      --green-dark: #b45309;
+      --green-deep: #78350f;
+      --mint: #fef3c7; /* Paper */
+      --mint-2: #fffbeb; /* Cream */
+      --bg: #fffbeb;
+      --bg2: #ffffff;
+      --ink: #0f172a;
       --text: #334155;
       --text2: #475569;
-      --gray: #64748B;
-      --gray-2: #94A3B8;
-      --card: #FFFFFF;
-      --line: #E2E8F0;
-      --border: #E2E8F0;
-      --hover: #F1F5F9;
-      --red: #EF4444;
-      --red-soft: #FEE2E2;
-      --amber: #F59E0B;
-      --amber-soft: #FEF3C7;
-      --blue: #3B82F6;
-      --blue-soft: #DBEAFE;
-      --teal: #14B8A6;
-      --r: 16px;
-      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.03);
-      --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.03);
+      --gray: #64748b;
+      --gray-2: #94a3b8;
+      --card: #ffffff;
+      --line: #e2e8f0;
+      --border: #fde68a;
+      --hover: #f1f5f9;
+      --red: #e11d48;
+      --red-soft: #ffe4e6;
+      --amber: #f59e0b;
+      --amber-soft: #fef3c7;
+      --blue: #3b82f6;
+      --blue-soft: #dbeafe;
+      --teal: #14b8a6;
+      --r: 18px;
+      --shadow: 0 4px 15px rgba(0, 0, 0, 0.03), 0 2px 4px rgba(0, 0, 0, 0.02);
+      --shadow-md: 0 10px 25px rgba(0, 0, 0, 0.05), 0 4px 10px rgba(0, 0, 0, 0.03);
+      --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.08), 0 8px 16px rgba(0, 0, 0, 0.04);
       --primary: var(--ink);
+      --watermark: url('hoi_an.jpg');
+      --accent: #e11d48; /* Lantern Red */
     }
+
 
     * {
       box-sizing: border-box;
@@ -62,8 +67,13 @@ window.onerror = function(message, source, lineno, colno, error) {
       color: var(--text);
       font-family: 'Be Vietnam Pro', 'Segoe UI', system-ui, -apple-system, sans-serif; font-variant-numeric: tabular-nums;
       font-size: 14px;
+      transition: background-color 0.3s ease, color 0.3s ease;
       line-height: 1.5;
       -webkit-font-smoothing: antialiased;
+    }
+
+    .card, aside, .topbar, .dash-panel, .btn, .stat-ic, .badge {
+      transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
     }
 
     button {
@@ -146,7 +156,20 @@ window.onerror = function(message, source, lineno, colno, error) {
       color: var(--green-dark);
     }
 /* ============ BỐ CỤC ============ */
-    .app { display: flex; min-height: 100vh; width: 100%; overflow-x: hidden; }
+    .app { 
+      display: flex; min-height: 100vh; width: 100%; overflow-x: hidden; position: relative; 
+    }
+
+    .app::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: var(--watermark) no-repeat center bottom;
+      background-size: cover;
+      opacity: 0.08;
+      z-index: 0;
+      pointer-events: none;
+    }
 
     /* --- Thanh bên --- */
     aside {
@@ -214,12 +237,11 @@ window.onerror = function(message, source, lineno, colno, error) {
       margin-left: 13.5px;
       padding-left: 16px;
       border: none;
-      background: #ffffff;
+      background: transparent;
       border-radius: 14px;
-      color: #0056b3;
-      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      color: var(--gray);
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
       position: relative;
-      box-shadow: 0 4px 10px rgba(0, 86, 179, 0.1);
       white-space: nowrap;
       z-index: 1; cursor: pointer;
     }
@@ -250,9 +272,9 @@ window.onerror = function(message, source, lineno, colno, error) {
     }
 
         .navbtn:hover {
-      background: #007bff;
-      color: #ffffff;
-      box-shadow: 0 8px 24px rgba(0, 86, 179, 0.4);
+      background: var(--mint-2);
+      color: var(--green-dark);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
       z-index: 100;
     }
 
@@ -263,14 +285,15 @@ window.onerror = function(message, source, lineno, colno, error) {
     }
 
     .navbtn.active {
-      background: #0056b3;
+      background: linear-gradient(135deg, var(--green-dark), var(--green));
       color: #ffffff;
       font-weight: 700;
-      box-shadow: 0 6px 16px rgba(0, 86, 179, 0.35);
+      box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
     }
 
     .navbtn.active:hover {
-      background: #0056b3;
+      background: linear-gradient(135deg, var(--green-deep), var(--green-dark));
+      transform: scale(1.02);
     }
 
     .side-promo {
@@ -300,7 +323,7 @@ window.onerror = function(message, source, lineno, colno, error) {
     }
 
     /* --- Nội dung --- */
-    .content { flex: 1; min-width: 0; padding: 22px 26px 60px; overflow-x: hidden; width: 100%; }
+    .content { flex: 1; min-width: 0; padding: 22px 26px 60px; overflow-x: hidden; width: 100%; position: relative; z-index: 1; }
 
     .topbar {
       display: flex;
@@ -424,16 +447,32 @@ window.onerror = function(message, source, lineno, colno, error) {
     }
 
     .card {
-      background: var(--card);
+      background: linear-gradient(145deg, #ffffff, var(--bg));
       border-radius: var(--r);
-      padding: 20px 24px;
+      padding: 22px 26px;
       box-shadow: var(--shadow);
-      border: 1px solid var(--border);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid rgba(0, 0, 0, 0.04);
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--mint), var(--green));
+      opacity: 0;
+      transition: opacity 0.3s;
     }
 
     .card:hover {
-      box-shadow: var(--shadow-md);
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-4px);
+    }
+    .card:hover::before {
+      opacity: 1;
+    }
     }
 
     .card h3 {
@@ -468,33 +507,35 @@ window.onerror = function(message, source, lineno, colno, error) {
     }
 
     .stat-ic {
-      width: 48px;
-      height: 48px;
-      border-radius: 14px;
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-      font-size: 1.2rem;
+      font-size: 1.3rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.5);
     }
 
     .ic-green {
-      background: var(--mint);
+      background: linear-gradient(135deg, var(--mint-2), var(--mint));
       color: var(--green-dark)
     }
 
     .ic-red {
-      background: var(--red-soft);
+      background: linear-gradient(135deg, #fff1f2, var(--red-soft));
       color: var(--red)
     }
 
     .ic-amber {
-      background: var(--amber-soft);
+      background: linear-gradient(135deg, #fffbeb, var(--amber-soft));
       color: var(--amber)
     }
 
     .ic-blue {
-      background: var(--blue-soft);
+      background: linear-gradient(135deg, #eff6ff, var(--blue-soft));
       color: var(--blue)
     }
 
@@ -585,21 +626,22 @@ window.onerror = function(message, source, lineno, colno, error) {
 
     th {
       text-align: left;
-      padding: 14px 16px;
-      background: var(--mint-2);
-      color: var(--green-dark);
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.8px;
+      padding: 16px 18px;
+      background: var(--mint);
+      color: var(--green-deep);
+      font-size: 11.5px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
       text-transform: uppercase;
       white-space: nowrap;
-      border-bottom: 2px solid var(--mint);
+      border-bottom: 2px solid var(--border);
     }
 
     td {
-      padding: 14px 16px;
+      padding: 16px 18px;
       vertical-align: middle;
       border-bottom: 1px solid var(--line);
+      transition: background 0.2s;
     }
 
     tr:last-child td {
@@ -634,32 +676,32 @@ window.onerror = function(message, source, lineno, colno, error) {
 
     /* ============ NÚT ============ */
     .btn {
-      background: var(--green);
+      background: linear-gradient(135deg, var(--green), var(--green-dark));
       color: #fff;
       border: none;
-      border-radius: 999px;
-      padding: 10px 20px;
+      border-radius: 12px;
+      padding: 12px 24px;
       font-size: 13.5px;
       font-weight: 700;
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      box-shadow: 0 4px 12px rgba(33, 166, 111, 0.25);
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      gap: 10px;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
     .btn:hover {
-      background: var(--green-dark);
-      transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgba(33, 166, 111, 0.35);
+      background: linear-gradient(135deg, var(--green-dark), var(--green-deep));
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
     }
 
     .btn-ghost {
       background: #fff;
       color: var(--ink);
       border: 1px solid var(--line);
-      border-radius: 999px;
-      padding: 10px 18px;
+      border-radius: 12px;
+      padding: 12px 20px;
       font-size: 13.5px;
       font-weight: 600;
       transition: all 0.2s;
@@ -668,6 +710,7 @@ window.onerror = function(message, source, lineno, colno, error) {
     .btn-ghost:hover {
       background: var(--hover);
       border-color: var(--gray-2);
+      transform: translateY(-1px);
     }
 
     .row-act {
@@ -881,25 +924,52 @@ window.onerror = function(message, source, lineno, colno, error) {
 
 
     @media(max-width:860px) {
-                  aside {
+      aside {
         position: fixed;
         left: 0;
         top: 0;
         z-index: 40;
         transform: translateX(-100%);
         transition: .2s;
-        box-shadow: 0 0 60px rgba(0, 0, 0, .15)
+        box-shadow: 0 0 60px rgba(0, 0, 0, .15);
+        width: 260px;
+        padding-top: 25px;
       }
 
       aside.open {
         transform: none
       }
 
+      aside .navbtn {
+        width: calc(100% - 30px);
+        margin-left: 15px;
+      }
+
+      aside .navbtn span {
+        position: static;
+        opacity: 1;
+        visibility: visible;
+        background: transparent;
+        color: inherit;
+        box-shadow: none;
+        padding: 0;
+        margin-left: 12px;
+        transform: none;
+        pointer-events: auto;
+      }
+
+      aside .logo-text small {
+        display: block;
+        text-align: center;
+        margin-top: 5px;
+        color: var(--gray);
+      }
+
       .menu-toggle {
         display: flex
       }
 
-      .content { flex: 1; min-width: 0; padding: 22px 26px 60px; overflow-x: hidden; width: 100%; }
+      .content { flex: 1; min-width: 0; padding: 22px 26px 60px; overflow-x: hidden; width: 100%; position: relative; z-index: 1; }
 
       .fgrid {
         grid-template-columns: 1fr
@@ -965,61 +1035,41 @@ window.onerror = function(message, source, lineno, colno, error) {
     .kpi-card {
       background: var(--bg2);
       padding: 20px;
-      border-radius: 16px;
+      border-radius: var(--r);
       display: flex;
       align-items: center;
       gap: 15px;
       border: 1px solid var(--border);
+      box-shadow: inset 0 0 0 1px #fff, 0 4px 6px -1px var(--shadow);
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       cursor: pointer;
-      box-shadow: 0 4px 6px -1px var(--shadow);
     }
 
     .kpi-card:hover {
       transform: translateY(-5px);
-      box-shadow: 0 12px 20px -5px var(--shadow);
-      border-color: var(--teal);
+      box-shadow: inset 0 0 0 1px #fff, 0 12px 20px -5px var(--shadow);
     }
 
     .kpi-icon {
-      width: 54px;
-      height: 54px;
+      width: 48px;
+      height: 48px;
       border-radius: 14px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.5rem;
+      background: var(--hover);
+      color: var(--green);
       flex-shrink: 0;
     }
-
-    .kpi-icon svg {
-      width: 28px;
-      height: 28px;
-      stroke-width: 2.2;
-    }
-
-    .kpi-icon.teal {
-      background: rgba(0, 163, 155, 0.1);
-      color: var(--teal);
-    }
-
-    .kpi-icon.blue {
-      background: rgba(26, 115, 232, 0.1);
-      color: var(--blue);
-    }
-
-    .kpi-icon.amber {
-      background: rgba(245, 158, 11, 0.1);
-      color: var(--amber);
-    }
-
-    .kpi-icon.green {
-      background: rgba(16, 185, 129, 0.1);
-      color: var(--green);
-    }
+    
+    .kpi-icon.blue { background: var(--blue-soft); color: var(--blue); }
+    .kpi-icon.amber { background: var(--amber-soft); color: var(--amber); }
+    .kpi-icon.green { background: var(--mint); color: var(--safe); }
+    .kpi-icon.red { background: var(--red-soft); color: var(--red); }
 
     .kpi-info {
       flex: 1;
+      min-width: 0;
     }
 
     .kpi-val {
@@ -1028,6 +1078,8 @@ window.onerror = function(message, source, lineno, colno, error) {
       color: var(--primary);
       line-height: 1.2;
       margin-bottom: 4px;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.5px;
     }
 
     .kpi-lbl {
@@ -1052,11 +1104,17 @@ window.onerror = function(message, source, lineno, colno, error) {
     }
 
     .dash-panel {
-      background: var(--bg2);
-      border-radius: 16px;
-      padding: 25px;
-      border: 1px solid var(--border);
-      box-shadow: 0 4px 12px var(--shadow);
+      background: linear-gradient(145deg, #ffffff, var(--bg));
+      border-radius: 20px;
+      padding: 28px;
+      border: 1px solid rgba(0, 0, 0, 0.04);
+      box-shadow: var(--shadow);
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+    }
+    .dash-panel:hover {
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-2px);
     }
 
     .dash-panel-title {
@@ -1085,43 +1143,45 @@ window.onerror = function(message, source, lineno, colno, error) {
       display: flex;
       align-items: center;
       gap: 15px;
-      padding: 12px 15px;
-      background: var(--bg);
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      transition: background 0.2s;
+      padding: 14px 18px;
+      background: #ffffff;
+      border-radius: 14px;
+      border: 1px solid rgba(0, 0, 0, 0.04);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
     .recent-item:hover {
-      background: var(--hover);
+      background: #ffffff;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.06);
+      transform: translateY(-2px);
       cursor: pointer;
     }
 
     .recent-ic {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
       background: rgba(0, 0, 0, 0.05);
       color: var(--text2);
       flex-shrink: 0;
-    }
-
-    .recent-ic svg {
-      width: 18px;
-      height: 18px;
+      font-weight: 700;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
     }
 
     .recent-ic.danger {
-      background: rgba(239, 68, 68, 0.1);
-      color: #ef4444;
+      background: #ffe4e6;
+      color: #e11d48;
+      border: 1px solid #fecdd3;
     }
 
     .recent-ic.success {
-      background: rgba(16, 185, 129, 0.1);
-      color: var(--green);
+      background: var(--mint);
+      color: var(--green-dark);
+      border: 1px solid #a7f3d0;
     }
 
     .recent-main {
@@ -1130,9 +1190,10 @@ window.onerror = function(message, source, lineno, colno, error) {
     }
 
     .recent-title {
-      font-weight: 600;
-      font-size: 0.95rem;
-      color: var(--primary);
+      font-weight: 700;
+      color: var(--ink);
+      font-size: 14.5px;
+      margin-bottom: 2px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -1227,7 +1288,7 @@ window.onerror = function(message, source, lineno, colno, error) {
       .dash-panel {
         grid-column: span 1 !important;
       }
-      .content { flex: 1; min-width: 0; padding: 22px 26px 60px; overflow-x: hidden; width: 100%; }
+      .content { flex: 1; min-width: 0; padding: 22px 26px 60px; overflow-x: hidden; width: 100%; position: relative; z-index: 1; }
       #page-title {
         font-size: 1.2rem !important;
       }
@@ -1397,8 +1458,9 @@ window.onerror = function(message, source, lineno, colno, error) {
             <path d="M3 6h18M3 12h18M3 18h18"></path>
           </svg>
         </button>
-        <div class="titles">
+        <div class="titles" style="display:flex; align-items:center; gap: 8px;">
           <h1 id="page-title">Tổng quan địa bàn KV01</h1>
+          <span id="theme-badge" style="display:flex; align-items:center; gap:4px; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 12px; background: var(--mint); color: var(--accent); border: 1px solid var(--accent);"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 8h12l-2 10H8z"/><path d="M12 2v6"/><path d="M12 18v4"/><path d="M8 8s1 4 4 4 4-4 4-4"/></svg> Phố Cổ</span>
         </div>
         <div class="searchbox">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
@@ -2653,20 +2715,24 @@ function onSearch(v) {
           const ratePct = (t.rate * 100).toFixed(2) + '%';
           const isBad = t.rate > 0.05; // >5% is bad
           const fillW = Math.min(100, t.rate * 100 * 5).toFixed(1) + '%';
+          const itemStyle = isBad 
+             ? 'border: 1px solid var(--red-soft); background: #fffafb; box-shadow: 0 4px 12px rgba(190, 18, 60, 0.06);' 
+             : 'box-shadow: 0 4px 12px rgba(180, 83, 9, 0.08); border: 1px solid var(--border);';
           return `
-          <div class="recent-item" style="cursor:default; display:flex; flex-direction:column; align-items:stretch; gap:8px;">
+          <div class="recent-item" style="cursor:default; display:flex; flex-direction:column; align-items:stretch; gap:8px; ${itemStyle} margin-bottom: 12px; border-radius: 12px; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); padding: 12px;">
             <div style="display:flex; align-items:center; gap:15px; width:100%;">
-                <div class="recent-ic ${isBad ? 'danger' : 'success'}">${idx + 1}</div>
+                <div class="recent-ic ${isBad ? 'danger' : 'success'}" style="${isBad ? 'background:var(--red);color:#fff;' : 'background:var(--green);color:#fff;'} box-shadow:0 2px 4px rgba(0,0,0,0.1); width:28px; height:28px; display:flex; align-items:center; justify-content:center; border-radius:8px; font-weight:700;">${idx + 1}</div>
                 <div class="recent-main">
-                  <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${esc(t.name)}">${esc(t.name)}</div>
-                  <div class="recent-sub">Đã kiểm tra: ${formatTy(t.checkedMoney)} tỷ</div>
+                  <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-weight:700;" title="${esc(t.name)}">${esc(t.name)}</div>
+                  <div class="recent-sub" style="font-size:11.5px;">Đã kiểm tra: ${formatTy(t.checkedMoney)} tỷ</div>
                 </div>
-                <div class="recent-right" style="color: ${isBad ? '#ef4444' : 'var(--green)'}; font-weight: 700;  text-align: right;">
+                <div class="recent-right" style="color: ${isBad ? 'var(--red)' : 'var(--safe)'}; font-weight: 800; text-align: right; font-variant-numeric: tabular-nums; letter-spacing: -0.5px; display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
                   ${ratePct}
+                  ${isBad ? `<div style="font-size:9px; background:var(--red); color:#fff; padding:2px 6px; border-radius:4px;">CẢNH BÁO</div>` : ''}
                 </div>
             </div>
-            <div class="bar-track" style="margin-top:2px;">
-                <div class="bar-fill" style="width: ${fillW}; ${isBad ? 'background:var(--red);' : 'background:var(--green);'}"></div>
+            <div style="width:100%; height:4px; background:var(--line); border-radius:99px; overflow:hidden; margin-top:2px;">
+                <div style="height:100%; width:${fillW}; background:${isBad ? 'var(--red)' : 'var(--safe)'}; border-radius:99px;"></div>
             </div>
           </div>
           `;
@@ -2728,7 +2794,30 @@ function onSearch(v) {
       </div>
 
       <div class="dash-grid">
-        ${violatingUnitIds.size > 0 ? `<div class="dash-panel" style="grid-column: 1 / -1; border-left: 4px solid var(--amber);"><div class="dash-panel-title"><span style="color: var(--amber);">⚠ Danh sách TCTD vi phạm</span></div><div style="font-size: 13.5px; color: var(--ink); line-height: 1.6;"><ul style="margin: 0; padding-left: 20px; color: var(--amber);">${Array.from(violatingUnitIds).map(id => `<li>${esc(unitName(id))}</li>`).join('')}</ul></div></div>` : ''}
+        ${violatingUnitIds.size > 0 ? `
+        <div style="grid-column: 1 / -1; background: linear-gradient(135deg, #fff1f2, #ffe4e6); border: 1px solid #fda4af; border-radius: 18px; padding: 22px 26px; box-shadow: 0 8px 25px rgba(225, 29, 72, 0.08); display: flex; flex-direction: column; gap: 18px; position: relative; overflow: hidden; margin-bottom: 5px;">
+          <div style="position: absolute; top: -15px; right: 10px; opacity: 0.06; transform: scale(3.5) rotate(-15deg); pointer-events: none;">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#e11d48" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          </div>
+          <div style="display: flex; align-items: center; gap: 14px; position: relative; z-index: 1;">
+            <div style="width: 42px; height: 42px; border-radius: 12px; background: #ffe4e6; border: 1px solid #fecdd3; display: flex; align-items: center; justify-content: center; color: #e11d48; flex-shrink: 0; box-shadow: 0 2px 8px rgba(225, 29, 72, 0.15);">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            </div>
+            <div>
+              <h3 style="margin: 0; font-size: 16.5px; font-weight: 800; color: #be123c; letter-spacing: -0.2px;">Danh sách TCTD vi phạm</h3>
+              <p style="margin: 3px 0 0 0; font-size: 12.5px; color: #e11d48; font-weight: 500;">Phát hiện ${violatingUnitIds.size} đơn vị có vi phạm cần chú ý</p>
+            </div>
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 10px; position: relative; z-index: 1;">
+            ${Array.from(violatingUnitIds).map(id => 
+              `<div style="display: inline-flex; align-items: center; gap: 8px; background: #ffffff; border: 1px solid #fecdd3; padding: 8px 16px; border-radius: 99px; font-size: 13.5px; font-weight: 600; color: #be123c; box-shadow: 0 2px 6px rgba(225, 29, 72, 0.06); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); cursor: default;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 12px rgba(225, 29, 72, 0.12)'; this.style.borderColor='#fda4af';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 2px 6px rgba(225, 29, 72, 0.06)'; this.style.borderColor='#fecdd3';">
+                <div style="width: 7px; height: 7px; border-radius: 50%; background: #e11d48; flex-shrink: 0;"></div>
+                ${esc(unitName(id))}
+              </div>`
+            ).join('')}
+          </div>
+        </div>
+        ` : ''}
                 <!-- Panel 1: Top TCTD Thu Hồi -->
         <div class="dash-panel">
           <div class="dash-panel-title">
@@ -3830,16 +3919,20 @@ function renderSaoluu() {
         openModal(id ? 'Sửa Nhật ký kiểm tra bó tiền' : 'Thêm Nhật ký kiểm tra bó tiền', `<div class="fgrid">
       ${F.field('Ngày kiểm tra', F.date('f-date', r.date))}
       ${F.field('Đơn vị', F.unitSel('f-unit', r.unitId))}
-      <div class="span" style="font-weight:700;border-bottom:1px solid var(--line);padding-bottom:5px;margin-top:10px;color:var(--main)">Mệnh giá thứ 1</div>
+      <div class="span" style="font-weight:700;border-bottom:1px solid var(--line);padding-bottom:5px;margin-top:10px;color:var(--green-deep);text-transform:uppercase;font-size:12px;letter-spacing:0.5px;">Mệnh giá thứ 1</div>
       ${F.field('Mệnh giá 1', F.select('f-denom1', denomOpts, r.denom1 || '500.000d'))}
-      ${F.field('Số tờ kiểm tra (MG 1)', F.num('f-amount1', r.amount1, 'VD: 1000'))}
-      ${F.field('Số tờ KĐTCLT (MG 1)', F.num('f-inv1', r.invalidAmount1, 'VD: 10'))}
-      ${F.field('Trạng thái Mệnh giá 1', F.select('f-diff', diffOpts, r.diff || 'khop'))}
-      <div class="span" style="font-weight:700;border-bottom:1px solid var(--line);padding-bottom:5px;margin-top:10px;color:var(--main)">Mệnh giá thứ 2</div>
+      <div class="span" style="display:none"></div>
+      ${F.field('Số tờ kiểm tra (MG 1)', `<input type="number" id="f-amount1" value="${r.amount1}" placeholder="VD: 1000" oninput="calcErr(1)" style="font-variant-numeric:tabular-nums; letter-spacing:-0.5px;">`)}
+      ${F.field('Số tờ KĐTCLT (MG 1)', `<input type="number" id="f-inv1" value="${r.invalidAmount1}" placeholder="VD: 10" oninput="calcErr(1)" style="font-variant-numeric:tabular-nums; letter-spacing:-0.5px;">`)}
+      <div class="span" id="err-res1" style="font-size:13px; font-weight:700; padding:10px 14px; border-radius:10px; background:var(--hover); color:var(--text); display:flex; justify-content:space-between; align-items:center; transition:0.3s; margin-top:-5px; margin-bottom:5px;">Tỷ lệ lỗi: ---</div>
+      ${F.field('Trạng thái kết luận 1', F.select('f-diff', diffOpts, r.diff || 'khop'), true)}
+      <div class="span" style="font-weight:700;border-bottom:1px solid var(--line);padding-bottom:5px;margin-top:10px;color:var(--green-deep);text-transform:uppercase;font-size:12px;letter-spacing:0.5px;">Mệnh giá thứ 2 (nếu có)</div>
       ${F.field('Mệnh giá 2', F.select('f-denom2', denom2Opts, r.denom2 || 'none'))}
-      ${F.field('Số tờ kiểm tra (MG 2)', F.num('f-amount2', r.amount2, 'VD: 1000'))}
-      ${F.field('Số tờ KĐTCLT (MG 2)', F.num('f-inv2', r.invalidAmount2, 'VD: 10'))}
-      ${F.field('Trạng thái Mệnh giá 2', F.select('f-diff2', diffOpts, r.diff2 || 'khop'))}
+      <div class="span" style="display:none"></div>
+      ${F.field('Số tờ kiểm tra (MG 2)', `<input type="number" id="f-amount2" value="${r.amount2}" placeholder="VD: 1000" oninput="calcErr(2)" style="font-variant-numeric:tabular-nums; letter-spacing:-0.5px;">`)}
+      ${F.field('Số tờ KĐTCLT (MG 2)', `<input type="number" id="f-inv2" value="${r.invalidAmount2}" placeholder="VD: 10" oninput="calcErr(2)" style="font-variant-numeric:tabular-nums; letter-spacing:-0.5px;">`)}
+      <div class="span" id="err-res2" style="font-size:13px; font-weight:700; padding:10px 14px; border-radius:10px; background:var(--hover); color:var(--text); display:flex; justify-content:space-between; align-items:center; transition:0.3s; margin-top:-5px; margin-bottom:5px;">Tỷ lệ lỗi: ---</div>
+      ${F.field('Trạng thái kết luận 2', F.select('f-diff2', diffOpts, r.diff2 || 'khop'), true)}
       <div class="span" style="font-weight:700;border-bottom:1px solid var(--line);padding-bottom:5px;margin-top:10px;color:var(--main)">Đính kèm</div>
       ${F.field('Đính kèm thêm (PDF/Ảnh)', `<input type="file" id="f-file" accept=".pdf,image/*" multiple>`, true)}
       ${(function(){
@@ -3861,6 +3954,7 @@ function renderSaoluu() {
           </div>`;
       })()}
     </div>${F.foot("saveLog()")}`);
+        setTimeout(() => { window.calcErr(1); window.calcErr(2); }, 100);
       }
       if (type === 'inspection') {
         const r = id ? data.inspections.find(x => x.id === id) : { date: today(), unitId: '', severity: 'nhe', status: 'chua', note: '', c0: 'dat', c1: 'dat', c2: 'dat', c3: 'dat', c4: 'dat', c5: 'dat' };
@@ -3969,6 +4063,35 @@ function renderSaoluu() {
     </div>${F.foot("saveSignature()")}`);
       }
     }
+
+    window.calcErr = function(n) {
+      const amtInput = document.getElementById('f-amount' + n);
+      const invInput = document.getElementById('f-inv' + n);
+      const res = document.getElementById('err-res' + n);
+      
+      if (!amtInput || !invInput || !res) return;
+
+      const amt = parseFloat(amtInput.value) || 0;
+      const inv = parseFloat(invInput.value) || 0;
+      
+      if (amt <= 0) { 
+        res.innerHTML = 'Tỷ lệ lỗi: ---'; 
+        res.style.background = 'var(--hover)'; 
+        res.style.color = 'var(--text)'; 
+        return; 
+      }
+      
+      const pct = (inv / amt) * 100;
+      if (pct > 5) {
+         res.innerHTML = `<span style="letter-spacing:-0.5px">Tỷ lệ lỗi: ${pct.toFixed(2)}%</span> <span style="color:var(--red); padding: 4px 10px; border-radius: 999px; background: var(--red-soft); font-size:11px;">KHÔNG ĐẠT (>5%)</span>`;
+         res.style.background = 'var(--red-soft)';
+         res.style.color = 'var(--red)';
+      } else {
+         res.innerHTML = `<span style="letter-spacing:-0.5px">Tỷ lệ lỗi: ${pct.toFixed(2)}%</span> <span style="color:var(--safe); padding: 4px 10px; border-radius: 999px; background: var(--mint); font-size:11px;">ĐẠT (≤5%)</span>`;
+         res.style.background = 'var(--mint)';
+         res.style.color = 'var(--safe)';
+      }
+    };
 
     function addAuditLog(action, key, details) {
       if (!data.auditLogs) data.auditLogs = [];
@@ -4333,6 +4456,8 @@ function renderSaoluu() {
       } else {
         render(); 
       }
+
+
     })();
   </script>
 </body></html>
