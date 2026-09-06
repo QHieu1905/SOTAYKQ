@@ -177,7 +177,7 @@
       box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
       max-height: 240px;
       overflow-y: auto;
-      z-index: 1000;
+      z-index: 25000;
     }
 
     .dropdown-item {
@@ -889,7 +889,7 @@
       position: fixed;
       inset: 0;
       background: rgba(18, 59, 43, .4);
-      z-index: 50;
+      z-index: 20000;
       backdrop-filter: blur(2px);
       display: none;
       align-items: flex-start;
@@ -4691,7 +4691,7 @@
       if (!t) {
         t = document.createElement("div");
         t.id = "rt-toast";
-        t.style.cssText = "position:fixed;bottom:20px;left:50%;transform:translateX(-50%);padding:10px 20px;border-radius:20px;color:#fff;font-size:14px;z-index:9999;transition:0.3s;opacity:0;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,0.15);";
+        t.style.cssText = "position:fixed;bottom:20px;left:50%;transform:translateX(-50%);padding:10px 20px;border-radius:20px;color:#fff;font-size:14px;z-index:30000;transition:0.3s;opacity:0;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,0.15);";
         document.body.appendChild(t);
       }
       t.style.background = color === "green" ? "var(--green)" : "var(--amber)";
