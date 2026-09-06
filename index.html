@@ -15,7 +15,7 @@
   </script>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Sổ tay điện tử 3633</title>
   <style>
     :root {
@@ -1693,16 +1693,17 @@
       .tq-tags { justify-content: center; gap: 4px; margin-top: 8px; flex-direction: row; flex-wrap: wrap; width: 100%; }
       .tq-tag { font-size: 9.5px; padding: 3px 6px; border-radius: 6px; text-align: center; }
       /* Fan Menu Bar */
-      .fan-menu { position: fixed; bottom: calc(20px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); z-index: 9999; display: none; pointer-events: none; }
+      .fan-menu { position: fixed; bottom: calc(24px + env(safe-area-inset-bottom, 12px)); left: 50%; transform: translateX(-50%); z-index: 9999; display: none; pointer-events: none; }
       .fan-overlay { position: fixed; inset: 0; background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); z-index: 9998; display: none; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
       .fan-overlay.open { display: block; opacity: 1; pointer-events: auto; }
-      .fan-btn { position: relative; width: 70px; height: 70px; border-radius: 50%; background: linear-gradient(135deg, var(--green-dark), var(--green)); color: white; border: none; box-shadow: 0 10px 25px rgba(180, 83, 9, 0.4); display: flex; align-items: center; justify-content: center; z-index: 10000; cursor: pointer; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); pointer-events: auto; }
-      .fan-btn svg { width: 34px; height: 34px; transition: transform 0.3s; }
+      .fan-btn { position: relative; width: 70px; height: 70px; border-radius: 50%; background: linear-gradient(135deg, var(--green-dark), var(--green)); color: white; border: none; box-shadow: 0 10px 25px rgba(180, 83, 9, 0.4); display: flex; align-items: center; justify-content: center; z-index: 10000; cursor: pointer; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); pointer-events: auto; touch-action: manipulation; }
+      .fan-btn svg { width: 34px; height: 34px; transition: transform 0.3s; pointer-events: none; }
       .fan-btn.open svg { transform: rotate(45deg); }
       .fan-label { position: absolute; bottom: 82px; left: 50%; transform: translateX(-50%); background: var(--ink); color: white; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,0.15); pointer-events: none; transition: opacity 0.3s, transform 0.3s; }
       .fan-menu.open .fan-label { opacity: 0; transform: translate(-50%, 10px); }
       .fan-items { position: absolute; bottom: 35px; left: 35px; width: 0; height: 0; z-index: 9999; pointer-events: none; }
-      .fan-item { position: absolute; width: 58px; height: 58px; border-radius: 50%; background: white; border: 1px solid rgba(0,0,0,0.05); box-shadow: 0 8px 20px rgba(0,0,0,0.08); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: var(--text); cursor: pointer; transform: translate(-50%, -50%) scale(0); opacity: 0; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s; pointer-events: auto; }
+      .fan-item { position: absolute; width: 58px; height: 58px; border-radius: 50%; background: white; border: 1px solid rgba(0,0,0,0.05); box-shadow: 0 8px 20px rgba(0,0,0,0.08); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: var(--text); cursor: pointer; transform: translate(-50%, -50%) scale(0); opacity: 0; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s; pointer-events: none; }
+      .fan-menu.open .fan-item { pointer-events: auto; }
       .fan-item:active { background: var(--hover); }
       .fan-item svg { width: 22px; height: 22px; color: var(--green-dark); }
       .fan-item span { font-size: 9.5px; font-weight: 700; color: var(--text2); text-align: center; line-height: 1.1; padding: 0 2px; }
@@ -3510,33 +3511,87 @@
       return `${secHead('Danh mục TCTD trên địa bàn', 'Dữ liệu gốc về các đơn vị chịu kiểm tra', "openForm('unit')", 'Thêm đơn vị')}
   ${list.length === 0
           ? emptyBox('bank', 'Chưa có đơn vị nào', 'Thêm chi nhánh TCTD để bắt đầu quản lý.')
-          : tbl(['STT', 'Đơn vị', 'Số lần KT Bó tiền', 'Kết quả KT (Đạt/Không đạt)', ''],
-            list.map((u, idx) => {
-              const uLogs = data.logs.filter(x => x.unitId === u.id);
-              let ktResult = pill('p-gray', 'Chưa KT');
-              if (uLogs.length > 0) {
-                let passCount = 0;
-                let failCount = 0;
-                uLogs.forEach(l => {
-                  const amt1 = Number(l.amount1) || 1;
-                  const inv1 = Number(l.invalidAmount1) || 0;
-                  const amt2 = Number(l.amount2) || 1;
-                  const inv2 = Number(l.invalidAmount2) || 0;
-                  if ((inv1 / amt1) * 100 > 5 || (inv2 / amt2) * 100 > 5) failCount++;
-                  else passCount++;
-                });
-                const fmtPass = String(passCount).padStart(2, '0');
-                const fmtFail = String(failCount).padStart(2, '0');
-                ktResult = pill(failCount > 0 ? 'p-red' : 'p-green', `${fmtPass}/${fmtFail}`);
-              }
-              return [
-                `<div style="text-align:center">${idx + 1}</div>`,
-                unitCell(u.id),
-                uLogs.length,
-                ktResult,
-                rowActs(`openForm('unit','${u.id}')`, `removeUnit('${u.id}')`)
-              ];
-            }))}`;
+          : (function() {
+              const mappedData = list.map((u, idx) => {
+                const uLogs = data.logs.filter(x => x.unitId === u.id);
+                let ktResult = pill('p-gray', 'Chưa KT');
+                if (uLogs.length > 0) {
+                  let passCount = 0;
+                  let failCount = 0;
+                  uLogs.forEach(l => {
+                    const amt1 = Number(l.amount1) || 1;
+                    const inv1 = Number(l.invalidAmount1) || 0;
+                    const amt2 = Number(l.amount2) || 1;
+                    const inv2 = Number(l.invalidAmount2) || 0;
+                    if ((inv1 / amt1) * 100 > 5 || (inv2 / amt2) * 100 > 5) failCount++;
+                    else passCount++;
+                  });
+                  const fmtPass = String(passCount).padStart(2, '0');
+                  const fmtFail = String(failCount).padStart(2, '0');
+                  ktResult = pill(failCount > 0 ? 'p-red' : 'p-green', `${fmtPass}/${fmtFail}`);
+                }
+                
+                const acts = rowActs(`openForm('unit','${u.id}')`, `removeUnit('${u.id}')`);
+                const deskRow = [
+                  `<div style="text-align:center">${idx + 1}</div>`,
+                  unitCell(u.id),
+                  uLogs.length,
+                  ktResult,
+                  acts
+                ];
+                
+                const uName = u.name || u.code || 'Đơn vị chưa rõ';
+                
+                const mobCard = `
+                  <div class="nk-card">
+                     <div class="nk-card-summary" onclick="this.parentElement.classList.toggle('expanded'); haptic();">
+                        <div class="nk-stt">${idx + 1}</div>
+                        <div style="flex:1; min-width:0;">
+                           <div style="font-weight:700; color:#111827; font-size:14px; margin-bottom: 4px;">${esc(uName)}</div>
+                           <div>${ktResult}</div>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:6px;">
+                           <svg class="nk-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </div>
+                     </div>
+                     <div class="nk-card-details">
+                        <div class="nk-detail-row" style="margin-bottom:12px; padding-top:4px;">
+                           <span style="font-size:12px; color:#6b7280; font-weight:600;">Số lần KT Bó tiền:</span>
+                           <span style="font-size:13px; font-weight:700; color:var(--ink);">${uLogs.length} lần</span>
+                        </div>
+                        <div style="display:flex; gap:12px; margin-top:16px;">
+                           <button class="nk-action-btn edit" onclick="haptic(); openForm('unit','${u.id}')">
+                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg> Sửa
+                           </button>
+                           <button class="nk-action-btn del" onclick="haptic(); removeUnit('${u.id}')">
+                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2-2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg> Xóa
+                           </button>
+                        </div>
+                     </div>
+                  </div>
+                `;
+
+                return { deskRow, mobCard };
+              });
+
+              return `
+                <div class="desktop-only">
+                  <div class="tbl-scroll">
+                    ${tbl(['STT', 'Đơn vị', 'Số lần KT Bó tiền', 'Kết quả KT (Đạt/Không đạt)', ''], mappedData.map(d => d.deskRow))}
+                  </div>
+                </div>
+                <div class="mobile-only">
+                  <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
+                    <button onclick="document.getElementById('pg-donvi').querySelectorAll('.nk-card').forEach(c=>c.classList.toggle('expanded')); haptic();" style="background:#f3f4f6; border:none; padding:8px 16px; border-radius:12px; font-size:12px; font-weight:600; color:#4b5563; cursor:pointer; touch-action: manipulation;">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; margin-right:4px;"><polyline points="4 14 12 22 20 14"></polyline><polyline points="4 2 12 10 20 2"></polyline></svg> Đóng/Mở tất cả
+                    </button>
+                  </div>
+                  <div class="nk-cards-list">
+                    ${mappedData.map(d => d.mobCard).join('')}
+                  </div>
+                </div>
+              `;
+          })()}`;
     }
 
     /* ================= 3. KẾ HOẠCH & LỊCH KIỂM TRA ================= */
