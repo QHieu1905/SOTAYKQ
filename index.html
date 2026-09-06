@@ -4974,8 +4974,8 @@
       month: (id, val) => `<input id="${id}" type="month" value="${esc(val)}">`,
       week: (id, val) => `<input id="${id}" type="week" value="${esc(val)}">`,
       area: (id, val, ph) => `<textarea id="${id}" placeholder="${ph || ''}">${esc(val)}</textarea>`,
-      select: (id, opts, val) => `<select id="${id}">${opts.map(([k, v]) => `<option value="${k}" ${k === val ? 'selected' : ''}>${esc(v)}</option>`).join('')}</select>`,
-      unitSel: (id, val) => F.select(id, data.units.map(u => [u.id, u.name]), val || data.units[0]?.id),
+      select: (id, opts, val, extraAttr='') => `<select id="${id}" ${extraAttr}>${opts.map(([k, v]) => `<option value="${k}" ${k === val ? 'selected' : ''}>${esc(v)}</option>`).join('')}</select>`,
+      unitSel: (id, val, extraAttr='') => F.select(id, data.units.map(u => [u.id, u.name]), val || data.units[0]?.id, extraAttr),
       foot: (saveFn) => `<div class="modal-foot"><button class="btn-ghost" onclick="closeModal()">Hủy</button>
     <button class="btn" onclick="${saveFn}">Lưu bản ghi</button></div>`,
     };
@@ -5003,6 +5003,49 @@
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
     let editing = null;
+    window.updateAttachedFiles = function(unitId, type) {
+      const container = document.getElementById('attached-files-container');
+      if (!container) return;
+      if (!unitId) { container.innerHTML = ''; return; }
+      
+      let html = '';
+      if (type === 'seal') {
+        const unitSeals = (data.seals || []).filter(x => x.unitId === unitId);
+        if (unitSeals.length > 0) {
+          html = `<div class="span" style="margin-top:-5px">
+                <div style="font-size:11.5px; font-weight:700; color:var(--gray); margin-bottom: 6px;">Các mẫu đang đính kèm:</div>
+                <div style="display:flex; flex-direction:column; gap:6px;">
+                    ${unitSeals.map(seal => `
+                        <div style="display:flex; justify-content:space-between; align-items:center; background:var(--mint); padding:6px 10px; border-radius:8px; border:1px solid #bce1ce;">
+                            <div>
+                                <div style="font-size:12px; font-weight:700; color:var(--ink);">${esc(seal.name)}</div>
+                                ${seal.fileName ? `<div style="font-size:11px; font-weight:600; color:var(--green-dark);">${esc(seal.fileName)}</div>` : ''}
+                            </div>
+                            <button type="button" title="Xoá mẫu này" style="background:none; border:none; color:var(--red); cursor:pointer; font-weight:bold; font-size:14px; padding:0 4px;" onclick="removeAttachedSeal('${seal.id}')">✕</button>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>`;
+        }
+      } else if (type === 'signature') {
+        const unitSigs = (data.signatures || []).filter(x => x.unitId === unitId && x.fileName);
+        if (unitSigs.length > 0) {
+          html = `<div class="span" style="margin-top:-5px">
+                <div style="font-size:11.5px; font-weight:700; color:var(--gray); margin-bottom: 6px;">Các tệp đang đính kèm:</div>
+                <div style="display:flex; flex-direction:column; gap:6px;">
+                    ${unitSigs.map(sig => `
+                        <div style="display:flex; justify-content:space-between; align-items:center; background:var(--mint); padding:6px 10px; border-radius:8px; border:1px solid #bce1ce;">
+                            <span style="font-size:12px; font-weight:600; color:var(--green-dark);">${esc(sig.fileName)}</span>
+                            <button type="button" title="Xoá file này" style="background:none; border:none; color:var(--red); cursor:pointer; font-weight:bold; font-size:14px; padding:0 4px;" onclick="removeAttachedSig('${sig.id}')">✕</button>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>`;
+        }
+      }
+      container.innerHTML = html;
+    };
+
     function openForm(type, id, extra) {
       editing = id || null;
       if (type === 'unit') {
@@ -5153,9 +5196,9 @@
         }
 
         openModal(id ? 'Sửa mẫu niêm phong' : 'Thêm mẫu niêm phong', `<div class="fgrid">
-      ${F.field('Đơn vị (TCTD)', F.unitSel('f-unit', unitId))}
+      ${F.field('Đơn vị (TCTD)', F.unitSel('f-unit', unitId, "onchange=\"updateAttachedFiles(this.value, 'seal')\""))}
       ${F.field('Đính kèm thêm (Hình ảnh/PDF)', `<input type="file" id="f-file" accept=".pdf,image/*" multiple>`, true)}
-      ${attachedFilesHtml}
+      <div id="attached-files-container" style="grid-column: 1 / -1;">${attachedFilesHtml}</div>
     </div>${F.foot("saveSeal()")}`);
       }
       if (type === 'signature') {
@@ -5178,9 +5221,9 @@
         }
 
         openModal(id ? 'Sửa chữ ký mẫu' : 'Thêm chữ ký mẫu', `<div class="fgrid">
-      ${F.field('Đơn vị (TCTD)', F.unitSel('f-unit', unitId))}
+      ${F.field('Đơn vị (TCTD)', F.unitSel('f-unit', unitId, "onchange=\"updateAttachedFiles(this.value, 'signature')\""))}
       ${F.field('Đính kèm thêm (Hình ảnh/PDF)', `<input type="file" id="f-file" accept=".pdf,image/*" multiple>`, true)}
-      ${attachedFilesHtml}
+      <div id="attached-files-container" style="grid-column: 1 / -1;">${attachedFilesHtml}</div>
     </div>${F.foot("saveSignature()")}`);
       }
     }
