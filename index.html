@@ -1514,11 +1514,7 @@
         -webkit-overflow-scrolling: touch;
       }
 
-      .unit-cell {
-        min-width: 0 !important;
-        width: 100%;
-        display: block !important;
-      }
+
 
       .row-act {
         white-space: normal !important;
@@ -1569,48 +1565,43 @@
       }
 
       .tbl-card tr {
-        margin-bottom: 15px;
+        margin-bottom: 16px;
         border: 1px solid var(--line);
-        border-radius: 8px;
+        border-radius: 16px; 
         background: #fff;
         padding: 0;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+        overflow: hidden; 
       }
 
       .tbl-card td {
         border: none !important;
-        border-bottom: 1px dashed var(--line) !important;
+        border-bottom: 1px dashed #cbd5e1 !important; 
         position: relative;
-        padding: 12px 15px !important;
+        padding: 14px 16px !important;
         text-align: left !important;
         white-space: normal !important;
         word-break: break-word !important;
-        font-size: 13.5px !important;
+        font-size: 14px !important;
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: flex-start;
-        min-height: 40px;
-        gap: 6px;
-      }
-
-      .tbl-card td:last-child {
-        border-bottom: 0 !important;
-        flex-direction: row;
-        justify-content: flex-end;
+        min-height: 44px;
+        gap: 6px; 
       }
 
       .tbl-card td::before {
         content: attr(data-label);
         position: static;
         width: 100%;
-        transform: none;
         text-align: left;
         font-weight: 700;
-        color: var(--gray);
-        font-size: 11px;
+        color: #94a3b8; 
+        font-size: 11.5px;
         text-transform: uppercase;
         line-height: 1.2;
+        margin-bottom: 4px; 
       }
 
       .tbl-card td[data-label=""]::before,
@@ -1623,12 +1614,70 @@
         justify-content: space-between;
         align-items: center;
         background: #f8fafc;
-        border-radius: 8px 8px 0 0;
+        border-radius: 16px 16px 0 0;
         border-bottom: 1px solid var(--line) !important;
       }
 
       .tbl-card td:first-child::before {
         width: auto;
+        margin-bottom: 0;
+      }
+
+      .tbl-card td[data-label="Đơn vị"], 
+      .unit-cell {
+        flex-direction: row !important; 
+        align-items: flex-start !important;
+        gap: 12px;
+      }
+      
+      .tbl-card td[data-label="Đơn vị"]::before,
+      .unit-cell::before {
+        content: ""; 
+        display: block;
+        width: 24px;
+        height: 24px;
+        flex-shrink: 0;
+        background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230f172a' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 21h18M5 21V9l7-5 7 5v12M9.5 21v-5h5v5'/%3E%3C/svg%3E");
+        background-size: contain;
+        background-repeat: no-repeat;
+        margin-bottom: 0;
+        margin-top: -1px; 
+      }
+
+      .tbl-card td[data-label="Đơn vị"] b,
+      .unit-cell b {
+        font-size: 16px !important;
+        font-weight: 800;
+        color: var(--ink); 
+        line-height: 1.4;
+      }
+
+      .tbl-card td[data-label="Lý do ưu tiên"] > div {
+        gap: 8px !important; 
+      }
+      
+      .tbl-card td[data-label="Lý do ưu tiên"] span {
+        padding: 6px 10px !important;
+        border-radius: 6px !important;
+        font-size: 12.5px !important;
+        line-height: 1.4 !important;
+      }
+
+      .tbl-card td:last-child {
+        border-bottom: 0 !important;
+        flex-direction: column; 
+        align-items: stretch;
+      }
+      
+      .tbl-card td:last-child button,
+      .tbl-card td[data-label="Hành động"] button {
+        width: 100%;
+        min-height: 44px !important; 
+        font-size: 14.5px !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px !important;
       }
 
       .grid-4,
@@ -1692,9 +1741,11 @@
       .tq-sub { font-size: 9.5px; line-height: 1.3; margin-top: 2px; white-space: normal; color: #6b7280; font-weight: 700; }
       .tq-tags { justify-content: center; gap: 4px; margin-top: 8px; flex-direction: row; flex-wrap: wrap; width: 100%; }
       .tq-tag { font-size: 9.5px; padding: 3px 6px; border-radius: 6px; text-align: center; }
-      /* Fan Menu Bar */
-      .fan-menu { position: fixed; bottom: calc(24px + env(safe-area-inset-bottom, 12px)); left: 50%; transform: translateX(-50%); z-index: 9999; display: none; pointer-events: none; }
-      .fan-overlay { position: fixed; inset: 0; background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); z-index: 9998; display: none; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+    }
+    
+    /* Fan Menu Bar */
+    .fan-menu { position: fixed; bottom: calc(24px + env(safe-area-inset-bottom, 12px)); left: 50%; margin-left: -35px; width: 70px; height: 70px; z-index: 9999; display: none; pointer-events: auto; transform: translateZ(0); }
+    .fan-overlay { position: fixed; inset: 0; background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); z-index: 9998; display: none; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
       .fan-overlay.open { display: block; opacity: 1; pointer-events: auto; }
       .fan-btn { position: relative; width: 70px; height: 70px; border-radius: 50%; background: linear-gradient(135deg, var(--green-dark), var(--green)); color: white; border: none; box-shadow: 0 10px 25px rgba(180, 83, 9, 0.4); display: flex; align-items: center; justify-content: center; z-index: 10000; cursor: pointer; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); pointer-events: auto; touch-action: manipulation; }
       .fan-btn svg { width: 34px; height: 34px; transition: transform 0.3s; pointer-events: none; }
@@ -1730,14 +1781,13 @@
         .desktop-only { display: none !important; }
         .mobile-only { display: block !important; }
         .flex-mobile-header.mobile-only { display: flex !important; }
-        .fan-menu { display: block; }
+        .fan-menu { display: flex; align-items: center; justify-content: center; }
         aside#sidebar { display: flex !important; position: fixed; top: 0; left: 0; bottom: 0; z-index: 9999; transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 10px 0 30px rgba(0,0,0,0.1); }
         aside#sidebar.open { transform: translateX(0); }
         .content { padding-bottom: calc(90px + env(safe-area-inset-bottom)) !important; }
         .menu-toggle { display: none !important; }
         .header { padding-left: 16px !important; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); background: rgba(255, 255, 255, 0.85) !important; }
       }
-    }
   </style>
 </head>
 
@@ -2947,7 +2997,7 @@
       const fanEl = document.getElementById('fan-items');
       const fanLabel = document.getElementById('fan-label');
       if (fanEl && fanLabel) {
-        const fanTabs = [{ id: 'tongquan', label: 'T.Quan', icon: 'dash' }, ...tabsToRender];
+        const fanTabs = [{ id: 'tongquan', label: 'Tổng Quan', icon: 'dash' }, ...tabsToRender];
         
         let currentLabel = 'Tổng quan';
         const currentTab = fanTabs.find(t => t.id === tab);
@@ -2958,8 +3008,15 @@
         const numItems = fanTabs.length;
         const innerCount = Math.floor(numItems / 2);
         const outerCount = numItems - innerCount;
-        const R_inner = 100;
-        const R_outer = 180;
+        
+        const screenW = window.innerWidth || 360;
+        let R_outer = 180;
+        let R_inner = 100;
+        if (screenW < 400) {
+            const ratio = screenW / 400;
+            R_outer = Math.max(130, 180 * ratio);
+            R_inner = Math.max(80, 100 * ratio);
+        }
         
         fanEl.innerHTML = fanTabs.map((t, index) => {
           const isOuter = index >= innerCount;
@@ -2977,8 +3034,12 @@
           }
           
           const angleRad = (angleDeg - 90) * (Math.PI / 180);
-          const x = R * Math.cos(angleRad);
-          const y = R * Math.sin(angleRad);
+          let x = R * Math.cos(angleRad);
+          let y = R * Math.sin(angleRad);
+          
+          // Giới hạn (clamp) X để icon không bị tràn màn hình (cách mép ít nhất 16px)
+          const maxOffsetX = (screenW / 2) - 16 - 29;
+          x = Math.max(-maxOffsetX, Math.min(maxOffsetX, x));
           
           let onclickStr = `haptic(); switchTab('${t.id}', true); window.toggleFanMenu();`;
           const isActive = tab === t.id || (t.id === 'tongquan' && !fanTabs.find(ft => ft.id === tab && ft.id !== 'tongquan'));
@@ -2996,6 +3057,20 @@
     function haptic() {
       if (navigator.vibrate) navigator.vibrate(8);
     }
+
+    let _lastInnerWidth = window.innerWidth;
+    window.addEventListener('resize', () => {
+      if (window.innerWidth !== _lastInnerWidth) {
+        _lastInnerWidth = window.innerWidth;
+        const menu = document.getElementById('fan-menu');
+        if (menu && menu.classList.contains('open')) {
+          window.toggleFanMenu();
+        }
+        if (typeof renderNav === 'function') {
+          renderNav();
+        }
+      }
+    });
 
     window.toggleFanMenu = function(e) {
       if (e) { e.preventDefault(); e.stopPropagation(); }
@@ -3521,9 +3596,16 @@
                   uLogs.forEach(l => {
                     const amt1 = Number(l.amount1) || 1;
                     const inv1 = Number(l.invalidAmount1) || 0;
-                    const amt2 = Number(l.amount2) || 1;
+                    
+                    const amt2Val = Number(l.amount2) || 0;
                     const inv2 = Number(l.invalidAmount2) || 0;
-                    if ((inv1 / amt1) * 100 > 5 || (inv2 / amt2) * 100 > 5) failCount++;
+                    const hasData2 = amt2Val > 0;
+                    
+                    const totalAmt = amt1 + (hasData2 ? amt2Val : 0);
+                    const totalInv = inv1 + (hasData2 ? inv2 : 0);
+                    const totalRatio = (totalInv / totalAmt) * 100;
+                    
+                    if (totalRatio > 5.0) failCount++;
                     else passCount++;
                   });
                   const fmtPass = String(passCount).padStart(2, '0');
@@ -3620,11 +3702,16 @@
         recentLogs.forEach(l => {
           const amt1 = Number(l.amount1) || 1;
           const inv1 = Number(l.invalidAmount1) || 0;
-          if ((inv1 / amt1) * 100 > 5) hasRecentFail = true;
-
-          const amt2 = Number(l.amount2) || 1;
+          
+          const amt2Val = Number(l.amount2) || 0;
           const inv2 = Number(l.invalidAmount2) || 0;
-          if ((inv2 / amt2) * 100 > 5) hasRecentFail = true;
+          const hasData2 = amt2Val > 0;
+          
+          const totalAmt = amt1 + (hasData2 ? amt2Val : 0);
+          const totalInv = inv1 + (hasData2 ? inv2 : 0);
+          const totalRatio = (totalInv / totalAmt) * 100;
+          
+          if (totalRatio > 5.0) hasRecentFail = true;
 
           if (l.diff === 'thua' || l.diff === 'thieu' || l.diff === 'lan' || l.diff2 === 'thua' || l.diff2 === 'thieu' || l.diff2 === 'lan') hasRecentDiff = true;
         });
@@ -3636,9 +3723,15 @@
           let historyArr = uLogs.map((l, idx) => {
             const amt1 = Number(l.amount1) || 1;
             const inv1 = Number(l.invalidAmount1) || 0;
-            const amt2 = Number(l.amount2) || 1;
+            
+            const amt2Val = Number(l.amount2) || 0;
             const inv2 = Number(l.invalidAmount2) || 0;
-            let isFail = ((inv1 / amt1) * 100 > 5) || ((inv2 / amt2) * 100 > 5);
+            const hasData2 = amt2Val > 0;
+            
+            const totalAmt = amt1 + (hasData2 ? amt2Val : 0);
+            const totalInv = inv1 + (hasData2 ? inv2 : 0);
+            const totalRatio = (totalInv / totalAmt) * 100;
+            let isFail = totalRatio > 5.0;
             let isDiff = l.diff === 'thua' || l.diff === 'thieu' || l.diff === 'lan' || l.diff2 === 'thua' || l.diff2 === 'thieu' || l.diff2 === 'lan';
 
             let statusText = isFail ? 'Không đạt' : 'Đạt';
@@ -4178,8 +4271,10 @@
           <summary style="font-weight:700; color:#1d4ed8; font-size:16px; display:flex; align-items:center; cursor:pointer; list-style:none; outline:none; gap: 8px; margin: 0;">
              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:#2563eb"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
              Thư viện văn bản
-             <div style="margin-left: auto;">
-               <button onclick="openForm('doc'); event.preventDefault();" style="padding:4px 12px; background:var(--main); color:#fff; border:none; border-radius:6px; cursor:pointer; font-size:12px; font-weight:600;">+ Thêm tài liệu</button>
+             <div style="margin-left: auto; margin-right: 8px;">
+               <button title="Thêm tài liệu" onclick="openForm('doc'); event.preventDefault(); event.stopPropagation();" style="width:40px; height:40px; background:#2563eb; color:#fff; border:none; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 10px rgba(37, 99, 235, 0.2); transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 6px 14px rgba(37, 99, 235, 0.3)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 10px rgba(37, 99, 235, 0.2)'">
+                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+               </button>
              </div>
           </summary>
           <p style="font-size: 13.5px; color: #6b7280; margin: 8px 0 16px 30px;">Các Nghị định, Thông tư và Biểu mẫu tiêu biểu</p>
@@ -4385,8 +4480,8 @@
           <summary style="font-weight:700; color:#15803d; font-size:16px; display:flex; align-items:center; cursor:pointer; list-style:none; outline:none; gap: 8px; margin: 0;">
              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:#16a34a"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
              Bảng đăng ký Mẫu niêm phong
-             <div style="margin-left: auto;">
-               ${noUnits ? '' : `<button onclick="openForm('seal'); event.preventDefault();" style="padding:4px 12px; background:var(--main); color:#fff; border:none; border-radius:6px; cursor:pointer; font-size:12px; font-weight:600;">+ Thêm mẫu</button>`}
+             <div style="margin-left: auto; margin-right: 8px;">
+               ${noUnits ? '' : `<button title="Thêm mẫu niêm phong" onclick="openForm('seal'); event.preventDefault(); event.stopPropagation();" style="width:40px; height:40px; background:#16a34a; color:#fff; border:none; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 10px rgba(22, 163, 74, 0.2); transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 6px 14px rgba(22, 163, 74, 0.3)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 10px rgba(22, 163, 74, 0.2)'"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>`}
              </div>
           </summary>
           <div style="border-top: 1px dashed #e5e7eb; padding-top: 16px; margin-top: 16px; overflow-x:auto;">
@@ -4514,8 +4609,8 @@
           <summary style="font-weight:700; color:#b45309; font-size:16px; display:flex; align-items:center; cursor:pointer; list-style:none; outline:none; gap: 8px; margin: 0;">
              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:#d97706"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
              Bảng đăng ký Chữ ký mẫu
-             <div style="margin-left: auto;">
-               ${noUnits ? '' : `<button onclick="openForm('signature'); event.preventDefault();" style="padding:4px 12px; background:var(--main); color:#fff; border:none; border-radius:6px; cursor:pointer; font-size:12px; font-weight:600;">+ Thêm chữ ký</button>`}
+             <div style="margin-left: auto; margin-right: 8px;">
+               ${noUnits ? '' : `<button title="Thêm chữ ký mẫu" onclick="openForm('signature'); event.preventDefault(); event.stopPropagation();" style="width:40px; height:40px; background:#d97706; color:#fff; border:none; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 10px rgba(217, 119, 6, 0.2); transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 6px 14px rgba(217, 119, 6, 0.3)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 10px rgba(217, 119, 6, 0.2)'"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>`}
              </div>
           </summary>
           <div style="border-top: 1px dashed #e5e7eb; padding-top: 16px; margin-top: 16px; overflow-x:auto;">
