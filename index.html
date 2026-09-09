@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi">
 
 <head>
@@ -1778,6 +1778,7 @@
       .nk-action-btn.del { background: #fee2e2; color: #e11d48; }
 
       @media (max-width: 860px) {
+        #sync-dot { top: auto; bottom: 80px; right: 16px; }
         .desktop-only { display: none !important; }
         .mobile-only { display: block !important; }
         .flex-mobile-header.mobile-only { display: flex !important; }
@@ -1849,7 +1850,6 @@
           </div>
         </div>
         <div style="display: flex; align-items: center; gap: 6px;">
-          <div id="last-sync-time" style="font-size: 11px; color: #64748b; font-weight: 600; padding-right: 8px;"></div>
           <button class="iconbtn-top" onclick="doLogout()" title="Đăng xuất" style="color:var(--red); width: 34px; height: 34px; border-radius: 50%; border: 1px solid #f87171; background: #fef2f2; display: flex; align-items: center; justify-content: center;">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
@@ -1879,6 +1879,10 @@
           <input type="text" id="search" onfocus="showSearchDropdown()" placeholder="Tìm kiếm hoặc chọn đơn vị..."
             oninput="onSearchInput(this.value)" onclick="this.value=''; onSearch('')" autocomplete="off">
           <div id="search-dropdown" class="custom-dropdown" style="display:none;"></div>
+        </div>
+        <div class="desktop-sync-time desktop-only" style="display:flex; align-items:center; gap:8px; margin-left:16px;">
+            <div id="last-sync-time" style="font-size: 11px; font-weight: 600; text-align:right;"></div>
+            <button onclick="window.forceRefreshData()" title="Làm mới dữ liệu" style="background:none; border:none; cursor:pointer; color:#64748b; padding:4px; display:flex; align-items:center; justify-content:center; border-radius:50%; transition:background 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16"/></svg></button>
         </div>
       </div>
 
@@ -2791,6 +2795,14 @@
           if (s) {
             mergeData(JSON.parse(s));
             await dbPut('store_data', 'default', data);
+          } else {
+            // QUAN TRỌNG: thiết bị này chưa có bản lưu cục bộ nào (máy mới / lần đầu mở trên domain này
+            // sau khi deploy lại). Trước đây `data` bị bỏ ngỏ ở dạng DEFAULT_DATA thô (users/auditLogs
+            // = undefined) và có thể bị đẩy lên Firestore, xoá mất dữ liệu thật trên cloud.
+            // Luôn gọi mergeData({}) để đảm bảo cấu trúc data an toàn, đồng thời đánh dấu là
+            // "đang chờ kéo dữ liệu thật từ server" để chặn mọi lượt ghi lên cho đến khi đồng bộ xong.
+            mergeData({});
+            window.__waitingForCloudPull = true;
           }
         } else {
           mergeData({});
@@ -4361,7 +4373,7 @@
       const invalidFiles = [];
 
       const htmlDocs = `
-        <div style="display:flex;justify-content:flex-end;margin-bottom:12px;"><button class="btn-refresh" onclick="refreshStaticData('docs')"><svg id="btn-refresh-icon-docs" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>LÃ m má»›i</button></div>
+        <div style="display:flex;justify-content:flex-end;margin-bottom:12px;"><button class="btn-refresh" onclick="refreshStaticData('docs')"><svg id="btn-refresh-icon-docs" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>Làm mới</button></div>
         <details style="margin-bottom:24px; background:linear-gradient(to right bottom, #eff6ff, #ffffff); border:1px solid #bfdbfe; border-radius:12px; padding:16px; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.05); transition: all 0.3s ease;">
           <summary style="font-weight:700; color:#1d4ed8; font-size:16px; display:flex; align-items:center; cursor:pointer; list-style:none; outline:none; gap: 8px; margin: 0;">
              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:#2563eb"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
@@ -4978,17 +4990,94 @@
     let isRemoteUpdating = false;
     let pendingData = null;
 
-    function syncDocToFirestore(col, id, docData) {
+    // ===== Hàng đợi đồng bộ chưa thành công =====
+    // Trước đây syncDocToFirestore() ghi kiểu "bắn rồi quên" (fire-and-forget): nếu mạng chập
+    // chờn hoặc lỗi tạm thời, .catch(console.error) chỉ log ra console mà KHÔNG hề báo cho người
+    // dùng biết, và bản ghi đó vĩnh viễn không lên Cloud trừ khi được sửa lại lần nữa. Đây chính là
+    // lý do 2 thiết bị có thể âm thầm lệch dữ liệu theo thời gian mà không ai nhận ra.
+    // Cơ chế mới: mọi lần ghi thất bại sẽ được lưu vào 1 hàng đợi bền (localStorage), tự động thử
+    // lại khi có mạng trở lại, và hiển thị rõ cho người dùng biết đang có bao nhiêu thay đổi CHƯA
+    // lên được Cloud.
+    const PENDING_SYNC_KEY = 'pending_sync_queue_v1';
+
+    function getPendingSyncQueue() {
+      try { return JSON.parse(localStorage.getItem(PENDING_SYNC_KEY) || '[]'); } catch (e) { return []; }
+    }
+    function setPendingSyncQueue(q) {
+      try { localStorage.setItem(PENDING_SYNC_KEY, JSON.stringify(q)); } catch (e) { }
+      updatePendingSyncBadge();
+    }
+    function queuePendingSync(col, id, docData) {
+      const q = getPendingSyncQueue();
+      const key = col + '::' + id;
+      const idx = q.findIndex(x => (x.col + '::' + x.id) === key);
+      const entry = { col, id, docData, ts: Date.now() };
+      if (idx >= 0) q[idx] = entry; else q.push(entry);
+      setPendingSyncQueue(q);
+    }
+    function removeFromPendingSyncQueue(col, id) {
+      const q = getPendingSyncQueue();
+      const key = col + '::' + id;
+      setPendingSyncQueue(q.filter(x => (x.col + '::' + x.id) !== key));
+    }
+    function updatePendingSyncBadge() {
+      const n = getPendingSyncQueue().length;
+      const lastSyncEl = document.getElementById('last-sync-time');
+      if (!lastSyncEl) return;
+      let badge = document.getElementById('pending-sync-badge');
+      if (n > 0) {
+        if (!badge) {
+          badge = document.createElement('div');
+          badge.id = 'pending-sync-badge';
+          badge.style.cssText = 'font-size:10px;font-weight:700;color:#ef4444;margin-top:2px;cursor:pointer;';
+          badge.title = 'Bấm để thử đồng bộ lại ngay';
+          badge.onclick = () => flushPendingSyncQueue(true);
+          lastSyncEl.parentElement && lastSyncEl.parentElement.appendChild(badge);
+        }
+        badge.innerText = `⚠️ ${n} thay đổi chưa lên Cloud`;
+      } else if (badge) {
+        badge.remove();
+      }
+    }
+    async function flushPendingSyncQueue(showToastMsg) {
+      if (!fbFirestore) return;
+      const q = getPendingSyncQueue();
+      if (q.length === 0) return;
+      if (showToastMsg) showToast(`Đang thử đồng bộ lại ${q.length} thay đổi...`, 'green');
+      for (const entry of q) {
+        await syncDocToFirestore(entry.col, entry.id, entry.docData, true);
+      }
+    }
+    setInterval(() => { if (navigator.onLine) flushPendingSyncQueue(); }, 45000);
+
+    async function syncDocToFirestore(col, id, docData, isRetry) {
       if (!fbFirestore || isRemoteUpdating) return;
-      if (docData === null) {
-         fbFirestore.collection("app_data").doc("main").collection(col).doc(id).delete().catch(console.error);
-      } else {
-         fbFirestore.collection("app_data").doc("main").collection(col).doc(id).set(docData).catch(console.error);
+      const ref = fbFirestore.collection("app_data").doc("main").collection(col).doc(String(id));
+      try {
+        if (docData === null) {
+          await ref.delete();
+        } else {
+          await ref.set(docData);
+        }
+        removeFromPendingSyncQueue(col, id);
+      } catch (err) {
+        console.error('Lỗi đồng bộ bản ghi lên Cloud, sẽ tự thử lại:', col, id, err);
+        queuePendingSync(col, id, docData);
       }
     }
 
     async function pushToFirestore() {
       if (!fbFirestore || isRemoteUpdating) return;
+      if (!window.hasServerSyncedOnce) {
+        // AN TOÀN: 'users' và 'auditLogs' được ghi đè NGUYÊN MẢNG (không phải từng bản ghi như các
+        // collection khác), nên nếu đẩy lên trước khi biết chắc trạng thái mới nhất từ server, có thể
+        // XOÁ SẠCH dữ liệu thật (ví dụ tài khoản viewer đã đăng ký trên máy khác). Do đó phải chờ tới khi
+        // nhận được phản hồi thật từ server ít nhất 1 lần trong phiên này rồi mới cho phép ghi lên.
+        window.__pendingPushAfterSync = true;
+        console.warn('[Sync] Hoãn lưu lên máy chủ: chưa xác nhận đồng bộ lần đầu với server trong phiên này.');
+        updateSyncUI('pending');
+        return;
+      }
       try {
         const dot = document.getElementById("sync-dot");
         if (dot) {
@@ -5018,6 +5107,43 @@
         }
       }
     }
+
+    // Công cụ khôi phục thủ công: dùng khi các thiết bị đã bị lệch dữ liệu (ví dụ sau sự cố đồng
+    // bộ) và người dùng xác nhận dữ liệu trên máy đang mở là bản đúng/mới nhất. Ghi đè toàn bộ
+    // dữ liệu Cloud bằng dữ liệu cục bộ hiện tại. Đây là thao tác CHỦ ĐỘNG của người dùng nên được
+    // phép bỏ qua điều kiện "đã đồng bộ lần đầu" của pushToFirestore().
+    window.forcePushAllLocalToCloud = async function () {
+      if (!fbFirestore) { alert('Chưa cấu hình Firebase.'); return; }
+      if (!confirm('CẢNH BÁO: Thao tác này sẽ GHI ĐÈ toàn bộ dữ liệu trên Cloud (tài khoản, lịch sử, đơn vị, kế hoạch, nhật ký, thu hồi, tài liệu, con dấu, chữ ký) bằng dữ liệu đang có trên máy này. Chỉ tiếp tục nếu bạn CHẮC CHẮN dữ liệu trên máy này là bản đúng/mới nhất. Tiếp tục?')) return;
+      if (!confirm('Xác nhận lần 2: hành động này KHÔNG THỂ hoàn tác. Bạn chắc chắn chứ?')) return;
+
+      window.hasServerSyncedOnce = true; // cho phép ghi vì đây là hành động chủ động, có xác nhận rõ ràng
+      showToast('Đang đẩy toàn bộ dữ liệu lên Cloud, vui lòng chờ...', 'green');
+
+      try {
+        await fbFirestore.collection("app_data").doc("main").set({
+          users: data.users || [],
+          auditLogs: data.auditLogs || [],
+          lastUpdated: data.lastUpdated || {}
+        }, { merge: true });
+
+        const cols = ['units', 'plans', 'logs', 'inspections', 'recoveries', 'docs', 'seals', 'signatures'];
+        let count = 0;
+        for (const col of cols) {
+          const items = data[col] || [];
+          for (const item of items) {
+            if (item && item.id) {
+              await fbFirestore.collection("app_data").doc("main").collection(col).doc(String(item.id)).set(item);
+              count++;
+            }
+          }
+        }
+        showToast(`Đã đẩy xong ${count} bản ghi lên Cloud.`, 'green');
+      } catch (e) {
+        console.error(e);
+        alert('Lỗi khi đẩy dữ liệu lên Cloud: ' + e.message);
+      }
+    };
 
     function showToast(msg, color = "green") {
       let t = document.getElementById("rt-toast");
@@ -5051,38 +5177,50 @@
     }
 
     window.forceRefreshData = function() {
+      // Dùng cho nút "Làm mới dữ liệu" bấm thủ công: cố ý bỏ qua cache, đọc thẳng từ server.
+      // Đây là hành động hiếm khi xảy ra (người dùng chủ động bấm) nên chấp nhận chi phí đọc đầy đủ.
       window.collectionFetchState = {};
       if (typeof window.loadTabData === 'function' && typeof tab !== 'undefined') {
-          console.log('[Force Refresh] Đang lấy lại dữ liệu thủ công / tự động...');
+          console.log('[Force Refresh] Làm mới thủ công...');
           window.loadTabData(tab, true);
-          if (fbFirestore) {
-             fbFirestore.collection("app_data").doc("main").get({source: 'server'}).then(doc => {
-                if (doc.exists) {
-                    const newData = doc.data();
-                    data.users = newData.users || [];
-                    data.auditLogs = newData.auditLogs || [];
-                    data.lastUpdated = newData.lastUpdated || {};
-                    updateSyncUI(false);
-                    render();
-                }
-             }).catch(e => console.error("Lỗi force refresh main doc:", e));
-          }
+          // Không cần .get({source:'server'}) cho document "main" nữa: onSnapshot listener ở
+          // setupRealtimeListener() đã luôn giữ data.users/auditLogs/lastUpdated mới nhất theo
+          // thời gian thực, gọi thêm 1 lần get() ở đây chỉ tốn thêm 1 read miễn phí mà không
+          // mang lại lợi ích gì.
       }
     };
-    
+
+    let __lastAutoResumeAt = 0;
+    window.autoRefreshOnResume = function() {
+      // Dùng khi tab active trở lại / mạng có lại: CHỈ đảm bảo tab hiện tại có dữ liệu mới nhất,
+      // tái sử dụng cơ chế so sánh lastUpdated (đã có sẵn, cập nhật liên tục qua listener của
+      // document "main" mà không tốn read) — không ép đọc thẳng từ server, không xoá sạch
+      // collectionFetchState. Nhờ vậy phần lớn các lần gọi hàm này sẽ không tốn read nào cả
+      // (vì dữ liệu thường vẫn còn mới), tránh việc mỗi lần khoá/mở màn hình điện thoại hay mất
+      // sóng chập chờn lại tốn hàng trăm read.
+      const now = Date.now();
+      if (now - __lastAutoResumeAt < 30 * 1000) return; // chống dội (debounce) khi mạng chập chờn
+      __lastAutoResumeAt = now;
+      if (typeof window.loadTabData === 'function' && typeof tab !== 'undefined') {
+          console.log('[Auto Resume] Kiểm tra dữ liệu tab hiện tại (ưu tiên cache)...');
+          window.loadTabData(tab, false);
+      }
+      if (typeof flushPendingSyncQueue === 'function') flushPendingSyncQueue();
+    };
+
     document.addEventListener('visibilitychange', () => {
         if (!document.hidden) {
             const lastSync = window._lastSyncTimestamp || 0;
             if (Date.now() - lastSync > 5 * 60 * 1000) {
-                console.log('[Force Refresh] App active trở lại sau 5 phút');
-                window.forceRefreshData();
+                console.log('[Auto Resume] App active trở lại sau 5 phút');
+                window.autoRefreshOnResume();
             }
         }
     });
     
     window.addEventListener('online', () => {
-        console.log('[Force Refresh] Mạng online trở lại');
-        window.forceRefreshData();
+        console.log('[Auto Resume] Mạng online trở lại');
+        window.autoRefreshOnResume();
     });
 
     function updateSyncUI(fromCache) {
@@ -5091,6 +5229,18 @@
         const now = new Date();
         const timeStr = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
         
+        if (fromCache === 'pending') {
+            if (lastSyncEl) {
+                lastSyncEl.innerHTML = `<span style="color: #f59e0b;">Đang đồng bộ lần đầu…</span> <div style="font-size: 9px; margin-top:2px; color:#64748b;">Chờ xác nhận từ máy chủ trước khi lưu</div>`;
+            }
+            if (syncDot) {
+                syncDot.className = 'syncing';
+                const txt = syncDot.querySelector('.text');
+                if (txt) txt.innerText = 'Đang đồng bộ lần đầu…';
+            }
+            return;
+        }
+
         if (!fromCache) {
             window._lastSyncTimestamp = Date.now();
             if (lastSyncEl) {
@@ -5127,6 +5277,17 @@
         if (!doc.metadata.fromCache) {
            window.sessionFirestoreReads++;
            console.log(`[Firestore Read] 'main' doc. Tổng reads hiện tại: ${window.sessionFirestoreReads}`);
+           // Xác nhận đã nhận được phản hồi THẬT từ server ít nhất 1 lần trong phiên này.
+           // Đây là điều kiện để mở khoá pushToFirestore (xem ghi chú trong hàm đó).
+           if (!window.hasServerSyncedOnce) {
+              window.hasServerSyncedOnce = true;
+              window.__waitingForCloudPull = false;
+              if (window.__pendingPushAfterSync) {
+                 window.__pendingPushAfterSync = false;
+                 if (typeof pushToFirestore === 'function') pushToFirestore();
+              }
+              if (typeof flushPendingSyncQueue === 'function') flushPendingSyncQueue();
+           }
         }
 
         if (doc.exists) {
@@ -5339,7 +5500,7 @@
            window.collectionFetchState[col] = 'loaded';
            
            if (btnIcon) btnIcon.classList.remove('spin');
-           showToast("ÄÃ£ lÃ m má»›i dá»¯ liá»‡u " + col, "green");
+           showToast("Đã làm mới dữ liệu " + col, "green");
            handleRemoteChange();
        }).catch(e => {
            if (btnIcon) btnIcon.classList.remove('spin');
@@ -5610,6 +5771,12 @@
           <button class="btn primary" onclick="saveFirebaseSettings()">Lưu cấu hình</button>
           <span style="display:flex;align-items:center;padding:0 10px;font-size:13px;color:var(--green);font-weight:600;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Đang tự động đồng bộ thời gian thực (Real-time)</span>
         </div>
+      </div>
+
+      <div class="card" style="margin-bottom:24px; border:1px solid #fecaca; background:#fff7f7;">
+        <div style="font-weight:700; color:#ef4444; margin-bottom:6px;">⚠️ Khôi phục thủ công: Buộc đẩy dữ liệu máy này lên Cloud</div>
+        <div style="font-size:13px; color:var(--gray); margin-bottom:12px;">Chỉ dùng khi các thiết bị đang bị lệch dữ liệu và bạn CHẮC CHẮN dữ liệu đang xem trên máy này (${(data.units||[]).length} đơn vị, ${(data.logs||[]).length} nhật ký...) là bản đúng/mới nhất. Thao tác này sẽ ghi đè toàn bộ dữ liệu trên Cloud bằng dữ liệu của máy này và không thể hoàn tác.</div>
+        <button class="btn" style="background:#fee2e2;color:#ef4444;font-weight:600;" onclick="window.forcePushAllLocalToCloud()">🚨 Buộc đẩy dữ liệu máy này lên Cloud</button>
       </div>
 
       ${secHead('Sao lưu File tĩnh (Dành cho iPhone/iPad)', 'Lưu vào iCloud hoặc Tệp (Files).')}
@@ -6697,6 +6864,7 @@
         if (typeof window.loadTabData === 'function') {
            window.loadTabData(typeof tab !== 'undefined' ? tab : 'tongquan');
         }
+        if (typeof updatePendingSyncBadge === 'function') updatePendingSyncBadge();
       }
 
 
@@ -6705,6 +6873,9 @@
 </body>
 
 </html>
+
+
+
 
 
 
