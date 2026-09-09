@@ -1744,7 +1744,7 @@
     }
     
     /* Fan Menu Bar */
-    .fan-menu { position: fixed; bottom: calc(32px + env(safe-area-inset-bottom, 16px)); left: 50%; margin-left: -35px; width: 70px; height: 70px; z-index: 9999; display: none; pointer-events: none; transform: translateZ(0); }
+    .fan-menu { position: fixed; bottom: 30px; left: 50%; margin-left: -35px; width: 70px; height: 70px; z-index: 9999; display: none; pointer-events: none; }
     .fan-overlay { position: fixed; inset: 0; background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); z-index: 9998; display: none; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
       .fan-overlay.open { display: block; opacity: 1; pointer-events: auto; }
       .fan-btn { position: relative; width: 70px; height: 70px; border-radius: 50%; background: linear-gradient(135deg, var(--green-dark), var(--green)); color: white; border: none; box-shadow: 0 10px 25px rgba(180, 83, 9, 0.4); display: flex; align-items: center; justify-content: center; z-index: 10000; cursor: pointer; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); pointer-events: auto; touch-action: manipulation; }
@@ -2813,37 +2813,41 @@
       }, 1200); // 1.2s debouncing for Firestore
     }
 
-    async function openLocalFile(fileId, fileUrl) {
-      const f = await dbGet('store_files', fileId);
-      if (f) {
-        const url = URL.createObjectURL(f);
+    async function openLocalFile(fileId, fileUrl, storagePath) {
+      const url = await resolveFileUrl(fileId, fileUrl, storagePath);
+      if (url) {
         window.open(url, '_blank');
-      } else if (fileUrl && fileUrl !== 'undefined') {
-        window.open(fileUrl, '_blank');
       } else {
-        alert('Không tìm thấy tệp đính kèm.');
+        if (!navigator.onLine) alert('Bạn đang offline và thiết bị chưa lưu file này. Vui lòng kết nối mạng để mở.');
+        else alert('Không tìm thấy tệp đính kèm trên hệ thống. Dữ liệu có thể đã bị lỗi.');
       }
     }
 
-    async function showPdfModal(source, isDbFile = false, fileName = 'Tài liệu đính kèm', fileUrl = '') {
+    async function showPdfModal(source, isDbFile = false, fileName = 'Tài liệu đính kèm', fileUrl = '', storagePath = '') {
       let url = source;
+      
+      const dot = document.getElementById("sync-dot");
+      if (dot && isDbFile) {
+        dot.className = 'syncing';
+        dot.querySelector('.text').innerText = 'Đang lấy file...';
+      }
+
       if (isDbFile) {
-        const f = await dbGet('store_files', source);
-        if (f) {
-          url = URL.createObjectURL(f);
-          fileName = f.name || fileName;
-        } else if (fileUrl && fileUrl !== 'undefined') {
-          url = fileUrl;
-        } else if (typeof fbStorage !== 'undefined' && fbStorage) {
-          try {
-            url = await fbStorage.ref('store_files/' + source).getDownloadURL();
-          } catch (e) {
-            alert('Không tìm thấy file trong cơ sở dữ liệu và máy chủ!');
-            return;
+        url = await resolveFileUrl(source, fileUrl, storagePath);
+        
+        if (dot) {
+          if (url) {
+             dot.className = 'synced';
+             dot.querySelector('.text').innerText = 'Đã mở file';
+             setTimeout(() => { if (dot.className === 'synced') dot.className = ''; }, 2000);
+          } else {
+             dot.className = 'sync-error';
+             dot.querySelector('.text').innerText = 'Lỗi tìm file';
+             setTimeout(() => { if (dot.className === 'sync-error') dot.className = ''; }, 3000);
+             if (!navigator.onLine) alert('Bạn đang offline và file này chưa được tải về máy. Cần kết nối mạng để mở.');
+             else alert('Không tìm thấy tệp đính kèm trên cả thiết bị lẫn máy chủ (File Not Found)!');
+             return;
           }
-        } else {
-          alert('Không tìm thấy file trong cơ sở dữ liệu!');
-          return;
         }
       }
 
@@ -2990,26 +2994,48 @@
       const fanEl = document.getElementById('fan-items');
       const fanLabel = document.getElementById('fan-label');
       if (fanEl && fanLabel) {
-        const fanTabs = [{ id: 'tongquan', label: 'Tổng Quan', icon: 'dash' }, ...tabsToRender];
+        let fanTabs = [{ id: 'tongquan', label: 'Tổng Quan', icon: 'dash' }, ...tabsToRender];
         
+        const priorityIds = ['tongquan', 'kehoach', 'nhatky'];
+        let priorityTabs = [];
+        let otherTabs = [];
+        fanTabs.forEach(t => {
+            if (priorityIds.includes(t.id)) priorityTabs.push(t);
+            else otherTabs.push(t);
+        });
+
+        const numItems = fanTabs.length;
+        const innerCount = Math.floor(numItems / 2);
+        const outerCount = numItems - innerCount;
+
+        let sortedInner = new Array(innerCount).fill(null);
+        let placeOrder = [];
+        if (innerCount === 3) placeOrder = [1, 0, 2];
+        else if (innerCount === 4) placeOrder = [1, 2, 0, 3];
+        else if (innerCount === 5) placeOrder = [2, 1, 3, 0, 4];
+        else placeOrder = Array.from({length: innerCount}, (_, i) => i);
+        
+        for (let i = 0; i < innerCount; i++) {
+           let pos = placeOrder[i];
+           if (priorityTabs.length > 0) sortedInner[pos] = priorityTabs.shift();
+           else sortedInner[pos] = otherTabs.shift();
+        }
+        
+        fanTabs = [...sortedInner, ...priorityTabs, ...otherTabs];
+
         let currentLabel = 'Tổng quan';
         const currentTab = fanTabs.find(t => t.id === tab);
         if (currentTab) currentLabel = currentTab.label;
         if (tab === 'tongquan' || !currentTab) currentLabel = 'Tổng quan';
         fanLabel.innerText = currentLabel;
 
-        const numItems = fanTabs.length;
-        const innerCount = Math.floor(numItems / 2);
-        const outerCount = numItems - innerCount;
-        
         const screenW = window.innerWidth || 360;
-        let R_outer = 180;
-        let R_inner = 100;
-        if (screenW < 400) {
-            const ratio = screenW / 400;
-            R_outer = Math.max(130, 180 * ratio);
-            R_inner = Math.max(80, 100 * ratio);
-        }
+        const startAngle = -80;
+        const maxOffsetX = (screenW / 2) - 16 - 29;
+        const maxR = Math.abs(maxOffsetX / Math.cos((startAngle - 90) * (Math.PI / 180)));
+        
+        let R_outer = Math.min(180, maxR);
+        let R_inner = Math.min(100, maxR * 0.55);
         
         fanEl.innerHTML = fanTabs.map((t, index) => {
           const isOuter = index >= innerCount;
@@ -3017,7 +3043,6 @@
           const layerCount = isOuter ? outerCount : innerCount;
           const R = isOuter ? R_outer : R_inner;
           
-          const startAngle = -80;
           const endAngle = 80;
           let angleDeg = startAngle;
           if (layerCount > 1) {
@@ -3029,10 +3054,6 @@
           const angleRad = (angleDeg - 90) * (Math.PI / 180);
           let x = R * Math.cos(angleRad);
           let y = R * Math.sin(angleRad);
-          
-          // Giới hạn (clamp) X để icon không bị tràn màn hình (cách mép ít nhất 16px)
-          const maxOffsetX = (screenW / 2) - 16 - 29;
-          x = Math.max(-maxOffsetX, Math.min(maxOffsetX, x));
           
           let onclickStr = `haptic(); switchTab('${t.id}', true); window.toggleFanMenu();`;
           const isActive = tab === t.id || (t.id === 'tongquan' && !fanTabs.find(ft => ft.id === tab && ft.id !== 'tongquan'));
@@ -4350,12 +4371,20 @@
                 }
                 let act = '';
                 if (files.length > 0) {
-                  act = `<div style="display:flex; flex-direction:column; gap:4px;">` + files.map(f => {
+                  act = `<div style="display:flex; flex-direction:column; gap:8px;">` + files.map(f => {
                     let safeName = encodeURIComponent(f.fileName || 'Tài liệu đính kèm').replace(/'/g, "%27");
-                    return `<a href="javascript:void(0)" onclick='showPdfModal("${f.fileId}", true, decodeURIComponent("${safeName}"), "${f.fileUrl || ''}"); return false;' style="color:var(--green);text-decoration:none;font-weight:600;font-size:13px;margin-right:15px">${esc(f.fileName)}</a>`;
+                    const isPdf = (f.fileName || '').toLowerCase().endsWith('.pdf');
+                    const icon = isPdf ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>` : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>`;
+                    const statusDot = (f.fileUrl || f.storagePath) ? `<span style="width:8px;height:8px;border-radius:50%;background:#10b981;margin-left:auto;flex-shrink:0" title="Đã đồng bộ Cloud"></span>` : `<span style="width:8px;height:8px;border-radius:50%;background:#f59e0b;margin-left:auto;flex-shrink:0" title="Lưu cục bộ/Đang tải"></span>`;
+                    return `
+                    <button onclick='showPdfModal("${f.fileId}", true, decodeURIComponent("${safeName}"), "${f.fileUrl || ''}", "${f.storagePath || ''}"); event.stopPropagation();' style="display:flex; align-items:center; gap:8px; width:100%; text-align:left; background:#f3f4f6; border:1px solid #e5e7eb; border-radius:8px; padding:8px 12px; cursor:pointer; font-size:13px; font-weight:600; color:#374151; min-height:44px; transition:0.2s;" onmouseover="this.style.background='#e5e7eb'" onmouseout="this.style.background='#f3f4f6'">
+                      ${icon}
+                      <span style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${esc(f.fileName)}</span>
+                      ${statusDot}
+                    </button>`;
                   }).join('') + `</div>`;
                 } else if (r.url) {
-                  act = `<a href="${r.url}" target="_blank" style="color:var(--green);text-decoration:none;font-weight:600;font-size:13px;margin-right:15px">${r.url}</a>`;
+                  act = `<a href="${r.url}" target="_blank" style="display:flex; align-items:center; gap:6px; color:#2563eb; background:#eff6ff; padding:8px 12px; border-radius:8px; text-decoration:none; font-weight:600; font-size:13px; min-height:44px; width:fit-content;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg> Link liên kết</a>`;
                 }
 
                 let fileNamesHtml = files.length > 0 ? files.map(f => `<div style="font-size:11px;color:var(--gray);margin-top:4px">${esc(f.fileName)}</div>`).join('') : '';
@@ -4447,7 +4476,7 @@
                 let onclick = '', onenter = '', onleave = '';
                 if (r.fileId) {
                   let safeName = encodeURIComponent(r.fileName || r.title || r.name || 'Tài liệu đính kèm').replace(/'/g, "%27");
-                  onclick = `onclick="showPdfModal('${r.fileId}', true, decodeURIComponent('${safeName}'), '${r.fileUrl || ''}'); return false;"`;
+                  onclick = `onclick="showPdfModal('${r.fileId}', true, decodeURIComponent('${safeName}'), '${r.fileUrl || ''}', '${r.storagePath || ''}'); return false;"`;
                   onenter = '';
                 } else {
                   const filePath = esc('MAU NIEM PHONG BO TIEN TCTD/' + r.fileName);
@@ -4577,7 +4606,7 @@
               let onclick = '', onenter = '', onleave = '';
               if (r.fileId) {
                 let safeName = encodeURIComponent(r.fileName || r.title || r.name || 'Tài liệu đính kèm').replace(/'/g, "%27");
-                onclick = `onclick="showPdfModal('${r.fileId}', true, decodeURIComponent('${safeName}'), '${r.fileUrl || ''}'); return false;"`;
+                onclick = `onclick="showPdfModal('${r.fileId}', true, decodeURIComponent('${safeName}'), '${r.fileUrl || ''}', '${r.storagePath || ''}'); return false;"`;
                 onenter = '';
               } else {
                 const filePath = esc('BANG DANG KY CHU KY MAU TCTD/' + r.fileName);
@@ -4773,19 +4802,143 @@
 
 
 
-    async function uploadToFirebaseStorage(file, fileId) {
-      if (typeof fbStorage !== 'undefined' && fbStorage) {
-        try {
-          const storageRef = fbStorage.ref('files/' + fileId);
-          const snapshot = await storageRef.put(file);
-          const downloadUrl = await snapshot.ref.getDownloadURL();
-          return downloadUrl;
-        } catch (e) {
-          console.error("Firebase Storage Upload Error:", e);
-          return null;
+    async function compressImage(file) {
+      if (!file.type.startsWith('image/')) return file;
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = event => {
+          const img = new Image();
+          img.src = event.target.result;
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const MAX_WIDTH = 1280;
+            const MAX_HEIGHT = 1280;
+            let width = img.width;
+            let height = img.height;
+            if (width > height) {
+              if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+            } else {
+              if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+            }
+            canvas.width = width; canvas.height = height;
+            ctx.drawImage(img, 0, 0, width, height);
+            canvas.toBlob((blob) => {
+              if (blob) {
+                const compressedFile = new File([blob], file.name, { type: 'image/jpeg', lastModified: Date.now() });
+                resolve(compressedFile);
+              } else { resolve(file); }
+            }, 'image/jpeg', 0.85); // 85% quality
+          };
+          img.onerror = () => resolve(file);
+        };
+        reader.onerror = () => resolve(file);
+      });
+    }
+
+    const FILE_DEBUG = false;
+    function logFileDebug(...args) {
+      if (FILE_DEBUG) console.log('[FILE_DEBUG]', ...args);
+    }
+
+    async function uploadFileToStorage(file, fileId) {
+      if (typeof fbStorage === 'undefined' || !fbStorage) return null;
+      try {
+        const storagePath = 'files/' + fileId;
+        const storageRef = fbStorage.ref(storagePath);
+        const snapshot = await storageRef.put(file);
+        const downloadUrl = await snapshot.ref.getDownloadURL();
+        return {
+          fileId,
+          fileName: file.name,
+          fileUrl: downloadUrl,
+          storagePath: storagePath,
+          contentType: file.type,
+          size: file.size,
+          uploadedAt: new Date().toISOString()
+        };
+      } catch (e) {
+        console.error("Firebase Storage Upload Error:", e);
+        return null;
+      }
+    }
+
+    function findRecordByFileId(fileId) {
+      for (const col of SYNC_COLLECTIONS) {
+        if (!data[col]) continue;
+        for (const item of data[col]) {
+           if (item.fileId === fileId) return { collection: col, rec: item };
+           if (item.files && item.files.some(f => f.fileId === fileId)) return { collection: col, rec: item };
         }
       }
       return null;
+    }
+
+    async function resolveFileUrl(fileId, fileUrl, storagePath) {
+      logFileDebug('Resolving file:', { fileId, fileUrl, storagePath });
+      
+      const localFile = await dbGet('store_files', fileId);
+      if (localFile) {
+        logFileDebug('Found in IndexedDB');
+        return URL.createObjectURL(localFile);
+      }
+      
+      if (fileUrl && fileUrl !== 'undefined') {
+        logFileDebug('Using existing fileUrl', fileUrl);
+        return fileUrl;
+      }
+      
+      if (typeof fbStorage !== 'undefined' && fbStorage) {
+        const pathsToTry = [];
+        if (storagePath && storagePath !== 'undefined') pathsToTry.push(storagePath);
+        pathsToTry.push('files/' + fileId);
+        pathsToTry.push('store_files/' + fileId);
+        
+        for (const p of pathsToTry) {
+          try {
+            logFileDebug('Trying Firebase Storage path:', p);
+            const url = await fbStorage.ref(p).getDownloadURL();
+            logFileDebug('Resolved from Firebase Storage:', p);
+            
+            if ((!fileUrl || fileUrl === 'undefined' || !storagePath || storagePath === 'undefined') && !isRemoteUpdating) {
+              const found = findRecordByFileId(fileId);
+              if (found) {
+                 const { collection, rec } = found;
+                 let changed = false;
+                 if (rec.files) {
+                    const fRef = rec.files.find(x => x.fileId === fileId);
+                    if (fRef && (!fRef.fileUrl || !fRef.storagePath)) {
+                       fRef.fileUrl = url; fRef.storagePath = p;
+                       changed = true;
+                    }
+                 }
+                 if (rec.fileId === fileId && (!rec.fileUrl || !rec.storagePath)) {
+                    rec.fileUrl = url; rec.storagePath = p;
+                    changed = true;
+                 }
+                 if (changed) {
+                    syncDocToFirestore(collection, rec.id, rec);
+                    saveData();
+                    logFileDebug('Backfilled metadata to Firestore for', collection, rec.id);
+                 }
+              }
+            }
+            return url;
+          } catch(e) {
+            logFileDebug('Failed to resolve path:', p, e.code || e.message);
+          }
+        }
+      }
+      
+      logFileDebug('Could not resolve file url for', fileId);
+      return null;
+    }
+
+    async function uploadToFirebaseStorage(file, fileId) {
+      // Legacy wrapper fallback if still used somewhere
+      const res = await uploadFileToStorage(file, fileId);
+      return res ? res.fileUrl : null;
     }
 
     window.saveFirebaseSettings = function () {
@@ -4813,9 +4966,17 @@
     let isRemoteUpdating = false;
     let pendingData = null;
 
+    function syncDocToFirestore(col, id, docData) {
+      if (!fbFirestore || isRemoteUpdating) return;
+      if (docData === null) {
+         fbFirestore.collection("app_data").doc("main").collection(col).doc(id).delete().catch(console.error);
+      } else {
+         fbFirestore.collection("app_data").doc("main").collection(col).doc(id).set(docData).catch(console.error);
+      }
+    }
+
     async function pushToFirestore() {
-      if (!fbFirestore) return;
-      if (isRemoteUpdating) return;
+      if (!fbFirestore || isRemoteUpdating) return;
       try {
         const dot = document.getElementById("sync-dot");
         if (dot) {
@@ -4823,8 +4984,11 @@
           dot.querySelector('.text').innerText = 'Đang lưu...';
         }
 
-        const clone = JSON.parse(JSON.stringify(data));
-        await fbFirestore.collection("app_data").doc("main").set(clone);
+        // Chỉ đồng bộ metadata (users, auditLogs) lên main doc
+        await fbFirestore.collection("app_data").doc("main").set({
+           users: data.users || [],
+           auditLogs: data.auditLogs || []
+        }, { merge: true });
 
         if (dot) {
           dot.className = 'synced';
@@ -4856,28 +5020,116 @@
       setTimeout(() => { t.style.opacity = "0"; }, 3000);
     }
 
+    const SYNC_COLLECTIONS = ['units', 'plans', 'logs', 'inspections', 'recoveries', 'docs', 'signatures', 'seals'];
+    let needsRender = false;
+
+    function handleRemoteChange() {
+      const isModalOpen = document.getElementById("overlay").classList.contains("open") || document.querySelector(".modal.open");
+      if (isModalOpen || (typeof editing !== "undefined" && editing !== null)) {
+        needsRender = true;
+        // showToast("Có dữ liệu mới từ máy khác. Sẽ cập nhật UI sau khi đóng cửa sổ này.", "orange");
+      } else {
+        isRemoteUpdating = true;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        dbPut('store_data', 'default', data).catch(e => { });
+        render();
+        setTimeout(() => { isRemoteUpdating = false; }, 500);
+      }
+    }
+
     function setupRealtimeListener() {
       if (!fbFirestore) return;
+      
+      // Main doc listener (users, auditLogs)
       fbFirestore.collection("app_data").doc("main").onSnapshot((doc) => {
+        if (doc.metadata.hasPendingWrites) return; // Bỏ qua sự kiện từ chính mình
         if (doc.exists) {
           const newData = doc.data();
           if (!newData.users) newData.users = [];
-          const isModalOpen = document.getElementById("overlay").classList.contains("open") || document.querySelector(".modal.open");
-
-          if (isModalOpen || (typeof editing !== "undefined" && editing !== null)) {
-            pendingData = newData;
-            showToast("Có dữ liệu mới từ máy khác. Sẽ cập nhật sau khi đóng cửa sổ này.", "orange");
-          } else {
-            isRemoteUpdating = true;
-            data = newData;
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-            dbPut("store_data", "default", data).catch(e => { });
-            render();
-            showToast("Dữ liệu đã tự động cập nhật.", "green");
-            setTimeout(() => { isRemoteUpdating = false; }, 500);
+          if (!newData.auditLogs) newData.auditLogs = [];
+          
+          data.users = newData.users;
+          data.auditLogs = newData.auditLogs;
+          
+          // Kiểm tra xem dữ liệu cũ còn tồn tại ở main doc không để migrate
+          let needsMigration = false;
+          SYNC_COLLECTIONS.forEach(col => {
+            if (newData[col] && newData[col].length > 0) {
+              needsMigration = true;
+            }
+          });
+          
+          if (needsMigration && !window.hasStartedMigration) {
+            window.hasStartedMigration = true;
+            console.log("Khởi chạy migrate dữ liệu sang sub-collections...");
+            migrateToSubcollections(newData);
+          } else if (!needsMigration) {
+             handleRemoteChange();
           }
         }
       });
+
+      // Sub-collections listener
+      SYNC_COLLECTIONS.forEach(col => {
+         fbFirestore.collection("app_data").doc("main").collection(col).onSnapshot(snapshot => {
+            if (snapshot.metadata.hasPendingWrites) return; // Bỏ qua event từ chính client
+            
+            let changed = false;
+            snapshot.docChanges().forEach(change => {
+               if (change.doc.metadata.hasPendingWrites) return;
+               const docData = change.doc.data();
+               changed = true;
+               
+               if (change.type === 'added' || change.type === 'modified') {
+                  const idx = data[col].findIndex(x => x.id === docData.id);
+                  if (idx >= 0) data[col][idx] = docData;
+                  else data[col].push(docData);
+               }
+               if (change.type === 'removed') {
+                  data[col] = data[col].filter(x => x.id !== docData.id);
+               }
+            });
+            if (changed) handleRemoteChange();
+         });
+      });
+    }
+
+    async function migrateToSubcollections(legacyData) {
+      if (!fbFirestore) return;
+      try {
+        const mainRef = fbFirestore.collection("app_data").doc("main");
+        
+        let batches = [];
+        let currentBatch = fbFirestore.batch();
+        let opCount = 0;
+
+        const commitCurrent = () => {
+          batches.push(currentBatch.commit());
+          currentBatch = fbFirestore.batch();
+          opCount = 0;
+        };
+
+        SYNC_COLLECTIONS.forEach(col => {
+          if (legacyData[col]) {
+            legacyData[col].forEach(item => {
+              const ref = mainRef.collection(col).doc(item.id);
+              currentBatch.set(ref, item);
+              opCount++;
+              if (opCount >= 490) commitCurrent();
+            });
+          }
+        });
+        
+        const newMain = { users: legacyData.users || [], auditLogs: legacyData.auditLogs || [] };
+        currentBatch.set(mainRef, newMain);
+        batches.push(currentBatch.commit());
+        
+        showToast("Đang tối ưu cấu trúc dữ liệu lên phiên bản mới...", "orange");
+        await Promise.all(batches);
+        showToast("Tối ưu cấu trúc dữ liệu thành công!", "green");
+      } catch (e) {
+        console.error("Lỗi migrate", e);
+      }
     }
 
     window.initFirebase = function () {
@@ -4962,11 +5214,11 @@
       const logs = data.auditLogs || [];
       const listHtml = logs.length === 0 ? `<div style="padding:20px; text-align:center; color:var(--gray)">Chưa có lịch sử nào</div>` :
         logs.map(u => `
-          <div style="background:#fff; border:1px solid var(--line); border-radius:12px; padding:15px; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-            <div>
+          <div style="background:#fff; border:1px solid var(--line); border-radius:12px; padding:15px; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; width:100%; box-sizing:border-box; overflow:hidden;">
+            <div style="min-width:0; flex:1;">
               <div style="font-weight:600; font-size:15px; color:var(--primary); margin-bottom:4px;">[${esc(u.timestamp)}] Tài khoản: ${esc(u.user)}</div>
               <div style="font-size:13px; color:var(--gray);">Hành động: <span style="font-weight:bold;color:${u.action === 'Xóa' ? 'red' : (u.action === 'Thêm' ? 'green' : '#f59e0b')}">${esc(u.action)}</span> - Bảng: ${esc(u.key)}</div>
-              <div style="font-size:13px; color:var(--gray);">Chi tiết: ${esc(u.details)}</div>
+              <div style="font-size:13px; color:var(--gray); word-break: break-all; overflow-wrap: anywhere;">Chi tiết: ${esc(u.details)}</div>
             </div>
           </div>
         `).join("");
@@ -5019,6 +5271,10 @@
 
     /* ================= RENDER ================= */
     function render() {
+      if (!sessionStorage.getItem('currentUser')) {
+        renderLogin();
+        return;
+      }
       document.body.classList.add('is-authenticated');
       let dl = document.getElementById('unit-list');
       if (dl && data && data.units) {
@@ -5117,6 +5373,7 @@
           rec.fileName = null;
           rec.fileUrl = null;
         }
+        syncDocToFirestore('docs', docId, rec);
         saveData();
         openForm('doc', docId);
       }
@@ -5133,8 +5390,8 @@
       area: (id, val, ph) => `<textarea id="${id}" placeholder="${ph || ''}">${esc(val)}</textarea>`,
       select: (id, opts, val, extraAttr='') => `<select id="${id}" ${extraAttr}>${opts.map(([k, v]) => `<option value="${k}" ${k === val ? 'selected' : ''}>${esc(v)}</option>`).join('')}</select>`,
       unitSel: (id, val, extraAttr='') => F.select(id, data.units.map(u => [u.id, u.name]), val || data.units[0]?.id, extraAttr),
-      foot: (saveFn) => `<div class="modal-foot"><button class="btn-ghost" onclick="closeModal()">Hủy</button>
-    <button class="btn" onclick="${saveFn}">Lưu bản ghi</button></div>`,
+      foot: (saveFn) => `<div class="modal-foot"><button type="button" class="btn-ghost" onclick="closeModal()">Hủy</button>
+    <button type="button" class="btn" onclick="${saveFn}">Lưu bản ghi</button></div>`,
     };
     const gv = id => document.getElementById(id).value;
 
@@ -5145,15 +5402,10 @@
     }
     function closeModal() {
       document.getElementById('overlay').classList.remove('open');
-      if (typeof pendingData !== 'undefined' && pendingData !== null) {
-        isRemoteUpdating = true;
-        data = pendingData;
-        pendingData = null;
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-        dbPut('store_data', 'default', data).catch(e => { });
+      if (needsRender) {
+        needsRender = false;
         render();
         if (typeof showToast === 'function') showToast("Đã cập nhật dữ liệu mới từ máy khác.", "green");
-        setTimeout(() => { isRemoteUpdating = false; }, 500);
       }
     }
     document.getElementById('overlay').addEventListener('click', e => { if (e.target.id === 'overlay') closeModal(); });
@@ -5495,31 +5747,34 @@
         'date': 'Ngày', 'denom1': 'Loại 1', 'amount1': 'SL 1', 'invalidAmount1': 'Lỗi 1', 'diff': 'Lệch 1',
         'denom2': 'Loại 2', 'amount2': 'SL 2', 'invalidAmount2': 'Lỗi 2', 'diff2': 'Lệch 2',
         'c0': 'Bó', 'c1': 'Lõi', 'c2': 'Thiếu', 'c3': 'Giả', 'c4': 'Mất góc', 'c5': 'Khác',
-        'severity': 'Mức độ', 'month': 'Tháng', 'denom': 'Mệnh giá', 'qty': 'SL', 'title': 'Tiêu đề'
+        'severity': 'Mức độ', 'month': 'Tháng', 'denom': 'Mệnh giá', 'qty': 'SL', 'title': 'Tiêu đề', 'fileName': 'Tên file'
       };
+
+      const excludeKeys = ['id', 'unitId', 'fileUrl', 'storagePath', 'contentType', 'size', 'uploadedAt', 'files', 'fileId'];
 
       let detailsText = '';
       if (i >= 0) {
         const old = data[key][i];
         let diffs = [];
         for (let k in rec) {
-          if (k !== 'id' && k !== 'unitId' && rec[k] !== old[k]) {
+          if (!excludeKeys.includes(k) && JSON.stringify(rec[k]) !== JSON.stringify(old[k])) {
             const kn = fMap[k] || k;
             diffs.push(`${kn}: [${old[k] || ''} -> ${rec[k] || ''}]`);
           }
         }
-        detailsText = `Cập nhật ${uName ? 'TCTD ' + uName : (rec.name ? 'TCTD ' + rec.name : '')}. Thay đổi: ` + (diffs.length > 0 ? diffs.join(', ') : 'Không đổi');
+        detailsText = `Cập nhật ${uName ? 'TCTD ' + uName : (rec.name ? 'TCTD ' + rec.name : '')}. Thay đổi: ` + (diffs.length > 0 ? diffs.join(', ') : 'Không có thay đổi dữ liệu chính');
         data[key][i] = rec;
         addAuditLog('Sửa', key, detailsText);
       } else {
         let vals = [];
         for (let k in rec) {
-          if (k !== 'id' && k !== 'unitId' && rec[k]) vals.push(`${fMap[k] || k}: ${rec[k]}`);
+          if (!excludeKeys.includes(k) && rec[k]) vals.push(`${fMap[k] || k}: ${rec[k]}`);
         }
         detailsText = `Thêm mới ${uName ? 'cho TCTD ' + uName : ''}. Dữ liệu: ` + vals.join(', ');
         data[key].push(rec);
         addAuditLog('Thêm', key, detailsText);
       }
+      syncDocToFirestore(key, rec.id, rec);
       saveData(); closeModal(); render();
     }
     function saveUnit() {
@@ -5532,49 +5787,23 @@
     }
     async function saveLog() {
       if (!gv('f-unit')) return alert('Chọn đơn vị');
-      const btnSave = document.querySelector('#modal-content .foot .btn-primary');
+      const btnSave = document.querySelector('.modal-foot .btn');
       if (btnSave) {
         btnSave.disabled = true;
-        btnSave.innerText = 'Đang lưu...';
+        btnSave.innerText = 'Đang xử lý...';
       }
 
       const rec = { id: editing || uid(), date: gv('f-date'), unitId: gv('f-unit'), denom1: gv('f-denom1'), amount1: gv('f-amount1'), invalidAmount1: gv('f-inv1'), denom2: gv('f-denom2'), amount2: gv('f-amount2'), invalidAmount2: gv('f-inv2'), diff: gv('f-diff'), diff2: gv('f-diff2'), };
 
-      rec.files = [];
       const newFilesToUpload = window.formLogFiles.filter(f => f.isNew);
       const oldFilesToKeep = window.formLogFiles.filter(f => !f.isNew);
       
-      let uploadedCount = 0;
-      const totalToUpload = newFilesToUpload.length;
-
-      const updateProgress = () => {
-        if (btnSave && totalToUpload > 0) {
-          btnSave.innerText = `Đang lưu... (${uploadedCount}/${totalToUpload})`;
-        }
-      };
-
-      const uploadPromises = newFilesToUpload.map(async (f) => {
-        const fileObj = f.fileObj;
+      const pendingFiles = newFilesToUpload.map(f => {
         const fileId = 'file_' + uid();
-        try {
-          await dbPut('store_files', fileId, fileObj);
-          const newFileRec = { fileId: fileId, fileName: fileObj.name };
-          if (typeof fbStorage !== 'undefined' && fbStorage) {
-            const url = await uploadToFirebaseStorage(fileObj, fileId);
-            if (url) newFileRec.fileUrl = url;
-          }
-          uploadedCount++;
-          updateProgress();
-          return newFileRec;
-        } catch (e) {
-          console.error("Upload error for file " + fileObj.name, e);
-          alert("Lỗi khi upload file: " + fileObj.name);
-          return null;
-        }
+        return { fileId, fileObj: f.fileObj, fileName: f.fileObj.name };
       });
 
-      const uploadedNewFiles = (await Promise.all(uploadPromises)).filter(Boolean);
-      rec.files = [...oldFilesToKeep.map(f => ({fileId: f.fileId, fileName: f.fileName, fileUrl: f.fileUrl})), ...uploadedNewFiles];
+      rec.files = [...oldFilesToKeep.map(f => ({fileId: f.fileId, fileName: f.fileName, fileUrl: f.fileUrl})), ...pendingFiles.map(f => ({fileId: f.fileId, fileName: f.fileName, fileUrl: null}))];
 
       if (rec.files.length > 0) {
         rec.fileId = rec.files[0].fileId;
@@ -5582,14 +5811,79 @@
         rec.fileUrl = rec.files[0].fileUrl;
       }
 
+      // Lưu lạc quan ngay lập tức
       upsert('logs', rec);
       
+      if (pendingFiles.length === 0) return;
+
+      // Xử lý upload ngầm
+      let uploadedCount = 0;
+      let failedCount = 0;
+      const totalToUpload = pendingFiles.length;
       const dot = document.getElementById("sync-dot");
-      if (dot) {
-        dot.className = 'synced';
-        dot.querySelector('.text').innerText = 'Đã lưu nhật ký và đồng bộ thành công';
-        setTimeout(() => { if (dot.className === 'synced') dot.className = ''; }, 3000);
-      }
+      
+      const updateSyncDot = () => {
+        if (dot) {
+          dot.className = 'syncing';
+          dot.querySelector('.text').innerText = `Đang tải file... (${uploadedCount}/${totalToUpload})` + (failedCount > 0 ? ` Lỗi: ${failedCount}` : '');
+        }
+      };
+      updateSyncDot();
+
+      const uploadPromises = pendingFiles.map(async (f) => {
+        try {
+          const compressed = await compressImage(f.fileObj);
+          await dbPut('store_files', f.fileId, compressed);
+          
+          if (typeof fbStorage !== 'undefined' && fbStorage) {
+            const res = await uploadFileToStorage(compressed, f.fileId);
+            if (res) {
+              const logIdx = data.logs.findIndex(x => x.id === rec.id);
+              if (logIdx >= 0) {
+                const updatedLog = data.logs[logIdx];
+                const fileRef = updatedLog.files.find(xf => xf.fileId === f.fileId);
+                if (fileRef) {
+                   fileRef.fileUrl = res.fileUrl;
+                   fileRef.storagePath = res.storagePath;
+                   fileRef.contentType = res.contentType;
+                   fileRef.size = res.size;
+                   fileRef.uploadedAt = res.uploadedAt;
+                }
+                if (updatedLog.fileId === f.fileId) {
+                   updatedLog.fileUrl = res.fileUrl;
+                   updatedLog.storagePath = res.storagePath;
+                }
+                
+                saveData(); // Cập nhật local
+                syncDocToFirestore('logs', rec.id, updatedLog); // Đẩy URL lên Firestore
+              }
+              uploadedCount++;
+            } else {
+              failedCount++;
+              console.error("Upload returned null for", f.fileName);
+            }
+          } else { uploadedCount++; }
+          updateSyncDot();
+        } catch (e) {
+          failedCount++;
+          console.error("Upload error for file " + f.fileName, e);
+          updateSyncDot();
+        }
+      });
+
+      Promise.all(uploadPromises).then(() => {
+        if (dot) {
+          if (failedCount > 0) {
+             dot.className = 'sync-error';
+             dot.querySelector('.text').innerText = `Tải xong ${uploadedCount}, lỗi ${failedCount} file`;
+          } else {
+             dot.className = 'synced';
+             dot.querySelector('.text').innerText = 'Đã tải xong file đính kèm';
+             setTimeout(() => { if (dot.className === 'synced' || dot.className === 'sync-error') dot.className = ''; }, 3000);
+          }
+        }
+        render(); // Cập nhật lại UI nếu cần
+      });
     }
     function saveInspection() {
       if (!gv('f-unit')) return alert('Chọn đơn vị');
@@ -5605,6 +5899,9 @@
     }
     async function saveDoc() {
       const title = gv('f-title').trim(); if (!title) return alert('Nhập tên văn bản');
+      const btnSave = document.querySelector('.modal-foot .btn');
+      if (btnSave) { btnSave.disabled = true; btnSave.innerText = 'Đang xử lý...'; }
+
       const rec = { id: editing || uid(), title, issueDate: gv('f-issueDate'), url: gv('f-url').trim() };
 
       if (editing) {
@@ -5616,28 +5913,88 @@
       }
 
       const fileInp = document.getElementById('f-file');
+      let pendingFiles = [];
       if (fileInp && fileInp.files.length > 0) {
         if (!rec.files) rec.files = [];
         for (let i = 0; i < fileInp.files.length; i++) {
           const f = fileInp.files[i];
           const fileId = 'file_' + uid();
-          await dbPut('store_files', fileId, f);
-          const newFile = { fileId: fileId, fileName: f.name };
-          if (typeof fbStorage !== 'undefined' && fbStorage) {
-            const url = await uploadToFirebaseStorage(f, fileId);
-            if (url) newFile.fileUrl = url;
-          }
-          rec.files.push(newFile);
+          pendingFiles.push({ fileId, fileObj: f, fileName: f.name });
+          rec.files.push({ fileId: fileId, fileName: f.name });
         }
         rec.url = '';
       }
+      
       upsert('docs', rec);
+      
+      if (pendingFiles.length === 0) return;
+      
+      const dot = document.getElementById("sync-dot");
+      let uploadedCount = 0;
+      let failedCount = 0;
+      const updateSyncDot = () => {
+        if (dot) {
+          dot.className = 'syncing';
+          dot.querySelector('.text').innerText = `Đang tải file... (${uploadedCount}/${pendingFiles.length})` + (failedCount > 0 ? ` Lỗi: ${failedCount}` : '');
+        }
+      };
+      updateSyncDot();
+      
+      const uploadPromises = pendingFiles.map(async (f) => {
+        try {
+          const compressed = await compressImage(f.fileObj);
+          await dbPut('store_files', f.fileId, compressed);
+          if (typeof fbStorage !== 'undefined' && fbStorage) {
+            const res = await uploadFileToStorage(compressed, f.fileId);
+            if (res) {
+              const docIdx = data.docs.findIndex(x => x.id === rec.id);
+              if (docIdx >= 0) {
+                const updatedDoc = data.docs[docIdx];
+                const fileRef = updatedDoc.files.find(xf => xf.fileId === f.fileId);
+                if (fileRef) {
+                   fileRef.fileUrl = res.fileUrl;
+                   fileRef.storagePath = res.storagePath;
+                   fileRef.contentType = res.contentType;
+                   fileRef.size = res.size;
+                   fileRef.uploadedAt = res.uploadedAt;
+                }
+                saveData();
+                syncDocToFirestore('docs', rec.id, updatedDoc);
+              }
+              uploadedCount++;
+            } else {
+              failedCount++;
+              console.error("Upload returned null for", f.fileName);
+            }
+          } else { uploadedCount++; }
+          updateSyncDot();
+        } catch(e) {
+          failedCount++;
+          console.error("Upload error for file", f.fileObj.name, e);
+          updateSyncDot();
+        }
+      });
+      
+      Promise.all(uploadPromises).then(() => {
+        if (dot) {
+          if (failedCount > 0) {
+             dot.className = 'sync-error';
+             dot.querySelector('.text').innerText = `Tải xong ${uploadedCount}, lỗi ${failedCount} file`;
+          } else {
+             dot.className = 'synced';
+             dot.querySelector('.text').innerText = 'Đã tải xong file đính kèm';
+             setTimeout(() => { if (dot.className === 'synced' || dot.className === 'sync-error') dot.className = ''; }, 3000);
+          }
+        }
+      });
     }
 
     async function saveSeal() {
       if (!gv('f-unit')) return alert('Chọn đơn vị');
-      const name = 'Mẫu niêm phong bó tiền';
+      const btnSave = document.querySelector('.modal-foot .btn');
+      if (btnSave) { btnSave.disabled = true; btnSave.innerText = 'Đang xử lý...'; }
 
+      const name = 'Mẫu niêm phong bó tiền';
       if (!data.seals) data.seals = [];
       const unitId = gv('f-unit');
 
@@ -5645,43 +6002,91 @@
         const old = data.seals.find(x => x.id === editing);
         if (old && old.unitId !== unitId) {
           data.seals.forEach(seal => {
-            if (seal.unitId === old.unitId) seal.unitId = unitId;
+            if (seal.unitId === old.unitId) { seal.unitId = unitId; syncDocToFirestore('seals', seal.id, seal); }
           });
         }
       }
 
       const fileInp = document.getElementById('f-file');
+      let pendingFiles = [];
       if (fileInp && fileInp.files.length > 0) {
         for (let i = 0; i < fileInp.files.length; i++) {
           const f = fileInp.files[i];
           const fileId = 'file_' + uid();
-          await dbPut('store_files', fileId, f);
-
-          const rec = {
-            id: uid(),
-            unitId: unitId,
-            name: name,
-            fileId: fileId,
-            fileName: f.name
-          };
-          if (typeof fbStorage !== 'undefined' && fbStorage) {
-            const url = await uploadToFirebaseStorage(f, fileId);
-            if (url) rec.fileUrl = url;
-          }
+          const rec = { id: uid(), unitId: unitId, name: name, fileId: fileId, fileName: f.name };
           data.seals.push(rec);
+          syncDocToFirestore('seals', rec.id, rec);
+          pendingFiles.push({ fileId, fileObj: f, recId: rec.id });
         }
       } else if (!editing) {
         const existingForUnit = data.seals.filter(x => x.unitId === unitId);
         if (existingForUnit.length === 0) {
-          data.seals.push({ id: uid(), unitId: unitId, name: name });
+          const rec = { id: uid(), unitId: unitId, name: name };
+          data.seals.push(rec);
+          syncDocToFirestore('seals', rec.id, rec);
         }
       }
 
       saveData(); closeModal(); render();
+
+      if (pendingFiles.length === 0) return;
+
+      const dot = document.getElementById("sync-dot");
+      let uploadedCount = 0;
+      let failedCount = 0;
+      const updateSyncDot = () => { if (dot) { dot.className = 'syncing'; dot.querySelector('.text').innerText = `Đang tải file... (${uploadedCount}/${pendingFiles.length})` + (failedCount > 0 ? ` Lỗi: ${failedCount}` : ''); } };
+      updateSyncDot();
+
+      const uploadPromises = pendingFiles.map(async (f) => {
+        try {
+          const compressed = await compressImage(f.fileObj);
+          await dbPut('store_files', f.fileId, compressed);
+
+          if (typeof fbStorage !== 'undefined' && fbStorage) {
+            const res = await uploadFileToStorage(compressed, f.fileId);
+            if (res) {
+              const sealIdx = data.seals.findIndex(x => x.id === f.recId);
+              if (sealIdx >= 0) {
+                data.seals[sealIdx].fileUrl = res.fileUrl;
+                data.seals[sealIdx].storagePath = res.storagePath;
+                data.seals[sealIdx].contentType = res.contentType;
+                data.seals[sealIdx].size = res.size;
+                data.seals[sealIdx].uploadedAt = res.uploadedAt;
+                saveData();
+                syncDocToFirestore('seals', f.recId, data.seals[sealIdx]);
+              }
+              uploadedCount++;
+            } else {
+              failedCount++;
+              console.error("Upload returned null for", f.fileName);
+            }
+          } else { uploadedCount++; }
+          updateSyncDot();
+        } catch (e) {
+          failedCount++;
+          console.error("Upload error for file", f.fileObj.name, e);
+          updateSyncDot();
+        }
+      });
+
+      Promise.all(uploadPromises).then(() => {
+        if (dot) {
+          if (failedCount > 0) {
+             dot.className = 'sync-error';
+             dot.querySelector('.text').innerText = `Tải xong ${uploadedCount}, lỗi ${failedCount} file`;
+          } else {
+             dot.className = 'synced';
+             dot.querySelector('.text').innerText = 'Đã tải xong file đính kèm';
+             setTimeout(() => { if (dot.className === 'synced' || dot.className === 'sync-error') dot.className = ''; }, 3000);
+          }
+        }
+      });
     }
 
     async function saveSignature() {
       if (!gv('f-unit')) return alert('Chọn đơn vị');
+      const btnSave = document.querySelector('.modal-foot .btn');
+      if (btnSave) { btnSave.disabled = true; btnSave.innerText = 'Đang xử lý...'; }
 
       if (!data.signatures) data.signatures = [];
       const unitId = gv('f-unit');
@@ -5690,38 +6095,84 @@
         const old = data.signatures.find(x => x.id === editing);
         if (old && old.unitId !== unitId) {
           data.signatures.forEach(sig => {
-            if (sig.unitId === old.unitId) sig.unitId = unitId;
+            if (sig.unitId === old.unitId) { sig.unitId = unitId; syncDocToFirestore('signatures', sig.id, sig); }
           });
         }
       }
 
       const fileInp = document.getElementById('f-file');
+      let pendingFiles = [];
       if (fileInp && fileInp.files.length > 0) {
         for (let i = 0; i < fileInp.files.length; i++) {
           const f = fileInp.files[i];
           const fileId = 'file_' + uid();
-          await dbPut('store_files', fileId, f);
-
-          const rec = {
-            id: uid(),
-            unitId: unitId,
-            fileId: fileId,
-            fileName: f.name
-          };
-          if (typeof fbStorage !== 'undefined' && fbStorage) {
-            const url = await uploadToFirebaseStorage(f, fileId);
-            if (url) rec.fileUrl = url;
-          }
+          const rec = { id: uid(), unitId: unitId, fileId: fileId, fileName: f.name };
           data.signatures.push(rec);
+          syncDocToFirestore('signatures', rec.id, rec);
+          pendingFiles.push({ fileId, fileObj: f, recId: rec.id });
         }
       } else if (!editing) {
         const existingForUnit = data.signatures.filter(x => x.unitId === unitId);
         if (existingForUnit.length === 0) {
-          data.signatures.push({ id: uid(), unitId: unitId });
+          const rec = { id: uid(), unitId: unitId };
+          data.signatures.push(rec);
+          syncDocToFirestore('signatures', rec.id, rec);
         }
       }
 
       saveData(); closeModal(); render();
+
+      if (pendingFiles.length === 0) return;
+
+      let uploadedCount = 0;
+      let failedCount = 0;
+      const updateSyncDot = () => { if (dot) { dot.className = 'syncing'; dot.querySelector('.text').innerText = `Đang tải file... (${uploadedCount}/${pendingFiles.length})` + (failedCount > 0 ? ` Lỗi: ${failedCount}` : ''); } };
+      updateSyncDot();
+
+      const uploadPromises = pendingFiles.map(async (f) => {
+        try {
+          const compressed = await compressImage(f.fileObj);
+          await dbPut('store_files', f.fileId, compressed);
+
+          if (typeof fbStorage !== 'undefined' && fbStorage) {
+            const res = await uploadFileToStorage(compressed, f.fileId);
+            if (res) {
+              const sigIdx = data.signatures.findIndex(x => x.id === f.recId);
+              if (sigIdx >= 0) {
+                data.signatures[sigIdx].fileUrl = res.fileUrl;
+                data.signatures[sigIdx].storagePath = res.storagePath;
+                data.signatures[sigIdx].contentType = res.contentType;
+                data.signatures[sigIdx].size = res.size;
+                data.signatures[sigIdx].uploadedAt = res.uploadedAt;
+                saveData();
+                syncDocToFirestore('signatures', f.recId, data.signatures[sigIdx]);
+              }
+              uploadedCount++;
+            } else {
+              failedCount++;
+              console.error("Upload returned null for", f.fileName);
+            }
+          } else { uploadedCount++; }
+          updateSyncDot();
+        } catch (e) {
+          failedCount++;
+          console.error("Upload error for file", f.fileObj.name, e);
+          updateSyncDot();
+        }
+      });
+
+      Promise.all(uploadPromises).then(() => {
+        if (dot) {
+          if (failedCount > 0) {
+             dot.className = 'sync-error';
+             dot.querySelector('.text').innerText = `Tải xong ${uploadedCount}, lỗi ${failedCount} file`;
+          } else {
+             dot.className = 'synced';
+             dot.querySelector('.text').innerText = 'Đã tải xong file đính kèm';
+             setTimeout(() => { if (dot.className === 'synced' || dot.className === 'sync-error') dot.className = ''; }, 3000);
+          }
+        }
+      });
     }
 
     /* ================= KHỞI ĐỘNG ================= */
