@@ -2853,13 +2853,19 @@
 
       const isPdf = fileName.toLowerCase().endsWith('.pdf');
       let contentHtml = '';
+      
+      const isMobileBrowser = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (navigator.maxTouchPoints && navigator.maxTouchPoints > 2 && /MacIntel/.test(navigator.platform));
+      const cannotRenderPdf = typeof navigator.pdfViewerEnabled !== 'undefined' ? !navigator.pdfViewerEnabled : isMobileBrowser;
+      const showPdfFallback = isMobileBrowser || cannotRenderPdf;
+
       if (isPdf) {
+        const fallbackDisplay = showPdfFallback ? 'block' : 'none';
         contentHtml = `
-            <div class="mobile-pdf-fallback" style="background:#fff3cd; color:#856404; padding:10px 15px; text-align:center; font-size:13px; border-bottom:1px solid #ffeeba; display:none; flex-shrink:0;">
-                <span style="display:block; margin-bottom:5px;">Trình duyệt trên điện thoại có thể chỉ xem được trang 1.</span>
+            <div class="mobile-pdf-fallback" id="pdf-fallback-banner" style="background:#fff3cd; color:#856404; padding:10px 15px; text-align:center; font-size:13px; border-bottom:1px solid #ffeeba; display:${fallbackDisplay}; flex-shrink:0;">
+                <span style="display:block; margin-bottom:5px;">Trình duyệt này có thể không hỗ trợ xem trực tiếp toàn bộ PDF.</span>
                 <button onclick="window.open('${url}', '_blank')" style="background:var(--green); color:#fff; border:none; padding:6px 12px; border-radius:6px; font-weight:600; font-size:12px; cursor:pointer;">Mở tab mới để xem toàn bộ</button>
             </div>
-            <iframe src="${url}#toolbar=0" style="width:100%; height:100%; border:none; flex:1;"></iframe>
+            <iframe src="${url}#toolbar=0" style="width:100%; height:100%; border:none; flex:1;" onload="try{ if(this.contentDocument && this.contentDocument.body.innerHTML === '') document.getElementById('pdf-fallback-banner').style.display='block'; }catch(e){}" onerror="document.getElementById('pdf-fallback-banner').style.display='block'"></iframe>
          `;
       } else {
         contentHtml = `
@@ -2906,7 +2912,6 @@
            }
         }
         @media (max-width: 768px) {
-           .mobile-pdf-fallback { display: block !important; }
            #pdf-modal-overlay { padding: 0 !important; }
         }
       </style>`;
@@ -5040,9 +5045,19 @@
     function setupRealtimeListener() {
       if (!fbFirestore) return;
       
+      // Khởi tạo biến đếm số lượt read trong phiên làm việc hiện tại
+      window.sessionFirestoreReads = window.sessionFirestoreReads || 0;
+
       // Main doc listener (users, auditLogs)
       fbFirestore.collection("app_data").doc("main").onSnapshot((doc) => {
         if (doc.metadata.hasPendingWrites) return; // Bỏ qua sự kiện từ chính mình
+        
+        // Đếm read thực tế từ server
+        if (!doc.metadata.fromCache) {
+           window.sessionFirestoreReads++;
+           console.log(`[Firestore Read] 'main' doc. Tổng reads hiện tại: ${window.sessionFirestoreReads}`);
+        }
+
         if (doc.exists) {
           const newData = doc.data();
           if (!newData.users) newData.users = [];
@@ -5074,9 +5089,18 @@
          fbFirestore.collection("app_data").doc("main").collection(col).onSnapshot(snapshot => {
             if (snapshot.metadata.hasPendingWrites) return; // Bỏ qua event từ chính client
             
+            // Đếm số tài liệu được tải mới từ server (không tính dữ liệu lấy từ cache cục bộ)
+            let serverReads = 0;
             let changed = false;
+            
             snapshot.docChanges().forEach(change => {
                if (change.doc.metadata.hasPendingWrites) return;
+               
+               if (!snapshot.metadata.fromCache) {
+                 // Nếu snapshot không từ cache, hoặc docChange cụ thể không phải từ pending, ta tính là 1 read từ server
+                 serverReads++;
+               }
+
                const docData = change.doc.data();
                changed = true;
                
@@ -5089,6 +5113,12 @@
                   data[col] = data[col].filter(x => x.id !== docData.id);
                }
             });
+            
+            if (serverReads > 0) {
+               window.sessionFirestoreReads += serverReads;
+               console.log(`[Firestore Read] collection '${col}' tải ${serverReads} docs từ server. Tổng reads: ${window.sessionFirestoreReads}`);
+            }
+
             if (changed) handleRemoteChange();
          });
       });
@@ -5132,7 +5162,7 @@
       }
     }
 
-    window.initFirebase = function () {
+    window.initFirebase = async function () {
       const fbConfigStr = localStorage.getItem("firebase_config");
       if (fbConfigStr) {
         try {
@@ -5145,6 +5175,18 @@
           fbDb = firebase.database();
           fbStorage = firebase.storage();
           fbFirestore = firebase.firestore();
+          
+          try {
+            await fbFirestore.enablePersistence({ synchronizeTabs: true });
+            console.log("Firebase Offline Persistence đã được bật.");
+          } catch (err) {
+            if (err.code == 'failed-precondition') {
+                console.warn('Cảnh báo: Có nhiều tab đang mở, persistence chỉ hoạt động ở tab đầu tiên.');
+            } else if (err.code == 'unimplemented') {
+                console.warn('Cảnh báo: Trình duyệt không hỗ trợ Firebase offline persistence.');
+            }
+          }
+
           console.log("Firebase initialized");
           setupRealtimeListener();
         } catch (e) {
@@ -6297,7 +6339,7 @@
     };
 
     (async () => {
-      initFirebase();
+      await initFirebase();
       await loadData();
       if (!sessionStorage.getItem('currentUser')) {
         renderLogin();
