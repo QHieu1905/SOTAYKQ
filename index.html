@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi">
 
 <head>
@@ -3135,6 +3135,7 @@
 
 
       render();
+      if (typeof window.loadTabData === 'function') window.loadTabData(id);
     }
     window.goToLogAndOpenForm = function (unitId) {
       switchTab('nhatky');
@@ -3592,7 +3593,12 @@
         <style>
           details > summary::-webkit-details-marker { display: none; }
           details[open] summary .summary-arrow-gray { transform: rotate(180deg); }
-        </style>
+          .spin { animation: spin 1s linear infinite; }
+      @keyframes spin { 100% { transform: rotate(360deg); } }
+      .btn-refresh { float: right; display: flex; align-items: center; gap: 4px; margin-bottom: 12px; font-weight: 600; padding: 4px 10px; border-radius: 8px; background: transparent; border: 1px solid transparent; color: #4b5563; cursor: pointer; }
+      .btn-refresh:hover { background: #f3f4f6; }
+      .load-more-container { text-align: center; padding: 20px; clear: both; }
+    </style>
       </div>
       `;
 
@@ -4354,6 +4360,7 @@
       const invalidFiles = [];
 
       const htmlDocs = `
+        <div style="display:flex;justify-content:flex-end;margin-bottom:12px;"><button class="btn-refresh" onclick="refreshStaticData('docs')"><svg id="btn-refresh-icon-docs" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>LÃ m má»›i</button></div>
         <details style="margin-bottom:24px; background:linear-gradient(to right bottom, #eff6ff, #ffffff); border:1px solid #bfdbfe; border-radius:12px; padding:16px; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.05); transition: all 0.3s ease;">
           <summary style="font-weight:700; color:#1d4ed8; font-size:16px; display:flex; align-items:center; cursor:pointer; list-style:none; outline:none; gap: 8px; margin: 0;">
              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:#2563eb"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
@@ -5084,45 +5091,234 @@
         }
       });
 
-      // Sub-collections listener
-      SYNC_COLLECTIONS.forEach(col => {
-         fbFirestore.collection("app_data").doc("main").collection(col).onSnapshot(snapshot => {
-            if (snapshot.metadata.hasPendingWrites) return; // Bỏ qua event từ chính client
-            
-            // Đếm số tài liệu được tải mới từ server (không tính dữ liệu lấy từ cache cục bộ)
-            let serverReads = 0;
-            let changed = false;
-            
-            snapshot.docChanges().forEach(change => {
-               if (change.doc.metadata.hasPendingWrites) return;
-               
-               if (!snapshot.metadata.fromCache) {
-                 // Nếu snapshot không từ cache, hoặc docChange cụ thể không phải từ pending, ta tính là 1 read từ server
-                 serverReads++;
-               }
+      // Sub-collections listeners are removed from here. They are loaded lazily.
+    }
 
-               const docData = change.doc.data();
-               changed = true;
-               
-               if (change.type === 'added' || change.type === 'modified') {
-                  const idx = data[col].findIndex(x => x.id === docData.id);
-                  if (idx >= 0) data[col][idx] = docData;
-                  else data[col].push(docData);
-               }
-               if (change.type === 'removed') {
-                  data[col] = data[col].filter(x => x.id !== docData.id);
-               }
-            });
-            
-            if (serverReads > 0) {
-               window.sessionFirestoreReads += serverReads;
-               console.log(`[Firestore Read] collection '${col}' tải ${serverReads} docs từ server. Tổng reads: ${window.sessionFirestoreReads}`);
-            }
+    // Náº¡p dá»¯ liá»‡u theo tab (Lazy load & Fetch Once)
+    window.activeListeners = window.activeListeners || {};
+    window.collectionFetchState = window.collectionFetchState || {};
+    window.collectionLimit = window.collectionLimit || { logs: 200, inspections: 200, recoveries: 200 };
 
-            if (changed) handleRemoteChange();
-         });
+    window.loadTabData = function(tabId) {
+      if (!window.fbFirestore) return;
+      
+      const tabToCol = {
+        'donvi': ['units', 'seals', 'signatures'], 
+        'kehoach': ['plans'], 
+        'nhatky': ['logs'],
+        'sanluong': ['inspections', 'recoveries'], 
+        'thuvien': ['docs']
+      };
+      
+      const cols = tabToCol[tabId] || [];
+      const realtimeCols = ['logs', 'inspections', 'recoveries'];
+      const onceCols = ['units', 'plans', 'docs', 'seals', 'signatures'];
+      
+      // Dá»n dáº¹p listener cá»§a cÃ¡c collection realtime khÃ´ng thuá»™c tab nÃ y
+      Object.keys(window.activeListeners).forEach(key => {
+         if (!cols.includes(key) && window.activeListeners[key]) {
+             window.activeListeners[key](); // unsubscribe
+             delete window.activeListeners[key];
+         }
+      });
+      
+      cols.forEach(col => {
+          const colRef = fbFirestore.collection("app_data").doc("main").collection(col);
+          
+          if (realtimeCols.includes(col)) {
+             if (!window.activeListeners[col]) {
+                const orderByField = (col === 'recoveries') ? 'month' : 'date';
+                let limitVal = window.collectionLimit[col] || 200;
+                let query = colRef.orderBy(orderByField, 'desc').limit(limitVal);
+                
+                window.activeListeners[col] = query.onSnapshot(snapshot => {
+                   if (snapshot.metadata.hasPendingWrites) return; 
+                   let serverReads = 0;
+                   let changed = false;
+                   
+                   snapshot.docChanges().forEach(change => {
+                     if (change.doc.metadata.hasPendingWrites) return;
+                     if (!snapshot.metadata.fromCache) serverReads++;
+                     const docData = change.doc.data();
+                     changed = true;
+                     if (change.type === 'added' || change.type === 'modified') {
+                        const idx = data[col].findIndex(x => x.id === docData.id);
+                        if (idx >= 0) data[col][idx] = docData;
+                        else data[col].push(docData);
+                     }
+                     if (change.type === 'removed') {
+                        data[col] = data[col].filter(x => x.id !== docData.id);
+                     }
+                   });
+                   
+                   if (serverReads > 0) {
+                      window.sessionFirestoreReads += serverReads;
+                      console.log(`[Firestore Read] collection '${col}' táº£i ${serverReads} docs. Tá»•ng: ${window.sessionFirestoreReads}`);
+                   }
+                   
+                   if (col === 'recoveries') {
+                      data[col].sort((a,b) => (b.month || '').localeCompare(a.month || ''));
+                   } else {
+                      data[col].sort((a,b) => (b.date || '').localeCompare(a.date || ''));
+                   }
+                   
+                   if (changed) handleRemoteChange();
+                });
+             }
+          }
+          
+          if (onceCols.includes(col)) {
+             if (!window.collectionFetchState[col]) {
+                 window.collectionFetchState[col] = 'loading';
+                 colRef.get().then(snap => {
+                     let serverReads = 0;
+                     data[col] = [];
+                     snap.forEach(doc => {
+                         if (!snap.metadata.fromCache) serverReads++;
+                         data[col].push(doc.data());
+                     });
+                     if (serverReads > 0) window.sessionFirestoreReads += serverReads;
+                     window.collectionFetchState[col] = 'loaded';
+                     handleRemoteChange();
+                 });
+             }
+          }
       });
     }
+
+    window.loadMoreData = function(col) {
+       if (!fbFirestore) return;
+       const btn = document.getElementById('btn-loadmore-' + col);
+       if (btn) { btn.disabled = true; btn.innerHTML = 'Äang táº£i...'; }
+       const btnMob = document.getElementById('btn-loadmore-' + col + '-mob');
+       if (btnMob) { btnMob.disabled = true; btnMob.innerHTML = 'Äang táº£i...'; }
+       
+       window.collectionLimit[col] += 200;
+       
+       if (window.activeListeners[col]) {
+           window.activeListeners[col]();
+           delete window.activeListeners[col];
+       }
+       
+       const cMap = {'logs':'nhatky', 'inspections':'sanluong', 'recoveries':'sanluong'};
+       window.loadTabData(cMap[col] || tab);
+    };
+
+    window.refreshStaticData = function(col) {
+       if (!fbFirestore) return;
+       const btnIcon = document.getElementById('btn-refresh-icon-' + col);
+       if (btnIcon) btnIcon.classList.add('spin');
+       
+       fbFirestore.collection("app_data").doc("main").collection(col).get().then(snap => {
+           let serverReads = 0;
+           data[col] = [];
+           snap.forEach(doc => {
+               if (!snap.metadata.fromCache) serverReads++;
+               data[col].push(doc.data());
+           });
+           if (serverReads > 0) window.sessionFirestoreReads += serverReads;
+           window.collectionFetchState[col] = 'loaded';
+           
+           if (btnIcon) btnIcon.classList.remove('spin');
+           showToast("ÄÃ£ lÃ m má»›i dá»¯ liá»‡u " + col, "green");
+           handleRemoteChange();
+       }).catch(e => {
+           if (btnIcon) btnIcon.classList.remove('spin');
+           alert("Lá»—i táº£i láº¡i: " + e.message);
+       });
+    };
+
+    window.checkConcurrencyAndSave = function(key, rec, saveCallback) {
+      if (typeof editing !== 'undefined' && editing && window.editingOriginalUpdatedAt) {
+         const currentDoc = data[key].find(x => x.id === rec.id);
+         if (currentDoc && currentDoc.updatedAt && currentDoc.updatedAt > window.editingOriginalUpdatedAt) {
+            const body = `
+               <p style="margin-bottom:20px;color:var(--text);line-height:1.5;">Dá»¯ liá»‡u nÃ y vá»«a Ä‘Æ°á»£c ngÆ°á»i khÃ¡c cáº­p nháº­t trÃªn server. Cáº­p nháº­t cá»§a báº¡n cÃ³ thá»ƒ ghi Ä‘Ã¨ dá»¯ liá»‡u má»›i. Báº¡n muá»‘n táº£i láº¡i dá»¯ liá»‡u má»›i nháº¥t hay váº«n ghi Ä‘Ã¨?</p>
+               <div style="display:flex;gap:10px;justify-content:flex-end;">
+                  <button type="button" class="btn" onclick="document.getElementById('conflict-modal').style.display='none'; window.reloadFormForConflict('${key}', '${rec.id}')">Táº£i láº¡i</button>
+                  <button type="button" class="btn btn-ghost" onclick="document.getElementById('conflict-modal').style.display='none'; window.forceSaveConflict()">Váº«n ghi Ä‘Ã¨</button>
+               </div>
+            `;
+            let modal = document.getElementById('conflict-modal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'conflict-modal';
+                modal.className = 'modal';
+                modal.style.zIndex = '9999';
+                modal.innerHTML = `<div class="modal-content"><div class="modal-head"><h3 style="color:var(--red);margin:0">Cáº£nh bÃ¡o xung Ä‘á»™t</h3></div><div class="modal-body" id="conflict-modal-body" style="padding:20px;"></div></div>`;
+                document.body.appendChild(modal);
+            }
+            document.getElementById('conflict-modal-body').innerHTML = body;
+            
+            let overlay = document.getElementById('conflict-overlay');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.id = 'conflict-overlay';
+                overlay.style = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9998;';
+                document.body.appendChild(overlay);
+            }
+            
+            modal.style.display = 'block';
+            modal.classList.add('open');
+            
+            window.forceSaveConflict = function() {
+                const ol = document.getElementById('conflict-overlay');
+                if (ol) ol.style.display = 'none';
+                rec.updatedAt = Date.now();
+                saveCallback();
+            };
+            window.reloadFormForConflict = function(k, id) {
+                const ol = document.getElementById('conflict-overlay');
+                if (ol) ol.style.display = 'none';
+                closeModal();
+                const map = {'units':'unit', 'plans':'plan', 'logs':'log', 'inspections':'inspection', 'recoveries':'recovery', 'docs':'doc', 'seals':'seal', 'signatures':'signature'};
+                setTimeout(() => openForm(map[k] || 'log', id), 200);
+            };
+            
+            return false;
+         }
+      }
+      rec.updatedAt = Date.now();
+      return true;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     async function migrateToSubcollections(legacyData) {
       if (!fbFirestore) return;
@@ -5547,6 +5743,15 @@
 
     function openForm(type, id, extra) {
       editing = id || null;
+      window.editingOriginalUpdatedAt = null;
+      if (editing) {
+          const map = {'unit':'units', 'plan':'plans', 'log':'logs', 'inspection':'inspections', 'recovery':'recoveries', 'doc':'docs', 'seal':'seals', 'signature':'signatures'};
+          const k = map[type];
+          if (k && data[k]) {
+             const r = data[k].find(x => x.id === editing);
+             if (r) window.editingOriginalUpdatedAt = r.updatedAt;
+          }
+      }
       if (type === 'unit') {
         const r = id ? data.units.find(x => x.id === id) : { name: '', code: '' };
         openModal(id ? 'Sửa đơn vị' : 'Thêm đơn vị TCTD', `<div class="fgrid">
@@ -5776,6 +5981,13 @@
     }
 
     function upsert(key, rec) {
+      if (!window._isForceSaving && typeof window.checkConcurrencyAndSave === 'function') {
+         if (!window.checkConcurrencyAndSave(key, rec, () => {
+             window._isForceSaving = true;
+             upsert(key, rec);
+             window._isForceSaving = false;
+         })) return;
+      }
       const i = data[key].findIndex(x => x.id === rec.id);
 
       let uName = '';
