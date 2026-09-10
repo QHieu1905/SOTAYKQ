@@ -5263,6 +5263,22 @@
         }
     }
 
+    // FIX: Chuẩn hoá mọi kiểu giá trị lastUpdated (Firestore Timestamp object,
+    // {seconds,nanoseconds}, số ms, hoặc chuỗi hỏng trong localStorage) về một
+    // con số mili-giây duy nhất để so sánh chính xác. Trước đây code so sánh
+    // trực tiếp Number(chuỗi) < TimestampObject, luôn cho kết quả NaN < object
+    // => luôn là false => cache "once-collections" (units, plans, docs, seals,
+    // signatures) không bao giờ được phát hiện là cũ, khiến các thiết bị bị
+    // kẹt ở dữ liệu cache cũ dù server đã có bản ghi mới hơn.
+    function tsToMillis(v) {
+      if (v === null || v === undefined) return 0;
+      if (typeof v === 'number') return v;
+      if (typeof v.toMillis === 'function') return v.toMillis();
+      if (typeof v.seconds === 'number') return v.seconds * 1000 + Math.floor((v.nanoseconds || 0) / 1e6);
+      const n = Number(v);
+      return isNaN(n) ? 0 : n;
+    }
+
     function setupRealtimeListener() {
       if (!fbFirestore) return;
       
@@ -5310,7 +5326,9 @@
           onceCols.forEach(col => {
              if (data.lastUpdated[col]) {
                 const local = localStorage.getItem('lastUpdated_' + col);
-                if (!local || Number(local) < data.lastUpdated[col]) {
+                const localMs = local ? Number(local) : NaN;
+                const serverMs = tsToMillis(data.lastUpdated[col]);
+                if (!local || isNaN(localMs) || localMs < serverMs) {
                    if (window.collectionFetchState[col] === 'loaded') {
                       window.collectionFetchState[col] = 'stale';
                       needsReload = true;
@@ -5421,11 +5439,13 @@
           }
           
           if (onceCols.includes(col)) {
-             const serverLastUpdated = (data.lastUpdated && data.lastUpdated[col]) ? data.lastUpdated[col] : null;
-             const localLastUpdated = localStorage.getItem('lastUpdated_' + col);
+             const serverLastUpdatedRaw = (data.lastUpdated && data.lastUpdated[col]) ? data.lastUpdated[col] : null;
+             const serverLastUpdated = serverLastUpdatedRaw ? tsToMillis(serverLastUpdatedRaw) : null;
+             const localLastUpdatedRaw = localStorage.getItem('lastUpdated_' + col);
+             const localLastUpdated = localLastUpdatedRaw ? Number(localLastUpdatedRaw) : null;
              
              let fetchSource = 'default';
-             if (!forceRefresh && serverLastUpdated && localLastUpdated && Number(localLastUpdated) >= Number(serverLastUpdated)) {
+             if (!forceRefresh && serverLastUpdated && localLastUpdated && !isNaN(localLastUpdated) && localLastUpdated >= serverLastUpdated) {
                 fetchSource = 'cache';
              }
              
@@ -5452,9 +5472,9 @@
                      }
                      
                      if (serverLastUpdated) {
-                         localStorage.setItem('lastUpdated_' + col, serverLastUpdated);
+                         localStorage.setItem('lastUpdated_' + col, String(serverLastUpdated));
                      } else {
-                         localStorage.setItem('lastUpdated_' + col, Date.now());
+                         localStorage.setItem('lastUpdated_' + col, String(Date.now()));
                      }
                      
                      window.collectionFetchState[col] = 'loaded';
@@ -5637,6 +5657,23 @@
         console.error("Lỗi migrate", e);
       }
     }
+
+    // FIX: Tự dọn các key lastUpdated_* bị hỏng do bug cũ (lưu nhầm Firestore
+    // Timestamp object thay vì số ms) — nếu không dọn, thiết bị đã từng bị lỗi
+    // sẽ vẫn kẹt ở cache cũ mãi mãi dù đã sửa code, vì Number("[object Object]")
+    // vẫn luôn là NaN. Chạy 1 lần khi khởi tạo Firebase.
+    (function cleanupCorruptedLastUpdatedCache() {
+      try {
+        Object.keys(localStorage).forEach(k => {
+          if (k.indexOf('lastUpdated_') === 0) {
+            const v = localStorage.getItem(k);
+            if (v === null || v === '' || isNaN(Number(v))) {
+              localStorage.removeItem(k);
+            }
+          }
+        });
+      } catch (e) { /* localStorage có thể không khả dụng, bỏ qua */ }
+    })();
 
     window.initFirebase = async function () {
       const fbConfigStr = localStorage.getItem("firebase_config");
