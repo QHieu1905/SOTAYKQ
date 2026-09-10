@@ -4736,6 +4736,30 @@
 
     /* ================= 8. SAO LƯU VÀ KHÔI PHỤC ================= */
 
+    function showProgressOverlay(show, percent = 0, msg = 'Đang xử lý...') {
+      let overlay = document.getElementById('progress-overlay');
+      if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'progress-overlay';
+        overlay.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:99999; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#fff; font-family:sans-serif; backdrop-filter:blur(4px);';
+        overlay.innerHTML = `
+          <div style="background:#fff; padding:24px 32px; border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,0.2); width:300px; max-width:80%; text-align:center;">
+            <div id="progress-msg" style="color:#333; font-weight:600; font-size:15px; margin-bottom:16px;">Đang xử lý...</div>
+            <div style="width:100%; height:8px; background:#e2e8f0; border-radius:4px; overflow:hidden;">
+              <div id="progress-bar" style="width:0%; height:100%; background:#2563eb; transition:width 0.2s ease;"></div>
+            </div>
+            <div id="progress-pct" style="color:#64748b; font-size:13px; font-weight:700; margin-top:12px;">0%</div>
+          </div>
+        `;
+        document.body.appendChild(overlay);
+      }
+      if (!show) { overlay.style.display = 'none'; return; }
+      overlay.style.display = 'flex';
+      document.getElementById('progress-msg').innerText = msg;
+      document.getElementById('progress-bar').style.width = percent + '%';
+      document.getElementById('progress-pct').innerText = percent + '%';
+    }
+
     async function generateFullBackupBlob() {
       // Create a Blob directly instead of a massive string to prevent Out of Memory
       const parts = [];
@@ -4752,8 +4776,16 @@
       }
 
       let first = true;
+      let count = 0;
+      let total = 0;
+      for (const f of files) if (activeFileIds.has(f.id)) total++;
+
       for (const f of files) {
         if (!activeFileIds.has(f.id)) continue;
+        count++;
+        if (typeof showProgressOverlay === 'function') {
+           showProgressOverlay(true, total > 0 ? Math.round((count/total)*100) : 100, `Đang nén file ${count}/${total}...`);
+        }
         const b64 = await new Promise((res) => {
           const r = new FileReader();
           r.readAsDataURL(f.file);
@@ -4769,17 +4801,29 @@
     }
 
     async function restoreFromJsonObj(obj) {
+      console.log('[cloudRestore] Cấu trúc file backup nhận được:', {
+        hasData: !!obj.data,
+        keys: obj && typeof obj === 'object' ? Object.keys(obj) : typeof obj,
+        fileCount: Array.isArray(obj.files) ? obj.files.length : 0
+      });
       if (!obj.data) throw new Error("File không hợp lệ");
       data = obj.data;
       saveData();
       if (obj.files && obj.files.length > 0) {
+        let count = 0;
+        let total = obj.files.length;
         for (const f of obj.files) {
+          count++;
+          if (typeof showProgressOverlay === 'function') {
+             showProgressOverlay(true, Math.round((count/total)*100), `Đang khôi phục file ${count}/${total}...`);
+          }
           const res = await fetch(f.data);
           const blob = await res.blob();
           const fileObj = new File([blob], f.name, { type: f.type });
           await dbPut('store_files', f.id, fileObj);
         }
       }
+      if (typeof showProgressOverlay === 'function') showProgressOverlay(false);
       alert('Khôi phục thành công!');
       location.reload();
     }
@@ -4787,12 +4831,24 @@
     async function cloudBackup() {
       if (!fbStorage) { alert('Chưa cấu hình Firebase Storage.'); return; }
       if (!confirm('Xác nhận: Tạo bản sao lưu toàn bộ dữ liệu hiện tại lên Cloud? Thao tác này sẽ ghi đè bản sao lưu cũ trên Cloud.')) return;
-      showToast('Đang tạo bản sao lưu, vui lòng chờ...', 'green');
       try {
+        if (typeof showProgressOverlay === 'function') showProgressOverlay(true, 0, 'Đang thu thập dữ liệu sao lưu...');
         const blob = await generateFullBackupBlob();
-        await fbStorage.ref('backups/he_thong_backup.json').put(blob);
+        
+        const task = fbStorage.ref('backups/he_thong_backup.json').put(blob, {
+          cacheControl: 'no-cache, max-age=0, must-revalidate',
+          contentType: 'application/json'
+        });
+        task.on('state_changed', (snapshot) => {
+           const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+           if (typeof showProgressOverlay === 'function') showProgressOverlay(true, Math.round(progress), 'Đang đẩy lên Cloud...');
+        });
+        await task;
+        
+        if (typeof showProgressOverlay === 'function') showProgressOverlay(false);
         showToast('Sao lưu lên Cloud thành công!', 'green');
       } catch (err) {
+        if (typeof showProgressOverlay === 'function') showProgressOverlay(false);
         console.error("Lỗi sao lưu lên Cloud", err);
         alert('Lỗi sao lưu lên Cloud: ' + err.message);
       }
@@ -4851,11 +4907,14 @@
           return;
         }
 
-        showToast('Đang tải bản sao lưu...', 'green');
+        if (typeof showProgressOverlay === 'function') showProgressOverlay(true, 0, 'Đang tải bản sao lưu từ Cloud...');
         const url = await ref.getDownloadURL();
-        const res = await fetch(url);
+        const bustUrl = url + (url.includes('?') ? '&' : '?') + '_cb=' + Date.now();
+        const res = await fetch(bustUrl, { cache: 'no-store' });
         if (!res.ok) throw new Error('Không thể tải file sao lưu');
+        if (typeof showProgressOverlay === 'function') showProgressOverlay(true, 50, 'Đang đọc nội dung bản sao lưu...');
         const text = await res.text();
+        console.log('[cloudRestore] Kích thước text tải về:', text.length, 'ký tự. 200 ký tự đầu:', text.slice(0, 200));
         const parsed = JSON.parse(text);
         
         // Cập nhật bộ đếm băng thông TRƯỚC khi gọi restoreFromJsonObj, vì hàm đó sẽ
@@ -4877,6 +4936,7 @@
 
         await restoreFromJsonObj(parsed); // hàm này tự validate, tự khôi phục file, tự alert + reload
       } catch (err) {
+        if (typeof showProgressOverlay === 'function') showProgressOverlay(false);
         console.error("Lỗi cập nhật từ Cloud", err);
         if (err instanceof TypeError && err.message.includes('Failed to fetch')) {
           alert("Không thể tải dữ liệu từ Cloud do lỗi kết nối hoặc cấu hình CORS. Vui lòng kiểm tra lại kết nối mạng, hoặc liên hệ quản trị viên để kiểm tra cấu hình CORS của Firebase Storage.");
@@ -4888,7 +4948,9 @@
 
     async function exportJson(isSilent = false) {
       try {
+        if (typeof showProgressOverlay === 'function') showProgressOverlay(true, 0, 'Đang chuẩn bị dữ liệu sao lưu...');
         const blob = await generateFullBackupBlob();
+        if (typeof showProgressOverlay === 'function') showProgressOverlay(false);
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
@@ -4897,6 +4959,7 @@
         a.click();
         URL.revokeObjectURL(url);
       } catch (e) {
+        if (typeof showProgressOverlay === 'function') showProgressOverlay(false);
         alert('Lỗi: ' + e.message);
       }
     }
@@ -4908,12 +4971,15 @@
       input.onchange = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
+        if (typeof showProgressOverlay === 'function') showProgressOverlay(true, 0, 'Đang đọc file cục bộ...');
         const reader = new FileReader();
         reader.onload = async (ev) => {
           try {
             const obj = JSON.parse(ev.target.result);
             await restoreFromJsonObj(obj);
+            if (typeof showProgressOverlay === 'function') showProgressOverlay(false);
           } catch (err) {
+            if (typeof showProgressOverlay === 'function') showProgressOverlay(false);
             alert('Lỗi khôi phục: ' + err.message);
           }
         };
