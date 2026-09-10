@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi">
 
 <head>
@@ -1880,10 +1880,7 @@
             oninput="onSearchInput(this.value)" onclick="this.value=''; onSearch('')" autocomplete="off">
           <div id="search-dropdown" class="custom-dropdown" style="display:none;"></div>
         </div>
-        <div class="desktop-sync-time desktop-only" style="display:flex; align-items:center; gap:8px; margin-left:16px;">
-            <div id="last-sync-time" style="font-size: 11px; font-weight: 600; text-align:right;"></div>
-            <button onclick="window.forceRefreshData()" title="Làm mới dữ liệu" style="background:none; border:none; cursor:pointer; color:#64748b; padding:4px; display:flex; align-items:center; justify-content:center; border-radius:50%; transition:background 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16"/></svg></button>
-        </div>
+
       </div>
 
       <div class="page active" id="pg-tongquan">
@@ -4787,6 +4784,116 @@
       location.reload();
     }
 
+    async function cloudBackup() {
+      if (!fbStorage) { alert('Chưa cấu hình Firebase Storage.'); return; }
+      if (!confirm('Xác nhận: Tạo bản sao lưu toàn bộ dữ liệu hiện tại lên Cloud? Thao tác này sẽ ghi đè bản sao lưu cũ trên Cloud.')) return;
+      showToast('Đang tạo bản sao lưu, vui lòng chờ...', 'green');
+      try {
+        const blob = await generateFullBackupBlob();
+        await fbStorage.ref('backups/he_thong_backup.json').put(blob);
+        showToast('Sao lưu lên Cloud thành công!', 'green');
+      } catch (err) {
+        console.error("Lỗi sao lưu lên Cloud", err);
+        alert('Lỗi sao lưu lên Cloud: ' + err.message);
+      }
+    }
+
+    async function cloudRestore() {
+      if (!fbStorage || !fbFirestore) { alert('Chưa cấu hình Firebase.'); return; }
+      if (!confirm('CẢNH BÁO: Khôi phục dữ liệu từ bản sao lưu Cloud sẽ GHI ĐÈ toàn bộ dữ liệu đang có trên máy này. Bạn có chắc chắn muốn tiếp tục?')) return;
+      showToast('Đang kiểm tra bản sao lưu...', 'green');
+      try {
+        const ref = fbStorage.ref('backups/he_thong_backup.json');
+        let metadata;
+        try {
+          metadata = await ref.getMetadata();
+        } catch (err) {
+          if (err.code === 'storage/object-not-found') {
+            alert("Chưa có bản sao lưu nào trên Cloud. Vui lòng nhờ quản trị viên bấm 'Sao lưu lên Cloud' trước.");
+          } else {
+            alert("Lỗi khi kiểm tra bản sao lưu: " + err.message);
+          }
+          return;
+        }
+
+        const fileSize = metadata.size || 0;
+        const now = new Date();
+        let quotaDate = new Date(now);
+        // Hạn mức Firebase Storage reset vào nửa đêm giờ Thái Bình Dương (tương đương 15:00 giờ Việt Nam).
+        // Nếu hiện tại < 15h, hạn mức vẫn thuộc về ngày hôm qua.
+        if (now.getHours() < 15) {
+            quotaDate.setDate(quotaDate.getDate() - 1);
+        }
+        const todayStr = quotaDate.getFullYear() + '-' + String(quotaDate.getMonth() + 1).padStart(2, '0') + '-' + String(quotaDate.getDate()).padStart(2, '0');
+        
+        let bwDoc;
+        try {
+          bwDoc = await fbFirestore.collection("app_data").doc("bandwidth_tracker").get();
+        } catch(e) {
+          console.warn('Không đọc được bandwidth_tracker, bỏ qua kiểm tra băng thông:', e);
+        }
+
+        let downloadedToday = 0;
+        let requiresUpdate = true;
+        if (bwDoc && bwDoc.exists) {
+          const bwData = bwDoc.data();
+          if (bwData.date === todayStr) {
+            downloadedToday = bwData.bytesDownloaded || 0;
+            requiresUpdate = false;
+          }
+        }
+
+        const limitMB = 850;
+        const limitBytes = limitMB * 1024 * 1024;
+        
+        if (downloadedToday + fileSize > limitBytes) {
+          alert(`Hệ thống đã sử dụng khoảng ${(downloadedToday / (1024 * 1024)).toFixed(1)} MB / 1024 MB băng thông tải xuống miễn phí hôm nay. Để tránh làm gián đoạn quyền truy cập của tất cả người dùng khác, tính năng 'Cập nhật từ Cloud' tạm khoá đến khi hạn mức được làm mới (theo giờ Firebase reset, thường là nửa đêm giờ Thái Bình Dương). Vui lòng thử lại vào ngày mai, hoặc dùng cách 'Nhập .json' thủ công nếu quản trị viên đã gửi sẵn file backup qua kênh khác.`);
+          return;
+        }
+
+        showToast('Đang tải bản sao lưu...', 'green');
+        const url = await ref.getDownloadURL();
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('Không thể tải file sao lưu');
+        const text = await res.text();
+        const parsed = JSON.parse(text);
+        
+        if (!parsed.units || !parsed.logs) {
+            alert('File sao lưu không hợp lệ!');
+            return;
+        }
+        
+        Object.assign(data, parsed);
+        data.lastUpdated = Date.now();
+        saveData();
+        
+        try {
+            if (requiresUpdate) {
+                await fbFirestore.collection("app_data").doc("bandwidth_tracker").set({
+                    date: todayStr,
+                    bytesDownloaded: fileSize
+                });
+            } else {
+                await fbFirestore.collection("app_data").doc("bandwidth_tracker").update({
+                    bytesDownloaded: firebase.firestore.FieldValue.increment(fileSize)
+                });
+            }
+        } catch(e) {
+            console.warn('Lỗi khi cập nhật bandwidth_tracker', e);
+        }
+
+        alert('Cập nhật từ Cloud thành công!');
+        location.reload();
+      } catch (err) {
+        console.error("Lỗi cập nhật từ Cloud", err);
+        if (err instanceof TypeError && err.message.includes('Failed to fetch')) {
+          alert("Không thể tải dữ liệu từ Cloud do lỗi kết nối hoặc cấu hình CORS. Vui lòng kiểm tra lại kết nối mạng, hoặc liên hệ quản trị viên để kiểm tra cấu hình CORS của Firebase Storage.");
+        } else {
+          alert('Lỗi cập nhật từ Cloud: ' + err.message);
+        }
+      }
+    }
+
     async function exportJson(isSilent = false) {
       try {
         const blob = await generateFullBackupBlob();
@@ -5022,7 +5129,7 @@
     }
     function updatePendingSyncBadge() {
       const n = getPendingSyncQueue().length;
-      const lastSyncEl = document.getElementById('last-sync-time');
+      const lastSyncEl = document.getElementById('saoluu-sync-status');
       if (!lastSyncEl) return;
       let badge = document.getElementById('pending-sync-badge');
       if (n > 0) {
@@ -5079,71 +5186,17 @@
         return;
       }
       try {
-        const dot = document.getElementById("sync-dot");
-        if (dot) {
-          dot.className = 'syncing';
-          dot.querySelector('.text').innerText = 'Đang lưu...';
-        }
-
         // Chỉ đồng bộ metadata (users, auditLogs, lastUpdated) lên main doc
         await fbFirestore.collection("app_data").doc("main").set({
            users: data.users || [],
            auditLogs: data.auditLogs || [],
            lastUpdated: data.lastUpdated || {}
         }, { merge: true });
-
-        if (dot) {
-          dot.className = 'synced';
-          dot.querySelector('.text').innerText = 'Đã đồng bộ';
-          setTimeout(() => { if (dot.className === 'synced') dot.className = ''; }, 2000);
-        }
       } catch (err) {
         console.error("Lỗi đồng bộ Firestore", err);
-        const dot = document.getElementById("sync-dot");
-        if (dot) {
-          dot.className = 'sync-error';
-          dot.querySelector('.text').innerText = 'Lỗi đồng bộ';
-          setTimeout(() => { if (dot.className === 'sync-error') dot.className = ''; }, 3000);
-        }
       }
     }
 
-    // Công cụ khôi phục thủ công: dùng khi các thiết bị đã bị lệch dữ liệu (ví dụ sau sự cố đồng
-    // bộ) và người dùng xác nhận dữ liệu trên máy đang mở là bản đúng/mới nhất. Ghi đè toàn bộ
-    // dữ liệu Cloud bằng dữ liệu cục bộ hiện tại. Đây là thao tác CHỦ ĐỘNG của người dùng nên được
-    // phép bỏ qua điều kiện "đã đồng bộ lần đầu" của pushToFirestore().
-    window.forcePushAllLocalToCloud = async function () {
-      if (!fbFirestore) { alert('Chưa cấu hình Firebase.'); return; }
-      if (!confirm('CẢNH BÁO: Thao tác này sẽ GHI ĐÈ toàn bộ dữ liệu trên Cloud (tài khoản, lịch sử, đơn vị, kế hoạch, nhật ký, thu hồi, tài liệu, con dấu, chữ ký) bằng dữ liệu đang có trên máy này. Chỉ tiếp tục nếu bạn CHẮC CHẮN dữ liệu trên máy này là bản đúng/mới nhất. Tiếp tục?')) return;
-      if (!confirm('Xác nhận lần 2: hành động này KHÔNG THỂ hoàn tác. Bạn chắc chắn chứ?')) return;
-
-      window.hasServerSyncedOnce = true; // cho phép ghi vì đây là hành động chủ động, có xác nhận rõ ràng
-      showToast('Đang đẩy toàn bộ dữ liệu lên Cloud, vui lòng chờ...', 'green');
-
-      try {
-        await fbFirestore.collection("app_data").doc("main").set({
-          users: data.users || [],
-          auditLogs: data.auditLogs || [],
-          lastUpdated: data.lastUpdated || {}
-        }, { merge: true });
-
-        const cols = ['units', 'plans', 'logs', 'inspections', 'recoveries', 'docs', 'seals', 'signatures'];
-        let count = 0;
-        for (const col of cols) {
-          const items = data[col] || [];
-          for (const item of items) {
-            if (item && item.id) {
-              await fbFirestore.collection("app_data").doc("main").collection(col).doc(String(item.id)).set(item);
-              count++;
-            }
-          }
-        }
-        showToast(`Đã đẩy xong ${count} bản ghi lên Cloud.`, 'green');
-      } catch (e) {
-        console.error(e);
-        alert('Lỗi khi đẩy dữ liệu lên Cloud: ' + e.message);
-      }
-    };
 
     function showToast(msg, color = "green") {
       let t = document.getElementById("rt-toast");
@@ -5224,19 +5277,13 @@
     });
 
     function updateSyncUI(fromCache) {
-        const lastSyncEl = document.getElementById('last-sync-time');
-        const syncDot = document.getElementById('sync-dot');
+        const lastSyncEl = document.getElementById('saoluu-sync-status');
         const now = new Date();
         const timeStr = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
         
         if (fromCache === 'pending') {
             if (lastSyncEl) {
-                lastSyncEl.innerHTML = `<span style="color: #f59e0b;">Đang đồng bộ lần đầu…</span> <div style="font-size: 9px; margin-top:2px; color:#64748b;">Chờ xác nhận từ máy chủ trước khi lưu</div>`;
-            }
-            if (syncDot) {
-                syncDot.className = 'syncing';
-                const txt = syncDot.querySelector('.text');
-                if (txt) txt.innerText = 'Đang đồng bộ lần đầu…';
+                lastSyncEl.innerHTML = `<span style="color: #f59e0b;">Đang đồng bộ lần đầu…</span> <span style="font-size: 11px; margin-left:6px; color:#64748b;">Chờ xác nhận từ máy chủ</span>`;
             }
             return;
         }
@@ -5244,21 +5291,11 @@
         if (!fromCache) {
             window._lastSyncTimestamp = Date.now();
             if (lastSyncEl) {
-                lastSyncEl.innerHTML = `<span style="color: #10b981;">Đã đồng bộ: ${timeStr}</span> <div style="font-size: 9px; margin-top:2px; color:#64748b;">Nguồn: Server</div>`;
-            }
-            if (syncDot) {
-                syncDot.className = 'synced';
-                const txt = syncDot.querySelector('.text');
-                if (txt) txt.innerText = 'Đã đồng bộ';
+                lastSyncEl.innerHTML = `<span style="color: #10b981;">Đã đồng bộ: ${timeStr}</span> <span style="font-size: 11px; margin-left:6px; color:#64748b;">Nguồn: Server</span>`;
             }
         } else {
             if (lastSyncEl) {
-                lastSyncEl.innerHTML = `<span style="color: #f59e0b;">Đang xem ngoại tuyến</span> <div style="font-size: 9px; margin-top:2px; color:#64748b;">Nguồn: Cache cục bộ</div>`;
-            }
-            if (syncDot) {
-                syncDot.className = 'offline';
-                const txt = syncDot.querySelector('.text');
-                if (txt) txt.innerText = 'Ngoại tuyến';
+                lastSyncEl.innerHTML = `<span style="color: #f59e0b;">Đang xem ngoại tuyến</span> <span style="font-size: 11px; margin-left:6px; color:#64748b;">Nguồn: Cache cục bộ</span>`;
             }
         }
     }
@@ -5313,6 +5350,23 @@
           
           data.users = newData.users;
           data.auditLogs = newData.auditLogs;
+          
+          // Kiểm tra và vô hiệu hoá phiên đăng nhập nếu tài khoản bị xoá
+          const cuStr = sessionStorage.getItem('currentUser');
+          if (cuStr) {
+            try {
+              const cu = JSON.parse(cuStr);
+              if (cu && cu.username !== 'admin') {
+                const stillExists = data.users && data.users.some(u => u.username === cu.username);
+                if (!stillExists) {
+                  sessionStorage.removeItem('currentUser');
+                  alert("Tài khoản của bạn đã bị quản trị viên xoá. Bạn sẽ bị đăng xuất.");
+                  location.reload();
+                  return;
+                }
+              }
+            } catch(e){}
+          }
           
           if (!doc.metadata.fromCache) {
              data.lastUpdated = newData.lastUpdated || {};
@@ -5806,14 +5860,20 @@
         </div>
         <div class="span" style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;align-items:center;">
           <button class="btn primary" onclick="saveFirebaseSettings()">Lưu cấu hình</button>
-          <span style="display:flex;align-items:center;padding:0 10px;font-size:13px;color:var(--green);font-weight:600;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Đang tự động đồng bộ thời gian thực (Real-time)</span>
+          <div id="saoluu-sync-status" style="font-size:13px; font-weight:600; padding:0 10px;"></div>
         </div>
       </div>
 
-      <div class="card" style="margin-bottom:24px; border:1px solid #fecaca; background:#fff7f7;">
-        <div style="font-weight:700; color:#ef4444; margin-bottom:6px;">⚠️ Khôi phục thủ công: Buộc đẩy dữ liệu máy này lên Cloud</div>
-        <div style="font-size:13px; color:var(--gray); margin-bottom:12px;">Chỉ dùng khi các thiết bị đang bị lệch dữ liệu và bạn CHẮC CHẮN dữ liệu đang xem trên máy này (${(data.units||[]).length} đơn vị, ${(data.logs||[]).length} nhật ký...) là bản đúng/mới nhất. Thao tác này sẽ ghi đè toàn bộ dữ liệu trên Cloud bằng dữ liệu của máy này và không thể hoàn tác.</div>
-        <button class="btn" style="background:#fee2e2;color:#ef4444;font-weight:600;" onclick="window.forcePushAllLocalToCloud()">🚨 Buộc đẩy dữ liệu máy này lên Cloud</button>
+      ${secHead('Đồng bộ Cloud thủ công', 'Sao lưu & Khôi phục dữ liệu trực tiếp qua Firebase Storage.')}
+      <div class="grid grid-4" style="margin-bottom: 24px;">
+        <div class="card stat" style="cursor:pointer;border:1px solid var(--line);background:#f0f9ff;" onclick="cloudBackup()">
+          <div class="stat-ic ic-blue"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/><path d="M12 16v-8"/><path d="m8 12 4-4 4 4"/></svg></div>
+          <div><div class="num" style="font-size:15px;color:#0284c7;">☁️ Sao lưu lên Cloud</div><div class="lbl">Tạo bản sao lưu trên Cloud</div></div>
+        </div>
+        <div class="card stat" style="cursor:pointer;border:1px solid var(--line);background:#fffbeb;" onclick="cloudRestore()">
+          <div class="stat-ic ic-amber"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/><path d="M12 8v8"/><path d="m8 12 4 4 4-4"/></svg></div>
+          <div><div class="num" style="font-size:15px;color:#d97706;">⬇️ Cập nhật từ Cloud</div><div class="lbl">Khôi phục bản sao lưu từ Cloud</div></div>
+        </div>
       </div>
 
       ${secHead('Sao lưu File tĩnh (Dành cho iPhone/iPad)', 'Lưu vào iCloud hoặc Tệp (Files).')}
@@ -6842,24 +6902,59 @@
     window.doRegister = async function () {
       const u = document.getElementById('reg-username').value.trim();
       const p = document.getElementById('reg-password').value;
-      if (!u || !p) { alert('Vui l\u00F2ng nh\u1EADp \u0111\u1EE7 th\u00F4ng tin!'); return; }
-      if (u === 'admin') { alert('Kh\u00F4ng th\u1EC3 d\u00F9ng t\u00EAn \u0111\u0103ng nh\u1EADp n\u00E0y!'); return; }
+      if (!u || !p) { alert('Vui lòng nhập đủ thông tin!'); return; }
+      if (u === 'admin') { alert('Không thể dùng tên đăng nhập này!'); return; }
+
+      if (fbFirestore && navigator.onLine) {
+        try {
+          const docSnap = await fbFirestore.collection("app_data").doc("main").get({source: 'server'});
+          if (docSnap.exists) {
+            const serverData = docSnap.data();
+            if (serverData.users) data.users = serverData.users;
+          }
+        } catch (e) {
+          console.warn('Lỗi lấy dữ liệu từ server, dùng cache.', e);
+        }
+      }
 
       if (!data.users) data.users = [];
       if (data.users.find(x => x.username === u)) {
-        alert('T\u00E0i kho\u1EA3n \u0111\u00E3 t\u1ED3n t\u1EA1i!'); return;
+        alert('Tài khoản đã tồn tại!'); return;
       }
 
-      data.users.push({ username: u, password: p, role: 'viewer' });
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch (e) { }
-      try { await dbPut('store_data', 'default', data); } catch (e) { }
+      const btn = document.querySelector('button[onclick="doRegister()"]');
+      const oldText = btn.innerText;
+      btn.innerText = 'Đang xử lý...';
+      btn.disabled = true;
 
-      if (typeof pushToFirestore === 'function') {
-        await pushToFirestore();
+      const newUser = { username: u, password: p, role: 'viewer' };
+      data.users.push(newUser);
+      
+      let success = false;
+      if (fbFirestore && navigator.onLine) {
+         try {
+            await fbFirestore.collection("app_data").doc("main").set({ 
+               users: firebase.firestore.FieldValue.arrayUnion(newUser) 
+            }, { merge: true });
+            success = true;
+         } catch (e) {
+            alert('Đăng ký bị gián đoạn do lỗi mạng. Vui lòng thử lại sau!');
+         }
+      } else {
+         alert('Bạn đang ngoại tuyến. Vui lòng kết nối mạng để đăng ký!');
       }
 
-      alert('\u0110\u0103ng k\u00FD th\u00E0nh c\u00F4ng! Vui l\u00F2ng \u0111\u0103ng nh\u1EADp.');
-      renderLogin('login');
+      if (!success) {
+         data.users = data.users.filter(x => x.username !== u);
+      } else {
+         try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch (e) { }
+         try { await dbPut('store_data', 'default', data); } catch (e) { }
+         alert('Đăng ký thành công! Vui lòng đăng nhập.');
+         renderLogin('login');
+      }
+      
+      btn.innerText = oldText;
+      btn.disabled = false;
     };
 
     window.doLogout = function () {
@@ -6869,18 +6964,44 @@
       }
     };
 
-    window.doLogin = function () {
+    window.doLogin = async function () {
       const u = document.getElementById('login-username').value.trim();
       const p = document.getElementById('login-password').value;
 
       let valid = false;
       if (u === 'admin' && p === 'Hieu1234') {
         valid = true;
-      } else if (typeof data !== 'undefined' && data.users && data.users.length > 0) {
-        const user = data.users.find(x => x.username === u && x.password === p);
-        if (user) {
-          valid = true;
+      } else {
+        const btn = document.querySelector('button[onclick="doLogin()"]');
+        const oldText = btn.innerText;
+        btn.innerText = 'Đang xác thực...';
+        btn.disabled = true;
+
+        if (fbFirestore && navigator.onLine) {
+           try {
+              const docSnap = await fbFirestore.collection("app_data").doc("main").get({source: 'server'});
+              if (docSnap.exists) {
+                 const serverData = docSnap.data();
+                 if (serverData.users) data.users = serverData.users;
+                 try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(e){}
+              }
+           } catch (e) {
+              console.warn('Lỗi kết nối server, đang kiểm tra bộ nhớ đệm (ngoại tuyến).', e);
+              showToast('Đang đăng nhập bằng bộ nhớ đệm (ngoại tuyến)', 'amber');
+           }
+        } else {
+           if (typeof showToast === 'function') showToast('Bạn đang ngoại tuyến. Đăng nhập bằng bộ nhớ đệm.', 'amber');
         }
+
+        if (typeof data !== 'undefined' && data.users && data.users.length > 0) {
+          const user = data.users.find(x => x.username === u && x.password === p);
+          if (user) {
+            valid = true;
+          }
+        }
+        
+        btn.innerText = oldText;
+        btn.disabled = false;
       }
 
       if (valid) {
