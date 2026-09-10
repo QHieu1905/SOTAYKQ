@@ -4858,15 +4858,8 @@
         const text = await res.text();
         const parsed = JSON.parse(text);
         
-        if (!parsed.units || !parsed.logs) {
-            alert('File sao lưu không hợp lệ!');
-            return;
-        }
-        
-        Object.assign(data, parsed);
-        data.lastUpdated = Date.now();
-        saveData();
-        
+        // Cập nhật bộ đếm băng thông TRƯỚC khi gọi restoreFromJsonObj, vì hàm đó sẽ
+        // location.reload() ở cuối nên code phía sau nó sẽ không chạy được.
         try {
             if (requiresUpdate) {
                 await fbFirestore.collection("app_data").doc("bandwidth_tracker").set({
@@ -4882,8 +4875,7 @@
             console.warn('Lỗi khi cập nhật bandwidth_tracker', e);
         }
 
-        alert('Cập nhật từ Cloud thành công!');
-        location.reload();
+        await restoreFromJsonObj(parsed); // hàm này tự validate, tự khôi phục file, tự alert + reload
       } catch (err) {
         console.error("Lỗi cập nhật từ Cloud", err);
         if (err instanceof TypeError && err.message.includes('Failed to fetch')) {
