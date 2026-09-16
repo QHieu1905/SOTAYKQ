@@ -16,7 +16,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Sổ tay điện tử 3633</title>
+  <title>Sổ tay điện tử Kiểm tra tuyển chọn tiền KĐTCLT</title>
   <style>
     :root {
       /* Hoi An Theme */
@@ -1055,48 +1055,24 @@
     }
 
 
-    @keyframes slideUp {
-      from { transform: translateY(100%); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
+    @keyframes popIn {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
     }
 
     .modal {
       max-width: 100% !important;
       height: auto;
       max-height: 92vh;
-      border-radius: 24px 24px 0 0;
-      margin-top: auto;
       display: flex;
       flex-direction: column;
-      animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-      position: relative;
-    }
-
-    .modal::before {
-      content: "";
-      position: absolute;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 40px;
-      height: 5px;
-      background: #e5e7eb;
-      border-radius: 99px;
-    }
-
-    .modal-head {
-      padding-top: 24px;
+      animation: popIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
     .modal-body {
-      flex: 1;
+      flex: 0 1 auto;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
-    }
-
-    .overlay {
-      padding: 0;
-      align-items: flex-end;
     }
 
     .iconbtn-top,
@@ -1768,7 +1744,7 @@
       .nk-card { background: #fff; border-radius: 16px; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid #f3f4f6; overflow: hidden; transition: all 0.3s; }
       .nk-card-summary { display: flex; align-items: center; padding: 16px; gap: 12px; cursor: pointer; user-select: none; }
       .nk-card-summary.nk-summary-top { align-items: flex-start; }
-      .nk-title-clamp { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word; line-height: 1.35; }
+      .nk-title-clamp { display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word; line-height: 1.35; }
       .nk-card-row1 { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
       .nk-card-row2 { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 6px; }
       .nk-stt { width: 32px; height: 32px; border-radius: 10px; background: #f3f4f6; color: #4b5563; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; flex-shrink: 0; }
@@ -1793,6 +1769,53 @@
         .menu-toggle { display: none !important; }
         .header { padding-left: 16px !important; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); background: rgba(255, 255, 255, 0.85) !important; }
       }
+      /* ===== Time filter dropdown ("Thời gian") — dùng chung cho Tổng quan/Nhật ký/Sản lượng ===== */
+      .tf-details summary { list-style: none; }
+      .tf-details summary::-webkit-details-marker { display: none; }
+      .tf-details summary::marker { content: ''; }
+      .tf-summary {
+        display: inline-flex; align-items: center; gap: 8px; background: #fff;
+        border: 1px solid var(--line); padding: 7px 14px; border-radius: 12px;
+        font-weight: 700; color: var(--gray); font-size: 13px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.02); user-select: none; cursor: pointer;
+        transition: border-color .15s, box-shadow .15s;
+      }
+      .tf-details[open] .tf-summary { border-color: var(--green); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+      .tf-summary .tf-caret { transition: transform .2s ease; flex-shrink: 0; }
+      .tf-details[open] .tf-summary .tf-caret { transform: rotate(180deg); }
+      .tf-badge { padding: 2px 7px; border-radius: 8px; font-size: 11px; color: #fff; font-weight: 700; }
+      .tf-panel {
+        position: absolute; right: 0; left: auto; top: calc(100% + 8px);
+        background: #fff; padding: 14px; border-radius: 14px; border: 1px solid var(--line);
+        box-shadow: 0 12px 28px rgba(0,0,0,0.12); display: flex; flex-direction: column; gap: 10px;
+        width: 300px; max-width: calc(100vw - 32px); box-sizing: border-box; z-index: 20;
+        animation: tf-pop .15s ease-out;
+      }
+      @keyframes tf-pop { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+      .tf-panel::before {
+        content: ''; position: absolute; top: -6px; right: 20px; width: 11px; height: 11px;
+        background: #fff; border-left: 1px solid var(--line); border-top: 1px solid var(--line);
+        transform: rotate(45deg); border-radius: 2px 0 0 0;
+      }
+      .tf-row { display: flex; gap: 8px; }
+      .tf-field { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+      .tf-field span { font-size: 11px; font-weight: 700; color: var(--gray); text-transform: uppercase; letter-spacing: 0.3px; }
+      .tf-field input[type="date"] {
+        width: 100%; box-sizing: border-box; padding: 7px 8px; border-radius: 8px;
+        border: 1px solid var(--line); font-family: inherit; font-size: 12.5px;
+        outline: none; cursor: pointer; color: var(--text); background: var(--bg2, #fff);
+      }
+      .tf-field input[type="date"]:focus { border-color: var(--green); }
+      .tf-actions { display: flex; gap: 6px; }
+      .tf-actions button {
+        flex: 1; padding: 8px 10px; border-radius: 9px; border: none; font-weight: 700;
+        cursor: pointer; font-size: 12.5px; transition: filter .15s, transform .1s;
+      }
+      .tf-actions button:active { transform: scale(0.97); }
+      .tf-actions .tf-apply { color: #fff; }
+      .tf-actions .tf-apply:hover { filter: brightness(1.08); }
+      .tf-actions .tf-clear { background: #fef2f2; color: #ef4444; }
+      .tf-actions .tf-clear:hover { background: #fee2e2; }
   </style>
 </head>
 
@@ -1847,15 +1870,15 @@
           <div style="width: 42px; height: 42px; border-radius: 50%; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: center; flex-shrink: 0; padding: 2px;">
             <img src="./SO TAY KHO QUY_files/logo-ngan-hang-nha-nuoc-viet-nam.webp" alt="SBV" style="width: 100%; height: 100%; object-fit: contain;">
           </div>
-          <div style="display:flex; flex-direction:column; line-height: 1.35; flex: 1;">
-            <b style="font-size:15px; color:#854d0e; letter-spacing: -0.2px;">Sổ tay điện tử 3633</b>
-            <span style="font-size:12px; color:#475569; font-weight: 600; margin-top: 1px;">Ngân hàng Nhà nước CN Khu vực 9</span>
-            <span style="font-size:11px; color:#64748b; font-weight: 500;">Phòng Tiền tệ - Kho quỹ (KV01)</span>
+          <div style="display:flex; flex-direction:column; line-height: 1.35; flex: 1; justify-content: center; align-items: center; text-align: center;">
+            <b style="font-size:14px; color:#854d0e; letter-spacing: -0.2px;">Sổ tay điện tử<br>Kiểm tra tuyển chọn tiền KĐTCLT</b>
+            <span style="font-size:11px; color:#475569; font-weight: 600; margin-top: 2px;">Ngân hàng Nhà nước CN Khu vực 9</span>
+            <span style="font-size:10px; color:#64748b; font-weight: 500;">Phòng Tiền tệ - Kho quỹ (KV01)</span>
           </div>
         </div>
         <div style="display: flex; align-items: center; gap: 6px;">
-          <button class="iconbtn-top" onclick="doLogout()" title="Đăng xuất" style="color:var(--red); width: 34px; height: 34px; border-radius: 50%; border: 1px solid #f87171; background: #fef2f2; display: flex; align-items: center; justify-content: center;">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <button class="iconbtn-top" onclick="event.stopPropagation(); doLogout();" title="Đăng xuất" style="cursor: pointer; position: relative; z-index: 100; touch-action: manipulation; color:var(--red); width: 34px; height: 34px; border-radius: 50%; border: 1px solid #f87171; background: #fef2f2; display: flex; align-items: center; justify-content: center;">
+            <svg style="pointer-events: none;" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
               <polyline points="16 17 21 12 16 7"></polyline>
               <line x1="21" y1="12" x2="9" y2="12"></line>
@@ -2289,6 +2312,38 @@
 
     /* ================= DỮ LIỆU & LƯU TRỮ ================= */
     const STORAGE_KEY = 'so-tay-kho-quy-v10';
+
+    /* ================= PHIÊN ĐĂNG NHẬP =================
+       FIX: trước đây dùng sessionStorage, bị xoá mỗi khi trình duyệt di động
+       "giải phóng" tiến trình tab (khoá màn hình / chuyển app). Chuyển sang
+       localStorage kèm mốc thời gian đăng nhập (loginAt) + hạn dùng, để phiên
+       vẫn còn khi mở lại app, nhưng vẫn tự hết hạn sau một thời gian dài. */
+    const SESSION_KEY = 'currentUser';
+    const SESSION_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000; // 30 ngày
+
+    window.getCurrentUser = function () {
+      const raw = localStorage.getItem(SESSION_KEY);
+      if (!raw) return null;
+      try {
+        const obj = JSON.parse(raw);
+        if (obj && obj.loginAt && (Date.now() - obj.loginAt > SESSION_MAX_AGE_MS)) {
+          localStorage.removeItem(SESSION_KEY);
+          return null;
+        }
+        return obj;
+      } catch (e) {
+        localStorage.removeItem(SESSION_KEY);
+        return null;
+      }
+    };
+
+    window.setCurrentUser = function (username) {
+      localStorage.setItem(SESSION_KEY, JSON.stringify({ username, loginAt: Date.now() }));
+    };
+
+    window.clearCurrentUser = function () {
+      localStorage.removeItem(SESSION_KEY);
+    };
     const DEFAULT_DATA = {
       units: [
         { id: 'u1', name: 'Trung tâm Quản lý tiền mặt Đà Nẵng- VIETINBANK', code: 'VIETINBANK' },
@@ -2961,28 +3016,26 @@
       '5. Vận chuyển tiền',
       '6. Quản lý chìa khóa, mã số'
     ];
-    let filterMonthSL = [];
-    function toggleMonthSL(m) {
-      const detailsEl = document.querySelector('.month-filter-details-sl');
-      if (detailsEl) window.slFilterOpen = detailsEl.open;
-      if (filterMonthSL.includes(m)) filterMonthSL = filterMonthSL.filter(x => x !== m);
-      else filterMonthSL.push(m);
-      render();
-    }
-    let filterMonthTQ = [];
-    function toggleMonthTQ(m) {
-      const detailsEl = document.querySelector('.month-filter-details-tq');
-      if (detailsEl) window.tqFilterOpen = detailsEl.open;
-      if (filterMonthTQ.includes(m)) filterMonthTQ = filterMonthTQ.filter(x => x !== m);
-      else filterMonthTQ.push(m);
-      render();
-    }
-    let filterMonthNK = [];
-    function toggleMonthNK(m) {
-      const detailsEl = document.querySelector('.month-filter-details-nk');
-      if (detailsEl) window.nkFilterOpen = detailsEl.open;
-      if (filterMonthNK.includes(m)) filterMonthNK = filterMonthNK.filter(x => x !== m);
-      else filterMonthNK.push(m);
+    let filterStartSL = '', filterEndSL = '';
+    let filterStartTQ = '', filterEndTQ = '';
+    let filterStartNK = '', filterEndNK = '';
+
+    function setMonthRange(m, module) {
+      if (!m) {
+        if (module === 'tq') { filterStartTQ = ''; filterEndTQ = ''; }
+        if (module === 'nk') { filterStartNK = ''; filterEndNK = ''; }
+        if (module === 'sl') { filterStartSL = ''; filterEndSL = ''; }
+        render();
+        return;
+      }
+      const [year, month] = m.split('-');
+      const start = `${year}-${month}-01`;
+      const endDay = new Date(year, month, 0).getDate();
+      const end = `${year}-${month}-${String(endDay).padStart(2, '0')}`;
+      
+      if (module === 'tq') { filterStartTQ = start; filterEndTQ = end; window.tqFilterOpen = true; }
+      if (module === 'nk') { filterStartNK = start; filterEndNK = end; window.nkFilterOpen = true; }
+      if (module === 'sl') { filterStartSL = start; filterEndSL = end; window.slFilterOpen = true; }
       render();
     }
     const DENOMS = { '500k': 500000, '200k': 200000, '100k': 100000, '50k': 50000, '20k': 20000, '10k': 10000, '5k': 5000 };
@@ -3229,20 +3282,59 @@
   </div>`;
     }
     window.isAdmin = function () {
-      const cu = sessionStorage.getItem('currentUser');
-      if (!cu) return false;
-      try {
-        const user = JSON.parse(cu);
-        return user.username === 'admin';
-      } catch (e) { return false; }
+      const user = getCurrentUser();
+      if (!user) return false;
+      return user.username === 'admin';
+    };
+    // Chế độ Bảo trì: admin bật để tạm khoá thao tác chỉnh sửa của người dùng khi nâng cấp app.
+    // Admin luôn không bị ảnh hưởng bởi bảo trì.
+    window.isMaintenanceOn = function () {
+      return !!(data.settings && data.settings.maintenanceMode);
+    };
+    // Quyền chỉnh sửa: admin luôn có; tài khoản role 'editor' có quyền khi KHÔNG bảo trì;
+    // tài khoản role 'viewer' (hoặc chưa xác định) chỉ được xem.
+    window.canEdit = function () {
+      const user = getCurrentUser();
+      if (!user) return false;
+      if (window.isAdmin()) return true;
+      if (window.isMaintenanceOn()) return false;
+      return user.role === 'editor';
     };
 
     function secHead(title, sub, addFn, addLabel) {
-      const isLog = addFn && typeof addFn === 'string' && addFn.includes("'log'");
-      const showAdd = (window.isAdmin() || isLog) && addFn;
+      const showAdd = window.canEdit() && addFn;
       const lbl = addLabel || "Thêm mới";
       return `<div class="sec-head"><div><h2>${title}</h2>${sub ? `<p>${sub}</p>` : ''}</div>
     ${showAdd ? `<button class="btn" onclick="${addFn}">${ICONS.plus} ${lbl}</button>` : ''}</div>`;
+    }
+    // Bộ lọc "Thời gian" dùng chung cho các trang (Tổng quan/Nhật ký/Sản lượng...).
+    // cfg: { className, start, end, startVar, endVar, module, color, isOpen }
+    function timeFilterDropdown(cfg) {
+      const hasFilter = cfg.start || cfg.end;
+      const color = cfg.color || 'var(--green)';
+      return `
+        <details class="tf-details ${cfg.className}" style="position:relative; z-index:10;" ${cfg.isOpen ? 'open' : ''}>
+          <summary class="tf-summary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+            Thời gian ${hasFilter ? `<span class="tf-badge" style="background:${color}">Đã lọc</span>` : ''}
+            <svg class="tf-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </summary>
+          <div class="tf-panel">
+            <div class="tf-row">
+              <label class="tf-field"><span>Từ ngày</span>
+                <input type="date" value="${cfg.start}" onchange="${cfg.startVar}=this.value">
+              </label>
+              <label class="tf-field"><span>Đến ngày</span>
+                <input type="date" value="${cfg.end}" onchange="${cfg.endVar}=this.value">
+              </label>
+            </div>
+            <div class="tf-actions">
+              <button class="tf-apply" onclick="render()" style="background:${color}">Áp dụng</button>
+              ${hasFilter ? `<button class="tf-clear" onclick="setMonthRange('', '${cfg.module}')">Xoá lọc</button>` : ''}
+            </div>
+          </div>
+        </details>
+      `;
     }
     function emptyBox(icon, title, hint) {
       return `<div class="empty"><div class="ring">${ICONS[icon]}</div><div class="t">${title}</div><div>${hint}</div></div>`;
@@ -3259,8 +3351,8 @@
     }
     function rowActs(editFn, delFn, extraFn, extraIcon, extraTitle) {
       return `<span class="row-act">
-    ${extraFn ? `<button title="${extraTitle}" style="color:var(--main)" onclick="${extraFn}">${ICONS[extraIcon]}</button>` : ''}
-    ${editFn ? `<button title="Sửa" onclick="${editFn}">${ICONS.edit}</button>` : ''}
+    ${(extraFn && window.canEdit && window.canEdit()) ? `<button title="${extraTitle}" style="color:var(--main)" onclick="${extraFn}">${ICONS[extraIcon]}</button>` : ''}
+    ${(editFn && window.canEdit && window.canEdit()) ? `<button title="Sửa" onclick="${editFn}">${ICONS.edit}</button>` : ''}
     ${(delFn && window.isAdmin && window.isAdmin()) ? `<button title="Xóa" class="del" onclick="${delFn}">${ICONS.trash}</button>` : ''}</span>`;
     }
     function filterBar(extra = '') {
@@ -3269,23 +3361,32 @@
 
     /* ================= 1. TỔNG QUAN ================= */
     function renderTongquan() {
+      // Tổng quan mặc định chỉ phản ánh dữ liệu của năm hiện tại.
+      // Điều này đồng thời bảo đảm KPI không bị sai khi local cache còn dữ liệu các năm trước.
       const year = new Date().getFullYear();
+      const yearPrefix = String(year) + '-';
 
       const allMonthsSet = new Set();
-      (data.logs || []).forEach(log => { if (log.date) allMonthsSet.add(log.date.slice(0, 7)); });
-      (data.recoveries || []).forEach(r => { if (r.month) allMonthsSet.add(r.month); });
+      (data.logs || []).forEach(log => {
+        if (log.date && log.date.startsWith(yearPrefix)) allMonthsSet.add(log.date.slice(0, 7));
+      });
+      (data.recoveries || []).forEach(r => {
+        if (r.month && r.month.startsWith(yearPrefix)) allMonthsSet.add(r.month);
+      });
       const allMonths = [...allMonthsSet].sort((a, b) => a.localeCompare(b));
 
       const filteredLogs = (data.logs || []).filter(log => {
-        if (!log.date) return false;
-        const month = log.date.slice(0, 7);
-        return filterMonthTQ.length === 0 || filterMonthTQ.includes(month);
+        if (!log.date || !log.date.startsWith(yearPrefix)) return false;
+        if (filterStartTQ && log.date < filterStartTQ) return false;
+        if (filterEndTQ && log.date > filterEndTQ) return false;
+        return true;
       });
 
-
       const filteredRecoveries = (data.recoveries || []).filter(r => {
-        if (!r.month) return false;
-        return filterMonthTQ.length === 0 || filterMonthTQ.includes(r.month);
+        if (!r.month || !r.month.startsWith(yearPrefix)) return false;
+        if (filterStartTQ && filterStartTQ.slice(0, 7) > r.month) return false;
+        if (filterEndTQ && filterEndTQ.slice(0, 7) < r.month) return false;
+        return true;
       });
 
       // Tính KPIs
@@ -3454,22 +3555,12 @@
              </div>
              Tổng quan
           </h2>
-          <details class="month-filter-details-tq" style="position: relative; z-index: 10;" ${window.tqFilterOpen ? 'open' : ''}>
-            <summary style="list-style: none; outline: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; background: #f9fafb; border: 1px solid #e5e7eb; padding: 6px 14px; border-radius: 12px; font-weight: 700; color: #4b5563; font-size: 13px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); user-select: none;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
-              Lọc tháng ${filterMonthTQ.length > 0 ? `<span style="background:#16a34a; color:#fff; padding: 2px 6px; border-radius: 8px; font-size: 11px;">${filterMonthTQ.length}</span>` : ''}
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-            </summary>
-            <div style="position: absolute; right: 0; top: calc(100% + 8px); background: #fff; padding: 12px; border-radius: 16px; border: 1px solid #e5e7eb; box-shadow: 0 10px 25px rgba(0,0,0,0.1); display: flex; flex-wrap: wrap; gap: 6px; width: max-content; max-width: 280px; z-index: 20;">
-              ${allMonths.map(m => {
-        const mStr = m.split('-')[1];
-        const active = filterMonthTQ.includes(m)
-          ? 'background: linear-gradient(135deg, #16a34a, #15803d); color:#fff; font-weight:700; box-shadow: 0 4px 10px rgba(22, 163, 74, 0.3);'
-          : 'background:#f3f4f6; color:#4b5563; font-weight:600;';
-        return `<button style="padding:6px 14px; border:none; border-radius:999px; cursor:pointer; font-size:13px; transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1); ${active}" onclick="toggleMonthTQ('${m}')">${mStr}</button>`;
-      }).join('')}
-            </div>
-          </details>
+          ${timeFilterDropdown({
+            className: 'month-filter-details-tq',
+            start: filterStartTQ, end: filterEndTQ,
+            startVar: 'filterStartTQ', endVar: 'filterEndTQ',
+            module: 'tq', color: '#16a34a', isOpen: window.tqFilterOpen
+          })}
         </div>
       `;
 
@@ -3516,7 +3607,7 @@
             </div>
             <div class="tq-content">
               <div class="tq-num">${formatTy(totalRecoveryMoney)} Tỷ</div>
-              <div class="tq-sub">Tiền KĐTCLT đã kiểm</div>
+              <div class="tq-sub">TIỀN ĐỦ TCLT ĐÃ KIỂM TRA</div>
             </div>
           </div>
         </div>
@@ -3928,9 +4019,8 @@
       let list = sortDate(byUnit(data.logs)).filter(r => matchQ(unitName(r.unitId)));
 
       const allMonths = [...new Set((data.logs || []).map(r => r.date ? r.date.slice(0, 7) : '').filter(Boolean))].sort((a, b) => a.localeCompare(b));
-      if (filterMonthNK.length > 0) {
-        list = list.filter(r => r.date && filterMonthNK.includes(r.date.slice(0, 7)));
-      }
+      if (filterStartNK) list = list.filter(r => r.date >= filterStartNK);
+      if (filterEndNK) list = list.filter(r => r.date <= filterEndNK);
 
       if (typeof filterResultNK !== 'undefined' && filterResultNK !== 'all') {
         list = list.filter(r => {
@@ -3980,28 +4070,16 @@
       const totalUnits = new Set(list.map(l => l.unitId)).size;
       const totalSheets = list.reduce((sum, r) => sum + (Number(r.amount1) || 0) + (Number(r.amount2) || 0), 0);
 
-      const monthFilterHtml = `
-        <details class="month-filter-details-nk" style="position: relative; z-index: 10;" ${window.nkFilterOpen ? 'open' : ''}>
-            <summary style="list-style: none; outline: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; background: #fff; border: 1px solid var(--line); padding: 6px 14px; border-radius: 12px; font-weight: 700; color: var(--gray); font-size: 13px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); user-select: none;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
-              Lọc tháng ${filterMonthNK.length > 0 ? `<span style="background:var(--green-dark); color:#fff; padding: 2px 6px; border-radius: 8px; font-size: 11px;">${filterMonthNK.length}</span>` : ''}
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-            </summary>
-            <div style="position: absolute; left: 0; top: calc(100% + 8px); background: #fff; padding: 12px; border-radius: 16px; border: 1px solid var(--line); box-shadow: 0 10px 25px rgba(0,0,0,0.1); display: flex; flex-wrap: wrap; gap: 6px; width: max-content; max-width: 280px; z-index: 20;">
-              ${allMonths.map(m => {
-        const mStr = m.split('-')[1];
-        const active = filterMonthNK.includes(m)
-          ? 'background:var(--mint); color:var(--green-dark); font-weight:700;'
-          : 'background:#f3f4f6; color:var(--gray); font-weight:600;';
-        return `<button style="padding:6px 14px; border:none; border-radius:999px; cursor:pointer; font-size:12.5px; transition:0.2s; ${active}" onclick="toggleMonthNK('${m}')">${mStr}</button>`;
-      }).join('')}
-            </div>
-        </details>
-      `;
+      const monthFilterHtml = timeFilterDropdown({
+        className: 'month-filter-details-nk',
+        start: filterStartNK, end: filterEndNK,
+        startVar: 'filterStartNK', endVar: 'filterEndNK',
+        module: 'nk', color: 'var(--main)', isOpen: window.nkFilterOpen
+      });
 
       const filterHtml = `
         <div style="display:flex; align-items:center; gap:12px; margin-left: 6px; flex-wrap: wrap;">
-          ${allMonths.length > 0 ? monthFilterHtml : ''}
+          ${monthFilterHtml}
           <div style="display:flex; align-items:center; gap:8px;">
             <span style="font-size:13px; color:var(--gray); font-weight:500;">Lọc kết quả:</span>
             <select id="filterResultNK" onchange="filterResultNK = this.value; render()" style="padding: 4px 10px; border-radius: 6px; border: 1px solid var(--line); font-family: inherit; font-size: 13px; outline: none; cursor: pointer; background: #fff;">
@@ -4202,6 +4280,8 @@
 
       (data.logs || []).forEach(log => {
         if (!log.date || !log.unitId) return;
+        if (filterStartSL && log.date < filterStartSL) return;
+        if (filterEndSL && log.date > filterEndSL) return;
         const month = log.date.slice(0, 7);
         const process = (denom, qty, invQty) => {
           if (!denom) return;
@@ -4220,6 +4300,8 @@
 
       (data.recoveries || []).forEach(r => {
         if (!r.month || !r.unitId || !r.denom) return;
+        if (filterStartSL && filterStartSL.slice(0, 7) > r.month) return;
+        if (filterEndSL && filterEndSL.slice(0, 7) < r.month) return;
         const month = r.month;
         const dStr = formatDenom(r.denom);
         const key = `${month}_${r.unitId}`;
@@ -4235,22 +4317,14 @@
       const allMonths = [...new Set(Object.values(agg).map(r => r.month))].sort((a, b) => a.localeCompare(b));
 
       const monthFilterHtml = `
-        <details class="month-filter-details-sl" style="position: relative; z-index: 10;" ${window.slFilterOpen ? 'open' : ''}>
-            <summary style="list-style: none; outline: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; background: #fff; border: 1px solid var(--line); padding: 6px 14px; border-radius: 12px; font-weight: 700; color: var(--gray); font-size: 13px; box-shadow: 0 2px 6px rgba(0,0,0,0.02); user-select: none;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
-              Lọc tháng ${filterMonthSL.length > 0 ? `<span style="background:var(--green-dark); color:#fff; padding: 2px 6px; border-radius: 8px; font-size: 11px;">${filterMonthSL.length}</span>` : ''}
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-            </summary>
-            <div style="position: absolute; left: 0; top: calc(100% + 8px); background: #fff; padding: 12px; border-radius: 16px; border: 1px solid var(--line); box-shadow: 0 10px 25px rgba(0,0,0,0.1); display: flex; flex-wrap: wrap; gap: 6px; width: max-content; max-width: 280px; z-index: 20;">
-              ${allMonths.map(m => {
-        const mStr = m.split('-')[1];
-        const active = filterMonthSL.includes(m)
-          ? 'background:var(--mint); color:var(--green-dark); font-weight:700;'
-          : 'background:#f3f4f6; color:var(--gray); font-weight:600;';
-        return `<button style="padding:6px 14px; border:none; border-radius:999px; cursor:pointer; font-size:12.5px; transition:0.2s; ${active}" onclick="toggleMonthSL('${m}')">${mStr}</button>`;
-      }).join('')}
-            </div>
-        </details>
+        <div style="display:flex; align-items:center; gap:12px; flex-wrap: wrap;">
+          ${allMonths.length > 0 ? timeFilterDropdown({
+            className: 'month-filter-details-sl',
+            start: filterStartSL, end: filterEndSL,
+            startVar: 'filterStartSL', endVar: 'filterEndSL',
+            module: 'sl', color: 'var(--main)', isOpen: window.slFilterOpen
+          }) : ''}
+        </div>
       `;
 
       const list = byUnit(Object.values(agg)).filter(r => {
@@ -4776,30 +4850,52 @@
     }
 
     async function generateFullBackupBlob() {
-      // Create a Blob directly instead of a massive string to prevent Out of Memory
-      const parts = [];
-      parts.push('{"data":' + JSON.stringify(data) + ',"files":[');
+      // GHI CHÚ (2026-09): Trước đây hàm này nhúng base64 TOÀN BỘ file đính kèm vào
+      // backup, dù file đó đã có sẵn trên Firebase Storage (qua uploadFileToStorage).
+      // Điều này khiến file backup phình lên ~160MB một cách dư thừa, vì dữ liệu bị
+      // lưu 2 lần (1 lần trên Storage, 1 lần base64 trong JSON backup).
+      //
+      // Nguyên tắc mới: backup chỉ nhúng base64 cho những file KHÔNG/CHƯA có
+      // storagePath xác nhận (tức chưa chắc đã an toàn trên Cloud — ví dụ vừa thêm
+      // lúc mất mạng). Các file đã có storagePath sẽ được bỏ qua khỏi backup; khi
+      // khôi phục, resolveFileUrl() sẽ tự tải chúng từ Storage như cách các file
+      // docs/seals/signatures vẫn đang hoạt động.
 
-      const files = await dbGetAllFiles();
+      // Bước 1: dựng map fileId -> đã có storagePath xác nhận hay chưa, từ chính "data"
+      const confirmedOnStorage = new Set();
       const activeFileIds = new Set();
+      const registerFileRef = (id, hasStoragePath) => {
+        if (!id) return;
+        activeFileIds.add(id);
+        if (hasStoragePath) confirmedOnStorage.add(id);
+      };
       for (const k in data) {
         if (Array.isArray(data[k])) {
           data[k].forEach(item => {
-            if (item.fileId) activeFileIds.add(item.fileId);
+            if (item.fileId) registerFileRef(item.fileId, !!(item.storagePath));
+            if (Array.isArray(item.files)) {
+              item.files.forEach(f => registerFileRef(f.fileId, !!(f.storagePath)));
+            }
           });
         }
       }
 
+      const parts = [];
+      parts.push('{"data":' + JSON.stringify(data) + ',"files":[');
+
+      const files = await dbGetAllFiles();
+      // Chỉ những file CHƯA xác nhận có mặt trên Storage mới cần nhúng base64 vào backup
+      const filesToEmbed = files.filter(f => activeFileIds.has(f.id) && !confirmedOnStorage.has(f.id));
+
       let first = true;
       let count = 0;
-      let total = 0;
-      for (const f of files) if (activeFileIds.has(f.id)) total++;
+      const total = filesToEmbed.length;
+      const skippedCount = files.filter(f => activeFileIds.has(f.id)).length - total;
 
-      for (const f of files) {
-        if (!activeFileIds.has(f.id)) continue;
+      for (const f of filesToEmbed) {
         count++;
         if (typeof showProgressOverlay === 'function') {
-           showProgressOverlay(true, total > 0 ? Math.round((count/total)*100) : 100, `Đang nén file ${count}/${total}...`);
+           showProgressOverlay(true, total > 0 ? Math.round((count/total)*100) : 100, `Đang nén file ${count}/${total} (${skippedCount} file đã có trên Cloud, bỏ qua)...`);
         }
         const b64 = await new Promise((res) => {
           const r = new FileReader();
@@ -4812,6 +4908,7 @@
         first = false;
       }
       parts.push(']}');
+      console.log(`[cloudBackup] Nhúng ${total} file base64 vào backup, bỏ qua ${skippedCount} file đã có sẵn trên Storage.`);
       return new Blob(parts, { type: 'application/json' });
     }
 
@@ -4846,6 +4943,24 @@
     async function cloudBackup() {
       if (!fbStorage) { alert('Chưa cấu hình Firebase Storage.'); return; }
       if (!confirm('Xác nhận: Tạo bản sao lưu toàn bộ dữ liệu hiện tại lên Cloud? Thao tác này sẽ ghi đè bản sao lưu cũ trên Cloud.')) return;
+
+      // FIX (2026-09): nếu còn thay đổi tài khoản (thêm/xoá/đổi mật khẩu) chưa kịp lên server
+      // (ví dụ vừa xoá xong rồi bấm Sao lưu ngay), backup KHÔNG BỊ SAI (backup luôn lấy dữ liệu
+      // local mới nhất) nhưng RỦI RO nằm ở máy khác sau khi khôi phục: bộ lắng nghe realtime sẽ
+      // ghi đè bằng dữ liệu server cũ, "hồi sinh" lại thay đổi tưởng đã xoá. Do đó phải đảm bảo
+      // server đã nhận thay đổi TRƯỚC khi cho phép backup.
+      const pendingBefore = getPendingSyncQueue().some(x => x.col === '__usersMeta');
+      if (pendingBefore) {
+        if (typeof showProgressOverlay === 'function') showProgressOverlay(true, 0, 'Đang đồng bộ thay đổi tài khoản trước khi sao lưu...');
+        await flushPendingSyncQueue(false);
+        if (typeof showProgressOverlay === 'function') showProgressOverlay(false);
+        const stillPending = getPendingSyncQueue().some(x => x.col === '__usersMeta');
+        if (stillPending) {
+          alert('Chưa thể sao lưu: vẫn còn thay đổi tài khoản (thêm/xoá/đổi mật khẩu) chưa đồng bộ được lên máy chủ, có thể do mất mạng. Vui lòng kiểm tra kết nối mạng và thử "Sao lưu lên Cloud" lại sau, để tránh bản sao lưu khôi phục sai trên các thiết bị khác.');
+          return;
+        }
+      }
+
       try {
         if (typeof showProgressOverlay === 'function') showProgressOverlay(true, 0, 'Đang thu thập dữ liệu sao lưu...');
         const blob = await generateFullBackupBlob();
@@ -5202,17 +5317,20 @@
     }
     function updatePendingSyncBadge() {
       const n = getPendingSyncQueue().length;
-      const lastSyncEl = document.getElementById('saoluu-sync-status');
-      if (!lastSyncEl) return;
+      // FIX (2026-09): Badge cũ chỉ gắn cạnh #saoluu-sync-status — phần tử này CHỈ tồn tại khi
+      // đang mở đúng màn hình "Cài đặt → Đồng bộ Firebase". Nếu người dùng đang ở màn hình khác
+      // (ví dụ đang thêm Nhật ký kiểm tra) lúc ghi thất bại, badge sẽ không bao giờ hiện ra dù
+      // hàng đợi có bản ghi lỗi thật — khiến người dùng tưởng nhầm là mọi thứ đã lên Cloud.
+      // Nay đổi sang 1 badge nổi cố định ở góc màn hình, hiển thị bất kể đang ở tab nào.
       let badge = document.getElementById('pending-sync-badge');
       if (n > 0) {
         if (!badge) {
           badge = document.createElement('div');
           badge.id = 'pending-sync-badge';
-          badge.style.cssText = 'font-size:10px;font-weight:700;color:#ef4444;margin-top:2px;cursor:pointer;';
+          badge.style.cssText = 'position:fixed;bottom:16px;right:16px;z-index:30000;background:#ef4444;color:#fff;font-size:13px;font-weight:700;padding:8px 14px;border-radius:20px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.25);';
           badge.title = 'Bấm để thử đồng bộ lại ngay';
           badge.onclick = () => flushPendingSyncQueue(true);
-          lastSyncEl.parentElement && lastSyncEl.parentElement.appendChild(badge);
+          document.body.appendChild(badge);
         }
         badge.innerText = `⚠️ ${n} thay đổi chưa lên Cloud`;
       } else if (badge) {
@@ -5225,7 +5343,11 @@
       if (q.length === 0) return;
       if (showToastMsg) showToast(`Đang thử đồng bộ lại ${q.length} thay đổi...`, 'green');
       for (const entry of q) {
-        await syncDocToFirestore(entry.col, entry.id, entry.docData, true);
+        if (entry.col === '__usersMeta') {
+          if (window.hasServerSyncedOnce) await syncUsersMetaToFirestore(entry.docData);
+        } else {
+          await syncDocToFirestore(entry.col, entry.id, entry.docData, true);
+        }
       }
     }
     setInterval(() => { if (navigator.onLine) flushPendingSyncQueue(); }, 45000);
@@ -5246,6 +5368,32 @@
       }
     }
 
+    // FIX (2026-09): trước đây pushToFirestore() im lặng bỏ qua nếu lỗi mạng / bị treo tiến
+    // trình (khoá màn hình di động ngay sau khi xoá tài khoản), khiến việc xoá KHÔNG BAO GIỜ
+    // tới được server. Tách phần ghi thật ra một hàm riêng, trả về true/false, và nếu thất bại
+    // thì đưa vào hàng đợi đồng bộ bền (giống các collection khác) để tự thử lại khi có mạng.
+    async function syncUsersMetaToFirestore(docData) {
+      if (!fbFirestore) return false;
+      try {
+        await fbFirestore.collection("app_data").doc("main").set(docData, { merge: true });
+        removeFromPendingSyncQueue('__usersMeta', 'main');
+        return true;
+      } catch (err) {
+        console.error('Lỗi đồng bộ tài khoản/nhật ký lên Cloud, sẽ tự thử lại:', err);
+        queuePendingSync('__usersMeta', 'main', docData);
+        return false;
+      }
+    }
+
+    function buildUsersMetaPayload() {
+      return {
+        users: data.users || [],
+        auditLogs: data.auditLogs || [],
+        settings: data.settings || {},
+        lastUpdated: data.lastUpdated || {}
+      };
+    }
+
     async function pushToFirestore() {
       if (!fbFirestore || isRemoteUpdating) return;
       if (!window.hasServerSyncedOnce) {
@@ -5258,16 +5406,28 @@
         updateSyncUI('pending');
         return;
       }
-      try {
-        // Chỉ đồng bộ metadata (users, auditLogs, lastUpdated) lên main doc
-        await fbFirestore.collection("app_data").doc("main").set({
-           users: data.users || [],
-           auditLogs: data.auditLogs || [],
-           lastUpdated: data.lastUpdated || {}
-        }, { merge: true });
-      } catch (err) {
-        console.error("Lỗi đồng bộ Firestore", err);
+      await syncUsersMetaToFirestore(buildUsersMetaPayload());
+    }
+
+    // Đẩy NGAY LẬP TỨC (không debounce) thay đổi tài khoản lên Cloud và CHỜ kết quả thật.
+    // Dùng cho các thao tác nhạy cảm (xoá tài khoản, khôi phục mật khẩu) để đảm bảo server
+    // đã nhận được thay đổi trước khi admin tiếp tục làm việc khác (ví dụ Sao lưu lên Cloud
+    // hoặc khoá màn hình). Trả về true nếu đã xác nhận tới server, false nếu bị hoãn/thất bại
+    // (trong trường hợp đó thay đổi vẫn nằm trong hàng đợi và sẽ tự thử lại).
+    async function pushUsersMetaNow() {
+      if (!fbFirestore) return true; // chạy ngoại tuyến hoàn toàn, không có gì để đồng bộ
+      if (!navigator.onLine) {
+        queuePendingSync('__usersMeta', 'main', buildUsersMetaPayload());
+        return false;
       }
+      if (!window.hasServerSyncedOnce) {
+        // Chưa từng nhận phản hồi thật từ server trong phiên này — không thể an toàn ghi đè
+        // ngay, nhưng vẫn lưu vào hàng đợi để tự đẩy lên ngay khi lần đồng bộ đầu tiên hoàn tất.
+        queuePendingSync('__usersMeta', 'main', buildUsersMetaPayload());
+        window.__pendingPushAfterSync = true;
+        return false;
+      }
+      return await syncUsersMetaToFirestore(buildUsersMetaPayload());
     }
 
 
@@ -5420,19 +5580,20 @@
           const newData = doc.data();
           if (!newData.users) newData.users = [];
           if (!newData.auditLogs) newData.auditLogs = [];
+          if (!newData.settings) newData.settings = {};
           
           data.users = newData.users;
           data.auditLogs = newData.auditLogs;
+          data.settings = newData.settings;
           
           // Kiểm tra và vô hiệu hoá phiên đăng nhập nếu tài khoản bị xoá
-          const cuStr = sessionStorage.getItem('currentUser');
-          if (cuStr) {
+          const cu = getCurrentUser();
+          if (cu) {
             try {
-              const cu = JSON.parse(cuStr);
               if (cu && cu.username !== 'admin') {
                 const stillExists = data.users && data.users.some(u => u.username === cu.username);
                 if (!stillExists) {
-                  sessionStorage.removeItem('currentUser');
+                  clearCurrentUser();
                   alert("Tài khoản của bạn đã bị quản trị viên xoá. Bạn sẽ bị đăng xuất.");
                   location.reload();
                   return;
@@ -5498,8 +5659,27 @@
     window.collectionFetchState = window.collectionFetchState || {};
     window.collectionLimit = window.collectionLimit || { logs: 200, inspections: 200, recoveries: 200 };
 
+    // Phiên bản dữ liệu tĩnh được đóng gói trong mã nguồn.
+    // Nếu admin cập nhật collection và lastUpdated trên server lớn hơn mốc này,
+    // ứng dụng mới đọc lại collection. Thiết bị mới vì vậy không phải đọc lại
+    // units/seals/signatures chỉ để lấy đúng bộ danh mục đã đóng gói sẵn.
+    const BUNDLED_STATIC_VERSION = 1789536660000; // 16/09/2026 12:31 GMT+7
+    const BUNDLED_STATIC_COLS = ['units', 'seals', 'signatures'];
+
+    function getBundledStaticVersion(col) {
+      return BUNDLED_STATIC_COLS.includes(col) ? BUNDLED_STATIC_VERSION : 0;
+    }
+
     window.loadTabData = function(tabId, forceRefresh = false) {
-      if (!window.fbFirestore) return;
+      // FIX (2026-09): trước đây kiểm tra "window.fbFirestore", nhưng biến Firestore thật sự
+      // chỉ được gán vào biến cục bộ "fbFirestore" (không có "window."), nên listener realtime
+      // cho logs/inspections/recoveries không được gắn.
+      if (!fbFirestore) return;
+      // Bảo trì: người dùng thường (không phải admin) không tải/đồng bộ dữ liệu mới từ Cloud
+      // nữa — chỉ dùng dữ liệu đã có sẵn (offline) cho tới khi admin tắt bảo trì.
+      if (window.isMaintenanceOn && window.isMaintenanceOn() && !(window.isAdmin && window.isAdmin())) {
+        return;
+      }
       
       const tabToCol = {
         'tongquan': ['units', 'logs', 'recoveries'],
@@ -5514,19 +5694,38 @@
       const realtimeCols = ['logs', 'inspections', 'recoveries'];
       const onceCols = ['units', 'plans', 'docs', 'seals', 'signatures'];
       
-      // Dá»n dáº¹p listener cá»§a cÃ¡c collection realtime khÃ´ng thuá»™c tab nÃ y
-      // Unsubscribe removed
-      
       cols.forEach(col => {
           const colRef = fbFirestore.collection("app_data").doc("main").collection(col);
           
           if (realtimeCols.includes(col)) {
-             if (!window.activeListeners[col]) {
+             const isOverviewScope = tabId === 'tongquan' && (col === 'logs' || col === 'recoveries');
+             const currentYear = new Date().getFullYear();
+             const scopeKey = isOverviewScope ? ('year-' + currentYear) : 'latest';
+             window.activeListeners[col] = window.activeListeners[col] || {};
+
+             if (!window.activeListeners[col][scopeKey]) {
                 const orderByField = (col === 'recoveries') ? 'month' : 'date';
-                let limitVal = window.collectionLimit[col] || 200;
-                let query = colRef.orderBy(orderByField, 'desc').limit(limitVal);
+                const limitVal = isOverviewScope ? 200 : (window.collectionLimit[col] || 200);
+                let query;
+
+                if (isOverviewScope) {
+                   const start = currentYear + '-01';
+                   if (col === 'logs') {
+                      query = colRef.where('date', '>=', currentYear + '-01-01')
+                                    .where('date', '<', (currentYear + 1) + '-01-01')
+                                    .orderBy('date', 'desc')
+                                    .limit(limitVal);
+                   } else {
+                      query = colRef.where('month', '>=', start)
+                                    .where('month', '<', (currentYear + 1) + '-01')
+                                    .orderBy('month', 'desc')
+                                    .limit(limitVal);
+                   }
+                } else {
+                   query = colRef.orderBy(orderByField, 'desc').limit(limitVal);
+                }
                 
-                window.activeListeners[col] = query.onSnapshot(snapshot => {
+                window.activeListeners[col][scopeKey] = query.onSnapshot(snapshot => {
                    if (snapshot.metadata.hasPendingWrites) return; 
                    let serverReads = 0;
                    let changed = false;
@@ -5548,7 +5747,7 @@
                    
                    if (serverReads > 0) {
                       window.sessionFirestoreReads += serverReads;
-                      console.log(`[Firestore Read] collection '${col}' táº£i ${serverReads} docs. Tá»•ng: ${window.sessionFirestoreReads}`);
+                      console.log(`[Firestore Read] collection '${col}' [${scopeKey}] tải ${serverReads} docs. Tổng: ${window.sessionFirestoreReads}`);
                    }
                    
                    if (col === 'recoveries') {
@@ -5570,13 +5769,23 @@
              const serverLastUpdated = serverLastUpdatedRaw ? tsToMillis(serverLastUpdatedRaw) : null;
              const localLastUpdatedRaw = localStorage.getItem('lastUpdated_' + col);
              const localLastUpdated = localLastUpdatedRaw ? Number(localLastUpdatedRaw) : null;
+             const bundledVersion = getBundledStaticVersion(col);
              
-             let fetchSource = 'default';
-             if (!forceRefresh && serverLastUpdated && localLastUpdated && !isNaN(localLastUpdated) && localLastUpdated >= serverLastUpdated) {
-                fetchSource = 'cache';
-             }
-             
-             if (!window.collectionFetchState[col] || window.collectionFetchState[col] === 'stale' || forceRefresh) {
+             // units/seals/signatures: dùng bản đóng gói nếu server chưa có phiên bản mới hơn.
+             // Chỉ khi admin cập nhật lastUpdated vượt mốc đóng gói mới fetch Firestore.
+             const serverIsNewerThanBundled = serverLastUpdated && serverLastUpdated > bundledVersion;
+             const canUseBundled = BUNDLED_STATIC_COLS.includes(col) && !forceRefresh && !serverIsNewerThanBundled;
+
+             if (canUseBundled && !window.collectionFetchState[col]) {
+                 window.collectionFetchState[col] = 'loaded';
+                 localStorage.setItem('lastUpdated_' + col, String(bundledVersion));
+                 updateSyncUI(false);
+                 handleRemoteChange();
+             } else if (!window.collectionFetchState[col] || window.collectionFetchState[col] === 'stale' || forceRefresh) {
+                 let fetchSource = 'default';
+                 if (!forceRefresh && serverLastUpdated && localLastUpdated && !isNaN(localLastUpdated) && localLastUpdated >= serverLastUpdated) {
+                    fetchSource = 'cache';
+                 }
                  window.collectionFetchState[col] = 'loading';
                  
                  let getPromise;
@@ -5607,6 +5816,15 @@
                      window.collectionFetchState[col] = 'loaded';
                      updateSyncUI(snap.metadata.fromCache);
                      handleRemoteChange();
+                 }).catch(err => {
+                     console.error('[Firestore] Không thể tải collection tĩnh ' + col, err);
+                     // Không làm mất bản dữ liệu đóng gói nếu fetch thất bại.
+                     if (BUNDLED_STATIC_COLS.includes(col)) {
+                        window.collectionFetchState[col] = 'loaded';
+                        handleRemoteChange();
+                     } else {
+                        window.collectionFetchState[col] = 'error';
+                     }
                  });
              }
           }
@@ -5622,9 +5840,11 @@
        
        window.collectionLimit[col] += 200;
        
-       if (window.activeListeners[col]) {
-           window.activeListeners[col]();
-           delete window.activeListeners[col];
+       // Chỉ thay listener "latest" của các tab chi tiết; listener năm hiện tại
+       // của Tổng quan vẫn được giữ sống suốt phiên.
+       if (window.activeListeners[col] && window.activeListeners[col].latest) {
+           window.activeListeners[col].latest();
+           delete window.activeListeners[col].latest;
        }
        
        const cMap = {'logs':'nhatky', 'inspections':'sanluong', 'recoveries':'sanluong'};
@@ -5644,6 +5864,8 @@
                data[col].push(doc.data());
            });
            if (serverReads > 0) window.sessionFirestoreReads += serverReads;
+           const refreshedLastUpdated = data.lastUpdated && data.lastUpdated[col] ? tsToMillis(data.lastUpdated[col]) : 0;
+           if (refreshedLastUpdated) localStorage.setItem('lastUpdated_' + col, String(refreshedLastUpdated));
            window.collectionFetchState[col] = 'loaded';
            
            if (btnIcon) btnIcon.classList.remove('spin');
@@ -5837,37 +6059,119 @@
 
 
 
-    function resetUserPassword(username) {
+    // FIX (2026-09): trước đây hàm này chỉ gọi saveData() (đẩy lên Cloud có debounce 1.2s, có
+    // thể bị treo/mất nếu người dùng khoá màn hình ngay sau đó), khiến thay đổi không kịp lên
+    // server. Nay ghi thẳng và CHỜ xác nhận thật từ Firestore trước khi báo thành công.
+    async function resetUserPassword(username, btnEl) {
       if (!confirm(`Khôi phục mật khẩu cho tài khoản "${username}" về mặc định "123456"?`)) return;
       const u = data.users.find(x => x.username === username);
-      if (u) {
-        u.password = "123456";
-        saveData();
-        alert("Khôi phục thành công! Mật khẩu mới là 123456");
-        render();
+      if (!u) return;
+      u.password = "123456";
+      saveData();
+
+      const oldText = btnEl ? btnEl.innerText : null;
+      if (btnEl) { btnEl.innerText = 'Đang xử lý...'; btnEl.disabled = true; }
+
+      const synced = await pushUsersMetaNow();
+
+      if (btnEl) { btnEl.innerText = oldText; btnEl.disabled = false; }
+
+      if (synced) {
+        alert("Khôi phục thành công! Mật khẩu mới là 123456 (đã đồng bộ lên máy chủ)");
+      } else {
+        alert("Đã khôi phục cục bộ, nhưng KHÔNG đồng bộ được lên máy chủ ngay (mất mạng hoặc đang chờ đồng bộ lần đầu). Hệ thống sẽ tự thử lại — vui lòng giữ mạng ổn định và không xoá dữ liệu ứng dụng cho tới khi đồng bộ xong.");
       }
+      render();
     }
-    function deleteUser(username) {
+
+    async function changeUserRole(username, newRole, btnEl) {
+      const u = data.users.find(x => x.username === username);
+      if (!u) return;
+      if (u.role === newRole) return;
+      u.role = newRole;
+      saveData();
+
+      const oldText = btnEl ? btnEl.innerText : null;
+      if (btnEl) { btnEl.innerText = 'Đang xử lý...'; btnEl.disabled = true; }
+
+      const synced = await pushUsersMetaNow();
+
+      if (btnEl) { btnEl.innerText = oldText; btnEl.disabled = false; }
+
+      if (synced) {
+        showToast(`Đã cập nhật quyền cho "${username}"`, 'green');
+      } else {
+        alert(`Đã đổi quyền cục bộ cho "${username}", nhưng KHÔNG đồng bộ được lên máy chủ ngay (mất mạng hoặc đang chờ đồng bộ lần đầu). Hệ thống sẽ tự thử lại — vui lòng giữ mạng ổn định cho tới khi đồng bộ xong.`);
+      }
+      render();
+    }
+
+    async function toggleMaintenanceMode(btnEl) {
+      data.settings = data.settings || {};
+      const turningOn = !data.settings.maintenanceMode;
+      if (turningOn && !confirm('Bật chế độ Bảo trì?\n\nTất cả tài khoản (trừ admin) sẽ bị khoá thao tác thêm/sửa và chỉ xem được dữ liệu đã có sẵn trên máy (ngoại tuyến), không tải dữ liệu mới từ Cloud, cho tới khi bạn tắt bảo trì.')) return;
+      if (!turningOn && !confirm('Tắt chế độ Bảo trì và cho phép người dùng thao tác/đồng bộ trở lại?')) return;
+      data.settings.maintenanceMode = turningOn;
+      saveData();
+
+      const oldText = btnEl ? btnEl.innerText : null;
+      if (btnEl) { btnEl.innerText = 'Đang xử lý...'; btnEl.disabled = true; }
+
+      const synced = await pushUsersMetaNow();
+
+      if (btnEl) { btnEl.innerText = oldText; btnEl.disabled = false; }
+
+      if (synced) {
+        showToast(turningOn ? 'Đã BẬT chế độ Bảo trì' : 'Đã TẮT chế độ Bảo trì', turningOn ? 'amber' : 'green');
+      } else {
+        alert('Đã đổi trạng thái Bảo trì cục bộ, nhưng KHÔNG đồng bộ được lên máy chủ ngay (mất mạng hoặc đang chờ đồng bộ lần đầu). Hệ thống sẽ tự thử lại.');
+      }
+      render();
+    }
+
+    async function deleteUser(username, btnEl) {
       if (!confirm(`Bạn có chắc muốn xóa vĩnh viễn tài khoản "${username}"?`)) return;
       data.users = data.users.filter(x => x.username !== username);
       saveData();
+
+      const oldText = btnEl ? btnEl.innerText : null;
+      if (btnEl) { btnEl.innerText = 'Đang xử lý...'; btnEl.disabled = true; }
+
+      const synced = await pushUsersMetaNow();
+
+      if (btnEl) { btnEl.innerText = oldText; btnEl.disabled = false; }
+
+      if (synced) {
+        showToast(`Đã xoá và đồng bộ tài khoản "${username}" lên máy chủ`, 'green');
+      } else {
+        alert(`Đã xoá tài khoản "${username}" trên máy này, nhưng KHÔNG đồng bộ được lên máy chủ ngay (mất mạng hoặc đang chờ đồng bộ lần đầu). Hệ thống sẽ tự thử lại. Lưu ý: KHÔNG nên "Sao lưu lên Cloud" cho tới khi thấy thông báo đã đồng bộ thành công, nếu không bản sao lưu có thể không phản ánh đúng việc xoá này.`);
+      }
       render();
     }
     function renderUsers() {
-      const users = (data.users || []).filter(u => u.role === "viewer");
+      const users = (data.users || []).filter(u => u.username !== "admin");
+      const editorCount = users.filter(u => u.role === 'editor').length;
       const listHtml = users.length === 0 ? `<div style="padding:20px; text-align:center; color:var(--gray)">Chưa có tài khoản nào đăng ký</div>` :
-        users.map(u => `
+        users.map(u => {
+          const isEditor = u.role === 'editor';
+          return `
           <div style="background:#fff; border:1px solid var(--line); border-radius:12px; padding:15px; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
             <div>
               <div style="font-weight:600; font-size:15px; color:var(--primary); margin-bottom:4px;">${esc(u.username)}</div>
-              <div style="font-size:13px; color:var(--gray);">Quyền: Người xem (Viewer)</div>
+              <div style="font-size:13px; color:${isEditor ? '#2563eb' : 'var(--gray)'};">Quyền: ${isEditor ? '✏️ Chỉnh sửa' : '👁️ Xem'}</div>
             </div>
-            <div style="display:flex; gap:10px;">
-              <button class="btn" style="padding:6px 12px; background:var(--mint); color:var(--green-dark); font-size:12px; border-radius:6px; font-weight:600;" onclick="resetUserPassword('${u.username}')">🔄 Khôi phục MK</button>
-              <button class="btn" style="padding:6px 12px; background:#fee2e2; color:#ef4444; font-size:12px; border-radius:6px; font-weight:600;" onclick="deleteUser('${u.username}')">❌ Xóa</button>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              ${isEditor
+                ? `<button class="btn" style="padding:6px 12px; background:var(--hover); color:var(--text); font-size:12px; border-radius:6px; font-weight:600;" onclick="changeUserRole('${u.username}','viewer', this)">👁️ Chuyển về Xem</button>`
+                : `<button class="btn" style="padding:6px 12px; background:#dbeafe; color:#2563eb; font-size:12px; border-radius:6px; font-weight:600;" onclick="changeUserRole('${u.username}','editor', this)">✏️ Cấp quyền Chỉnh sửa</button>`}
+              <button class="btn" style="padding:6px 12px; background:var(--mint); color:var(--green-dark); font-size:12px; border-radius:6px; font-weight:600;" onclick="resetUserPassword('${u.username}', this)">🔄 Khôi phục MK</button>
+              <button class="btn" style="padding:6px 12px; background:#fee2e2; color:#ef4444; font-size:12px; border-radius:6px; font-weight:600;" onclick="deleteUser('${u.username}', this)">❌ Xóa</button>
             </div>
           </div>
-        `).join("");
+        `;
+        }).join("");
+
+      const maintenanceOn = window.isMaintenanceOn();
 
       return `
         <div style="display:flex; align-items:center; gap:12px; margin-bottom: 24px;">
@@ -5876,12 +6180,23 @@
             </div>
             <div>
                 <h1 style="font-size:1.4rem; color:var(--text); margin-bottom:4px; letter-spacing:-0.5px">Quản lý Tài khoản</h1>
-                <p style="color:var(--gray); font-size:0.9rem">Quản lý người dùng đăng ký ứng dụng</p>
+                <p style="color:var(--gray); font-size:0.9rem">Quản lý người dùng đăng ký ứng dụng và phân quyền</p>
             </div>
         </div>
+
+        <div class="card" style="margin-bottom:24px; border:1px solid ${maintenanceOn ? '#f59e0b' : 'var(--line)'}; background:${maintenanceOn ? '#fffbeb' : '#fff'};">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+            <div>
+              <div style="font-weight:700; font-size:15px; color:${maintenanceOn ? '#b45309' : 'var(--text)'};">🛠️ Chế độ Bảo trì: ${maintenanceOn ? 'ĐANG BẬT' : 'Đang tắt'}</div>
+              <div style="font-size:13px; color:var(--gray); margin-top:4px; max-width:480px;">Khi bật, mọi tài khoản (trừ admin) bị khoá thao tác thêm/sửa và chỉ xem dữ liệu offline đã có sẵn, không tải dữ liệu mới từ Cloud — dùng khi bạn đang nâng cấp app.</div>
+            </div>
+            <button class="btn" style="padding:8px 16px; font-size:13px; font-weight:700; border-radius:8px; background:${maintenanceOn ? '#16a34a' : '#f59e0b'}; color:#fff;" onclick="toggleMaintenanceMode(this)">${maintenanceOn ? 'Tắt Bảo trì' : 'Bật Bảo trì'}</button>
+          </div>
+        </div>
+
         <div class="dash-grid" style="margin-bottom: 20px;">
           <div class="dash-panel" style="grid-column: 1 / -1; display:flex; justify-content:space-between; align-items:center;">
-             <div class="dash-panel-title">Tổng số tài khoản Viewer</div>
+             <div class="dash-panel-title">Tổng số tài khoản (${editorCount} được Chỉnh sửa)</div>
              <div style="font-size:24px; font-weight:700; color:var(--green)">${users.length}</div>
           </div>
         </div>
@@ -5965,11 +6280,23 @@
 
     /* ================= RENDER ================= */
     function render() {
-      if (!sessionStorage.getItem('currentUser')) {
+      if (!getCurrentUser()) {
         renderLogin();
         return;
       }
       document.body.classList.add('is-authenticated');
+      let maintBanner = document.getElementById('maint-banner');
+      if (window.isMaintenanceOn && window.isMaintenanceOn() && !(window.isAdmin && window.isAdmin())) {
+        if (!maintBanner) {
+          maintBanner = document.createElement('div');
+          maintBanner.id = 'maint-banner';
+          maintBanner.style.cssText = 'position:sticky;top:0;z-index:500;background:#f59e0b;color:#fff;font-weight:700;font-size:13px;text-align:center;padding:8px 12px;';
+          maintBanner.textContent = '🛠️ Hệ thống đang bảo trì/nâng cấp — bạn chỉ xem được dữ liệu offline, tạm thời không thể thêm/sửa và không đồng bộ dữ liệu mới.';
+          document.body.insertBefore(maintBanner, document.body.firstChild);
+        }
+      } else if (maintBanner) {
+        maintBanner.remove();
+      }
       let dl = document.getElementById('unit-list');
       if (dl && data && data.units) {
         let newHtml = '<option value="Tất cả đơn vị"></option>' + data.units.map(u => `<option value="${esc(u.name)}"></option>`).join('');
@@ -6209,6 +6536,16 @@
     };
 
     function openForm(type, id, extra) {
+      if (!window.canEdit || !window.canEdit()) {
+        if (window.isMaintenanceOn && window.isMaintenanceOn() && !(window.isAdmin && window.isAdmin())) {
+          if (typeof showToast === 'function') showToast('Hệ thống đang bảo trì. Vui lòng thử lại sau.', 'amber');
+          else alert('Hệ thống đang bảo trì. Vui lòng thử lại sau.');
+        } else {
+          if (typeof showToast === 'function') showToast('Tài khoản của bạn chỉ có quyền xem, không thể chỉnh sửa.', 'amber');
+          else alert('Tài khoản của bạn chỉ có quyền xem, không thể chỉnh sửa.');
+        }
+        return;
+      }
       editing = id || null;
       window.editingOriginalUpdatedAt = null;
       if (editing) {
@@ -6425,8 +6762,8 @@
 
     function addAuditLog(action, key, details) {
       if (!data.auditLogs) data.auditLogs = [];
-      const cu = sessionStorage.getItem('currentUser');
-      const user = cu ? JSON.parse(cu).username : 'Khách';
+      const cu = getCurrentUser();
+      const user = cu ? cu.username : 'Khách';
       const d = new Date();
       d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
       const ts = d.toISOString().replace('T', ' ').slice(0, 19);
@@ -6448,6 +6785,10 @@
     }
 
     function upsert(key, rec) {
+      if (!window.canEdit || !window.canEdit()) {
+        alert('Tài khoản của bạn không có quyền lưu thay đổi (đang ở chế độ Xem hoặc hệ thống đang Bảo trì).');
+        return;
+      }
       if (!window._isForceSaving && typeof window.checkConcurrencyAndSave === 'function') {
          if (!window.checkConcurrencyAndSave(key, rec, () => {
              window._isForceSaving = true;
@@ -6912,11 +7253,11 @@
       if (mode === 'login') {
         formHtml = `
             <h2 style="margin-bottom:5px; color:var(--text); letter-spacing:-0.5px">\u0110\u0103ng nh\u1EADp</h2>
-            <p style="color:var(--gray); margin-bottom:20px; font-size:13px">S\u1ED5 tay Kho Qu\u1EF9 \u0111i\u1EC7n t\u1EED 3633</p>
-            <input type="text" id="login-username" class="inp" placeholder="T\u00EAn \u0111\u0103ng nh\u1EADp" style="width:100%; margin-bottom:15px; box-sizing:border-box">
-            <input type="password" id="login-password" class="inp" placeholder="M\u1EADt kh\u1EA9u" style="width:100%; margin-bottom:20px; box-sizing:border-box">
+            <p style="color:var(--gray); margin-bottom:20px; font-size:13px; line-height:1.4;">Sổ tay điện tử<br>Kiểm tra tuyển chọn tiền KĐTCLT</p>
+            <input type="text" id="login-username" class="inp" placeholder="T\u00EAn \u0111\u0103ng nh\u1EADp" style="width:100%; margin-bottom:15px; box-sizing:border-box" onkeydown="if(event.key==='Enter'){event.preventDefault(); document.getElementById('login-password').focus();}">
+            <input type="password" id="login-password" class="inp" placeholder="M\u1EADt kh\u1EA9u" style="width:100%; margin-bottom:20px; box-sizing:border-box" onkeydown="if(event.key==='Enter'){event.preventDefault(); doLogin();}">
             <button class="btn" style="background:var(--green);color:white;width:100%; padding:10px; font-size:15px; margin-bottom:15px; justify-content:center; border:none; border-radius:4px; cursor:pointer;" onclick="doLogin()">Đăng nhập</button>
-            <div style="font-size:13px; color:var(--gray)">Chưa có tài khoản? <a href="#" style="color:var(--green)" onclick="renderLogin('register')">Đăng ký (Người xem)</a></div>
+            <div style="font-size:13px; color:var(--gray); line-height:1.5;">Chưa có tài khoản?<br><a href="#" style="color:var(--green); display:inline-block; margin-top:2px;" onclick="renderLogin('register')">Đăng ký (Người xem)</a></div>
             <div style="font-size:12px; color:var(--gray); margin-top:20px; border-top:1px solid var(--line); padding-top:15px;">
               <a href="#" style="color:var(--gray); text-decoration:none; display:flex; align-items:center; justify-content:center; gap:5px;" onclick="promptFirebaseConfig(); return false;">
                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg> Cấu hình Máy chủ
@@ -6930,7 +7271,7 @@
             <input type="text" id="reg-username" class="inp" placeholder="T\u00EAn \u0111\u0103ng nh\u1EADp" style="width:100%; margin-bottom:15px; box-sizing:border-box">
             <input type="password" id="reg-password" class="inp" placeholder="M\u1EADt kh\u1EA9u" style="width:100%; margin-bottom:20px; box-sizing:border-box">
             <button class="btn" style="background:var(--green);color:white;width:100%; padding:10px; font-size:15px; margin-bottom:15px; justify-content:center; border:none; border-radius:4px; cursor:pointer;" onclick="doRegister()">Đăng ký</button>
-            <div style="font-size:13px; color:var(--gray)">Đã có tài khoản? <a href="#" style="color:var(--green)" onclick="renderLogin('login')">Đăng nhập</a></div>
+            <div style="font-size:13px; color:var(--gray); line-height:1.5;">Đã có tài khoản?<br><a href="#" style="color:var(--green); display:inline-block; margin-top:2px;" onclick="renderLogin('login')">Đăng nhập</a></div>
             <div style="font-size:12px; color:var(--gray); margin-top:20px; border-top:1px solid var(--line); padding-top:15px;">
               <a href="#" style="color:var(--gray); text-decoration:none; display:flex; align-items:center; justify-content:center; gap:5px;" onclick="promptFirebaseConfig(); return false;">
                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg> Cấu hình Máy chủ
@@ -6953,21 +7294,36 @@
 
     window.promptFirebaseConfig = function () {
       const current = localStorage.getItem("firebase_config") || "";
-      const input = prompt("Nhập cấu hình Firebase (JSON) để kết nối máy chủ:", current);
-      if (input !== null) {
-        if (input.trim() === "") {
-          localStorage.removeItem("firebase_config");
-          alert("Đã xóa cấu hình máy chủ. Ứng dụng sẽ hoạt động ngoại tuyến.");
-          location.reload();
-        } else {
-          try {
-            JSON.parse(input); // Validate JSON
-            localStorage.setItem("firebase_config", input.trim());
-            alert("Đã lưu cấu hình! Hệ thống sẽ tải lại để kết nối.");
-            location.reload();
-          } catch (e) {
-            alert("Cấu hình không hợp lệ. Vui lòng nhập đúng định dạng JSON.");
-          }
+      const body = `
+        <div style="display:flex; flex-direction:column; gap:15px; margin-top:10px;">
+          <p style="margin:0; font-size:14px; color:var(--text);">Nhập cấu hình Firebase (JSON) để kết nối máy chủ.<br><small style="color:var(--gray)">Để trống nếu muốn xóa cấu hình hiện tại và dùng ngoại tuyến.</small></p>
+          <textarea id="firebase-config-input" class="inp" rows="6" style="width:100%; box-sizing:border-box; font-family:monospace; font-size:12px; padding:10px;">${current}</textarea>
+          <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:10px;">
+            <button class="btn" style="background:var(--gray); color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer;" onclick="closeModal()">Hủy</button>
+            <button class="btn" style="background:var(--green); color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer;" onclick="saveFirebaseConfig()">Lưu cấu hình</button>
+          </div>
+        </div>
+      `;
+      openModal("Cấu hình Máy chủ", body);
+    };
+
+    window.saveFirebaseConfig = function() {
+      const input = document.getElementById('firebase-config-input').value;
+      if (input.trim() === "") {
+        localStorage.removeItem("firebase_config");
+        if (typeof showToast === 'function') showToast("Đã xóa cấu hình máy chủ. Ứng dụng sẽ hoạt động ngoại tuyến.", "amber");
+        else alert("Đã xóa cấu hình máy chủ. Ứng dụng sẽ hoạt động ngoại tuyến.");
+        setTimeout(() => location.reload(), 1500);
+      } else {
+        try {
+          JSON.parse(input); // Validate JSON
+          localStorage.setItem("firebase_config", input.trim());
+          if (typeof showToast === 'function') showToast("Đã lưu cấu hình! Hệ thống sẽ tải lại để kết nối.", "green");
+          else alert("Đã lưu cấu hình! Hệ thống sẽ tải lại để kết nối.");
+          setTimeout(() => location.reload(), 1500);
+        } catch (e) {
+          if (typeof showToast === 'function') showToast("Cấu hình không hợp lệ. Vui lòng nhập đúng định dạng JSON.", "red");
+          else alert("Cấu hình không hợp lệ. Vui lòng nhập đúng định dạng JSON.");
         }
       }
     };
@@ -7031,10 +7387,8 @@
     };
 
     window.doLogout = function () {
-      if (confirm('Bạn có chắc chắn muốn đăng xuất?')) {
-        sessionStorage.removeItem('currentUser');
-        location.reload();
-      }
+      clearCurrentUser();
+      location.reload();
     };
 
     window.doLogin = async function () {
@@ -7078,7 +7432,7 @@
       }
 
       if (valid) {
-        sessionStorage.setItem('currentUser', JSON.stringify({ username: u }));
+        setCurrentUser(u);
         location.reload();
       } else {
         alert("Tên đăng nhập hoặc mật khẩu không đúng!");
@@ -7088,7 +7442,7 @@
     (async () => {
       await initFirebase();
       await loadData();
-      if (!sessionStorage.getItem('currentUser')) {
+      if (!getCurrentUser()) {
         renderLogin();
       } else {
         render();
