@@ -4940,6 +4940,118 @@
       location.reload();
     }
 
+    // Sao chép 8 collection từ app_data/main/{col} sang app_data/regions/KV01/{col}.
+    // An toàn khi chạy lại nhiều lần (ghi đè theo id, không xoá dữ liệu cũ ở main).
+    // GIAI ĐOẠN 1: chỉ tạo bản sao ở nhánh mới để kiểm tra, ứng dụng vẫn đang đọc/ghi
+    // ở app_data/main như hiện tại. Nên chạy lại hàm này ngay trước khi chuyển listener
+    // sang nhánh regions/ (giai đoạn 2) để đảm bảo có dữ liệu mới nhất.
+    async function migrateToRegions() {
+      if (!window.isAdmin || !window.isAdmin()) { alert('Chỉ admin được thực hiện thao tác này.'); return; }
+      if (!fbFirestore) { alert('Chưa cấu hình Firebase.'); return; }
+      if (!confirm('Sao chép dữ liệu hiện tại (KV01) sang cấu trúc phân vùng mới để chuẩn bị nâng cấp?\n\nThao tác này KHÔNG xoá hay thay đổi dữ liệu đang dùng, chỉ tạo thêm 1 bản sao. Có thể chạy lại nhiều lần.')) return;
+
+      const targetRegion = 'KV01';
+      try {
+        let totalDocs = 0;
+        for (const col of SYNC_COLLECTIONS) {
+          if (typeof showProgressOverlay === 'function') showProgressOverlay(true, 0, `Đang sao chép "${col}"...`);
+          const srcRef = fbFirestore.collection("app_data").doc("main").collection(col);
+          const snap = await srcRef.get();
+          const docs = snap.docs;
+          // Firestore bắt buộc xen kẽ collection/document, nên "khu vực" được biểu diễn
+          // bằng tên document "regions_KV01" (song song với document "main" hiện có),
+          // chứ không phải collection con "regions" chứa document "KV01".
+          const dstRef = fbFirestore.collection("app_data").doc("regions_" + targetRegion).collection(col);
+
+          let batch = fbFirestore.batch();
+          let opCount = 0;
+          for (let i = 0; i < docs.length; i++) {
+            const docSnap = docs[i];
+            batch.set(dstRef.doc(docSnap.id), docSnap.data());
+            opCount++;
+            totalDocs++;
+            if (opCount >= 450) {
+              await batch.commit();
+              batch = fbFirestore.batch();
+              opCount = 0;
+            }
+            if (typeof showProgressOverlay === 'function') showProgressOverlay(true, Math.round(((i + 1) / Math.max(docs.length, 1)) * 100), `Đang sao chép "${col}" (${i + 1}/${docs.length})...`);
+          }
+          if (opCount > 0) await batch.commit();
+        }
+
+        data.settings = data.settings || {};
+        data.settings.migratedToRegionsAt = Date.now();
+        saveData();
+        await pushUsersMetaNow();
+
+        if (typeof showProgressOverlay === 'function') showProgressOverlay(false);
+        showToast(`Đã sao chép xong ${totalDocs} bản ghi sang cấu trúc phân vùng (KV01).`, 'green');
+      } catch (err) {
+        if (typeof showProgressOverlay === 'function') showProgressOverlay(false);
+        console.error('Lỗi migrate sang phân vùng:', err);
+        alert('Lỗi khi sao chép dữ liệu sang phân vùng: ' + err.message);
+      }
+    }
+
+    // FIX: Trên một số mạng (đặc biệt mạng cơ quan/ngân hàng), kênh real-time (WebSocket) của
+    // Firestore có thể bị tường lửa chặn một phần trong khi kết nối HTTPS thường vẫn thông suốt.
+    // Khi đó window.hasServerSyncedOnce không bao giờ lên true (vì chỉ được set trong callback
+    // onSnapshot), khiến: (1) tab không bao giờ nhận dữ liệu mới → số liệu hiển thị bị kẹt, và
+    // (2) mọi thay đổi cục bộ (kể cả bật/tắt Bảo trì) chỉ nằm trong hàng đợi, không bao giờ được
+    // đẩy lên vì pushUsersMetaNow()/flushPendingSyncQueue() đều chờ hasServerSyncedOnce=true.
+    // forceSyncNow() đọc/ghi thẳng bằng .get({source:'server'}) (HTTPS thường), không phụ thuộc
+    // kênh real-time, nên vẫn hoạt động được trong tình huống trên — dùng làm lối thoát thủ công.
+    async function forceSyncNow(btnEl) {
+      if (!fbFirestore) { alert('Chưa cấu hình Firebase.'); return; }
+      if (!navigator.onLine) { alert('Máy đang ngoại tuyến — vui lòng kiểm tra kết nối mạng rồi thử lại.'); return; }
+
+      const oldText = btnEl ? btnEl.innerText : null;
+      if (btnEl) { btnEl.innerText = 'Đang đồng bộ...'; btnEl.disabled = true; }
+
+      try {
+        const mainSnap = await fbFirestore.collection("app_data").doc("main").get({ source: 'server' });
+        if (mainSnap.exists) {
+          const serverData = mainSnap.data();
+          data.users = serverData.users || [];
+          data.auditLogs = serverData.auditLogs || [];
+          data.settings = serverData.settings || {};
+          data.lastUpdated = serverData.lastUpdated || {};
+        }
+        if (!window.hasServerSyncedOnce) {
+          window.hasServerSyncedOnce = true;
+          window.__waitingForCloudPull = false;
+        }
+
+        // Đẩy ngay các thay đổi cục bộ còn tồn đọng (vd. bật/tắt Bảo trì chưa lên được server)
+        await flushPendingSyncQueue(false);
+
+        // Tải trực tiếp từ server (không qua onSnapshot) các collection của tab đang xem,
+        // để số liệu hiển thị đúng ngay lập tức.
+        const tabToColMap = {
+          tongquan: ['units', 'logs', 'recoveries'], donvi: ['units', 'seals', 'signatures'],
+          kehoach: ['plans'], nhatky: ['logs'], sanluong: ['inspections', 'recoveries'], thuvien: ['docs']
+        };
+        const colsToRefresh = tabToColMap[typeof tab !== 'undefined' ? tab : 'tongquan'] || [];
+        for (const col of colsToRefresh) {
+          const snap = await fbFirestore.collection("app_data").doc("main").collection(col).get({ source: 'server' });
+          data[col] = snap.docs.map(d => d.data());
+        }
+
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch (e) { }
+        try { await dbPut('store_data', 'default', data); } catch (e) { }
+
+        if (typeof render === 'function') render();
+        if (typeof updatePendingSyncBadge === 'function') updatePendingSyncBadge();
+        showToast('Đã đồng bộ trực tiếp với máy chủ thành công!', 'green');
+      } catch (err) {
+        console.error('Lỗi buộc đồng bộ:', err);
+        alert('Không thể kết nối trực tiếp tới máy chủ Firestore: ' + err.message + '\n\nNếu đang ở mạng cơ quan/công ty, có thể do tường lửa chặn kết nối. Vui lòng thử đổi sang mạng khác (ví dụ 4G) để kiểm tra.');
+      } finally {
+        if (btnEl) { btnEl.innerText = oldText; btnEl.disabled = false; }
+      }
+    }
+
     async function cloudBackup() {
       if (!fbStorage) { alert('Chưa cấu hình Firebase Storage.'); return; }
       if (!confirm('Xác nhận: Tạo bản sao lưu toàn bộ dữ liệu hiện tại lên Cloud? Thao tác này sẽ ghi đè bản sao lưu cũ trên Cloud.')) return;
@@ -5328,8 +5440,8 @@
           badge = document.createElement('div');
           badge.id = 'pending-sync-badge';
           badge.style.cssText = 'position:fixed;bottom:16px;right:16px;z-index:30000;background:#ef4444;color:#fff;font-size:13px;font-weight:700;padding:8px 14px;border-radius:20px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.25);';
-          badge.title = 'Bấm để thử đồng bộ lại ngay';
-          badge.onclick = () => flushPendingSyncQueue(true);
+          badge.title = 'Bấm để buộc đồng bộ ngay (kể cả khi kênh real-time bị chặn)';
+          badge.onclick = () => forceSyncNow();
           document.body.appendChild(badge);
         }
         badge.innerText = `⚠️ ${n} thay đổi chưa lên Cloud`;
@@ -5446,6 +5558,30 @@
     }
 
     const SYNC_COLLECTIONS = ['units', 'plans', 'logs', 'inspections', 'recoveries', 'docs', 'signatures', 'seals'];
+
+    // ===== Phân vùng theo khu vực (KV01-KV04) =====
+    // GIAI ĐOẠN 1 (hiện tại): chỉ chuẩn bị dữ liệu/quy ước, CHƯA đổi đường dẫn Firestore
+    // mà các listener/collection đang dùng (app_data/main/{col}), để không ảnh hưởng tới
+    // hệ thống đang chạy. Việc chuyển listener/backup sang app_data/regions/{regionId}/{col}
+    // sẽ làm ở giai đoạn 2, sau khi đã chạy migrateToRegions() và kiểm tra dữ liệu.
+    const ALL_REGIONS = ['KV01', 'KV02', 'KV03', 'KV04'];
+
+    function getActiveRegions() {
+      data.settings = data.settings || {};
+      if (!Array.isArray(data.settings.activeRegions) || data.settings.activeRegions.length === 0) {
+        data.settings.activeRegions = ['KV01'];
+      }
+      return data.settings.activeRegions;
+    }
+
+    // Trả về khu vực của 1 tài khoản. admin luôn thuộc KV01 (theo quyết định:
+    // admin quản lý toàn bộ nhưng nhập liệu cho KV01). Tài khoản cũ (đăng ký trước khi
+    // có phân vùng) mặc định KV01 để tương thích ngược.
+    function getUserRegion(username) {
+      if (username === 'admin') return 'KV01';
+      const u = (data.users || []).find(x => x.username === username);
+      return (u && u.region) || 'KV01';
+    }
     let needsRender = false;
 
     function handleRemoteChange() {
@@ -6106,6 +6242,29 @@
       render();
     }
 
+    async function changeUserRegion(username, newRegion, btnEl) {
+      const u = data.users.find(x => x.username === username);
+      if (!u) return;
+      if (!ALL_REGIONS.includes(newRegion)) return;
+      if (u.region === newRegion) return;
+      u.region = newRegion;
+      saveData();
+
+      const oldText = btnEl ? btnEl.innerText : null;
+      if (btnEl) { btnEl.disabled = true; }
+
+      const synced = await pushUsersMetaNow();
+
+      if (btnEl) { btnEl.disabled = false; }
+
+      if (synced) {
+        showToast(`Đã chuyển "${username}" sang ${newRegion}`, 'green');
+      } else {
+        alert(`Đã đổi khu vực cục bộ cho "${username}", nhưng KHÔNG đồng bộ được lên máy chủ ngay (mất mạng hoặc đang chờ đồng bộ lần đầu). Hệ thống sẽ tự thử lại.`);
+      }
+      render();
+    }
+
     async function toggleMaintenanceMode(btnEl) {
       data.settings = data.settings || {};
       const turningOn = !data.settings.maintenanceMode;
@@ -6154,11 +6313,16 @@
       const listHtml = users.length === 0 ? `<div style="padding:20px; text-align:center; color:var(--gray)">Chưa có tài khoản nào đăng ký</div>` :
         users.map(u => {
           const isEditor = u.role === 'editor';
+          const userRegion = u.region || 'KV01';
+          const regionOptions = ALL_REGIONS.map(r => `<option value="${r}" ${r === userRegion ? 'selected' : ''}>${r}</option>`).join('');
           return `
           <div style="background:#fff; border:1px solid var(--line); border-radius:12px; padding:15px; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
             <div>
               <div style="font-weight:600; font-size:15px; color:var(--primary); margin-bottom:4px;">${esc(u.username)}</div>
               <div style="font-size:13px; color:${isEditor ? '#2563eb' : 'var(--gray)'};">Quyền: ${isEditor ? '✏️ Chỉnh sửa' : '👁️ Xem'}</div>
+              <div style="font-size:13px; color:var(--gray); margin-top:2px; display:flex; align-items:center; gap:6px;">Khu vực:
+                <select onchange="changeUserRegion('${u.username}', this.value, this)" style="border:1px solid var(--line); border-radius:6px; padding:2px 6px; font-size:12px; font-weight:600;">${regionOptions}</select>
+              </div>
             </div>
             <div style="display:flex; gap:10px; flex-wrap:wrap;">
               ${isEditor
@@ -6239,7 +6403,16 @@
 
     function renderSaoluu() {
       const fbConfig = localStorage.getItem('firebase_config') || '';
-      return `${secHead('Đồng bộ Firebase Storage', 'Lưu trữ đám mây toàn bộ dữ liệu (Text & File Đính kèm).')}
+      const migratedAt = data.settings && data.settings.migratedToRegionsAt;
+      const migrateSection = (window.isAdmin && window.isAdmin()) ? `
+      ${secHead('Chuẩn bị phân vùng theo khu vực (KV01-KV04)', 'Bước chuẩn bị nâng cấp — sao chép dữ liệu hiện tại sang cấu trúc mới, chưa ảnh hưởng tới ứng dụng đang chạy.')}
+      <div class="card" style="margin-bottom:24px">
+        <div style="font-size:13px; color:var(--gray); margin-bottom:10px;">${migratedAt ? `Đã sao chép lần gần nhất: ${new Date(migratedAt).toLocaleString('vi-VN')}. Có thể chạy lại để cập nhật bản sao mới nhất trước khi nâng cấp chính thức.` : 'Chưa chạy lần nào.'}</div>
+        <button class="btn" style="background:#ede9fe;color:#6d28d9;font-weight:600;" onclick="migrateToRegions()">🧭 Sao chép dữ liệu sang cấu trúc phân vùng (KV01)</button>
+      </div>
+
+      ${secHead('Đồng bộ Firebase Storage', 'Lưu trữ đám mây toàn bộ dữ liệu (Text & File Đính kèm).')}` : `${secHead('Đồng bộ Firebase Storage', 'Lưu trữ đám mây toàn bộ dữ liệu (Text & File Đính kèm).')}`;
+      return `${migrateSection}
       <div class="card" style="margin-bottom:24px">
         <div class="fgrid">
           <label class="f span"><span>Firebase Config JSON</span>
@@ -6248,8 +6421,10 @@
         </div>
         <div class="span" style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;align-items:center;">
           <button class="btn primary" onclick="saveFirebaseSettings()">Lưu cấu hình</button>
+          <button class="btn" style="background:#fee2e2;color:#dc2626;font-weight:600;" onclick="forceSyncNow(this)">🔄 Buộc đồng bộ ngay</button>
           <div id="saoluu-sync-status" style="font-size:13px; font-weight:600; padding:0 10px;"></div>
         </div>
+        <div style="font-size:12.5px; color:var(--gray); margin-top:6px;">Dùng nút "Buộc đồng bộ ngay" khi thấy số liệu bị kẹt/cũ hoặc badge "chưa lên Cloud" không tự hết — nút này đồng bộ trực tiếp, không phụ thuộc kênh real-time.</div>
       </div>
 
       ${secHead('Đồng bộ Cloud thủ công', 'Sao lưu & Khôi phục dữ liệu trực tiếp qua Firebase Storage.')}
@@ -7356,7 +7531,11 @@
       btn.innerText = 'Đang xử lý...';
       btn.disabled = true;
 
-      const newUser = { username: u, password: p, role: 'viewer' };
+      // Tài khoản mới tự đăng ký được gán vào khu vực đang hoạt động đầu tiên
+      // (hiện tại luôn là KV01, vì KV02-04 chưa mở). Khi mở thêm khu vực, admin
+      // đổi khu vực cho tài khoản qua changeUserRegion() nếu cần.
+      const regionForNewUser = getActiveRegions()[0] || 'KV01';
+      const newUser = { username: u, password: p, role: 'viewer', region: regionForNewUser };
       data.users.push(newUser);
       
       let success = false;
