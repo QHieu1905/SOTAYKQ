@@ -1786,18 +1786,22 @@
       .tf-details[open] .tf-summary .tf-caret { transform: rotate(180deg); }
       .tf-badge { padding: 2px 7px; border-radius: 8px; font-size: 11px; color: #fff; font-weight: 700; }
       .tf-panel {
-        position: absolute; right: 0; top: calc(100% + 8px);
+        position: absolute; top: calc(100% + 8px);
         background: #fff; padding: 14px; border-radius: 14px; border: 1px solid var(--line);
         box-shadow: 0 12px 28px rgba(0,0,0,0.12); display: flex; flex-direction: column; gap: 10px;
         width: 300px; max-width: calc(100vw - 32px); box-sizing: border-box; z-index: 20;
         animation: tf-pop .15s ease-out;
       }
+      .tf-details.tf-right .tf-panel { right: 0; left: auto; }
+      .tf-details.tf-left .tf-panel { left: 0; right: auto; }
       @keyframes tf-pop { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
       .tf-panel::before {
-        content: ''; position: absolute; top: -6px; right: 25px; width: 11px; height: 11px;
+        content: ''; position: absolute; top: -6px; width: 11px; height: 11px;
         background: #fff; border-left: 1px solid var(--line); border-top: 1px solid var(--line);
         transform: rotate(45deg); border-radius: 2px 0 0 0;
       }
+      .tf-details.tf-right .tf-panel::before { right: 25px; left: auto; }
+      .tf-details.tf-left .tf-panel::before { left: 20px; right: auto; }
       .tf-row { display: flex; gap: 8px; }
       .tf-field { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
       .tf-field span { font-size: 11px; font-weight: 700; color: var(--gray); text-transform: uppercase; letter-spacing: 0.3px; }
@@ -3314,7 +3318,7 @@
       const hasFilter = cfg.start || cfg.end;
       const color = cfg.color || 'var(--green)';
       return `
-        <details class="tf-details ${cfg.className}" style="position:relative; z-index:10;" ${cfg.isOpen ? 'open' : ''}>
+        <details class="tf-details tf-${cfg.align || 'left'} ${cfg.className}" style="position:relative; z-index:10;" ${cfg.isOpen ? 'open' : ''}>
           <summary class="tf-summary">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
             Thời gian ${hasFilter ? `<span class="tf-badge" style="background:${color}">Đã lọc</span>` : ''}
@@ -3557,7 +3561,7 @@
              Tổng quan
           </h2>
           ${timeFilterDropdown({
-            className: 'month-filter-details-tq',
+            className: 'month-filter-details-tq', align: 'right',
             start: filterStartTQ, end: filterEndTQ,
             startVar: 'filterStartTQ', endVar: 'filterEndTQ',
             module: 'tq', color: '#16a34a', isOpen: window.tqFilterOpen
@@ -4072,7 +4076,7 @@
       const totalSheets = list.reduce((sum, r) => sum + (Number(r.amount1) || 0) + (Number(r.amount2) || 0), 0);
 
       const monthFilterHtml = timeFilterDropdown({
-        className: 'month-filter-details-nk',
+        className: 'month-filter-details-nk', align: 'left',
         start: filterStartNK, end: filterEndNK,
         startVar: 'filterStartNK', endVar: 'filterEndNK',
         module: 'nk', color: 'var(--main)', isOpen: window.nkFilterOpen
@@ -4320,7 +4324,7 @@
       const monthFilterHtml = `
         <div style="display:flex; align-items:center; gap:12px; flex-wrap: wrap;">
           ${allMonths.length > 0 ? timeFilterDropdown({
-            className: 'month-filter-details-sl',
+            className: 'month-filter-details-sl', align: 'left',
             start: filterStartSL, end: filterEndSL,
             startVar: 'filterStartSL', endVar: 'filterEndSL',
             module: 'sl', color: 'var(--main)', isOpen: window.slFilterOpen
