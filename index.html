@@ -4333,7 +4333,6 @@
       `;
 
       const list = byUnit(Object.values(agg)).filter(r => {
-        if (filterMonthSL.length > 0 && !filterMonthSL.includes(r.month)) return false;
         if (!matchQ(unitName(r.unitId), r.month)) return false;
         return Object.values(r.items).some(i => i.qty > 0 || i.invQty > 0);
       }).sort((a, b) => b.month.localeCompare(a.month));
