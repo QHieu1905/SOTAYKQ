@@ -1770,6 +1770,7 @@
         .header { padding-left: 16px !important; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); background: rgba(255, 255, 255, 0.85) !important; }
       }
       /* ===== Time filter dropdown ("Thời gian") — dùng chung cho Tổng quan/Nhật ký/Sản lượng ===== */
+      .tf-details { position: relative; display: inline-block; }
       .tf-details summary { list-style: none; }
       .tf-details summary::-webkit-details-marker { display: none; }
       .tf-details summary::marker { content: ''; }
@@ -1785,7 +1786,7 @@
       .tf-details[open] .tf-summary .tf-caret { transform: rotate(180deg); }
       .tf-badge { padding: 2px 7px; border-radius: 8px; font-size: 11px; color: #fff; font-weight: 700; }
       .tf-panel {
-        position: absolute; left: 0; top: calc(100% + 8px);
+        position: absolute; right: 0; top: calc(100% + 8px);
         background: #fff; padding: 14px; border-radius: 14px; border: 1px solid var(--line);
         box-shadow: 0 12px 28px rgba(0,0,0,0.12); display: flex; flex-direction: column; gap: 10px;
         width: 300px; max-width: calc(100vw - 32px); box-sizing: border-box; z-index: 20;
@@ -1793,7 +1794,7 @@
       }
       @keyframes tf-pop { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
       .tf-panel::before {
-        content: ''; position: absolute; top: -6px; left: 20px; width: 11px; height: 11px;
+        content: ''; position: absolute; top: -6px; right: 25px; width: 11px; height: 11px;
         background: #fff; border-left: 1px solid var(--line); border-top: 1px solid var(--line);
         transform: rotate(45deg); border-radius: 2px 0 0 0;
       }
