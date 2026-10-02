@@ -1836,12 +1836,6 @@
     .top-btn.danger:hover { background: var(--red-soft); border-color: #fecdd3; color: var(--red); }
     #nav { display: flex; flex-direction: column; gap: 4px; }
     .modal:not(#pdf-modal-container) { max-width: min(100%, 760px) !important; max-height: 92vh; max-height: 92dvh; }
-    @media (min-width: 1100px) {
-      aside#sidebar { width: 240px; }
-      aside#sidebar .navbtn { width: calc(100% - 24px); margin-left: 12px; padding: 0 14px; height: 46px; gap: 12px; }
-      aside#sidebar .navbtn span { position: static; transform: none; opacity: 1; visibility: visible; margin-left: 0; background: transparent; color: inherit; padding: 0; box-shadow: none; font-size: 13.5px; font-weight: 600; white-space: normal; line-height: 1.25; pointer-events: auto; text-align: left; }
-      aside#sidebar .navbtn:hover span { margin-left: 0; }
-    }
     #tabbar, #more-sheet { display: none; }
     @media (max-width: 860px) {
       .top-actions { display: none; }
@@ -1882,6 +1876,19 @@
       .kpi-lbl { font-size: .72rem !important; }
       .tq-sub { font-size: 11px !important; }
       .tq-tag { font-size: 10.5px !important; }
+    }
+    /* Nhật ký kiểm tra: vừa khít màn hình, không cuộn ngang */
+    .nk-desk .tbl-scroll { overflow-x: visible; }
+    .nk-desk table { table-layout: auto; font-size: 13px; }
+    .nk-desk th { white-space: normal; padding: 14px 10px; line-height: 1.3; }
+    .nk-desk td { padding: 12px 10px; }
+    .nk-desk th:first-child, .nk-desk td:first-child { padding-left: 14px; }
+    .nk-desk .unit-cell { min-width: 0; }
+    .nk-desk .pill { white-space: normal; text-align: center; }
+    @media (max-width: 1100px) {
+      .nk-desk table { font-size: 12.5px; }
+      .nk-desk th { font-size: 10.5px; letter-spacing: 0; padding: 12px 6px; }
+      .nk-desk td { padding: 10px 6px; }
     }
   </style>
 </head>
@@ -4280,7 +4287,7 @@
 
                 const deskRow = [
                   `<div style="text-align:center">${idx + 1}</div>`, fmtDate(r.date), unitCell(r.unitId), denomStr, amountStr, invStr, ratioStr,
-                  diffStr, conclusionPill, fileHtml, rowActs(`openForm('log','${r.id}')`, `removeRec('logs','${r.id}')`)
+                  conclusionPill, fileHtml, rowActs(`openForm('log','${r.id}')`, `removeRec('logs','${r.id}')`)
                 ];
 
                 const mobCard = `
@@ -4334,11 +4341,11 @@
                 return { deskRow, mobCard };
               });
 
-              const deskTable = tbl(['STT', 'Ngày kiểm tra', 'Đơn vị', 'Mệnh giá', 'Số tờ kiểm tra', 'Số tờ KĐTCLT', 'Tỷ lệ', 'Khớp đúng/Thừa/Thiếu/Lẫn', 'Kết luận', 'File', ''], mappedData.map(d => d.deskRow));
+              const deskTable = tbl(['STT', 'Ngày kiểm tra', 'Đơn vị', 'Mệnh giá', 'Số tờ kiểm tra', 'Số tờ KĐTCLT', 'Tỷ lệ', 'Kết luận', 'File', ''], mappedData.map(d => d.deskRow));
               const mobList = mappedData.map(d => d.mobCard).join('');
 
               return `
-                <div class="desktop-only">${deskTable}</div>
+                <div class="desktop-only nk-desk">${deskTable}</div>
                 <div class="mobile-only">
                   <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
                     <button onclick="document.querySelectorAll('.nk-card').forEach(c=>c.classList.toggle('expanded')); haptic();" style="background:#f3f4f6; border:none; padding:8px 16px; border-radius:12px; font-size:12px; font-weight:600; color:#4b5563; cursor:pointer; touch-action: manipulation;">
