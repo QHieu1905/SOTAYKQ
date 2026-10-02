@@ -1836,29 +1836,25 @@
     .top-btn.danger:hover { background: var(--red-soft); border-color: #fecdd3; color: var(--red); }
     #nav { display: flex; flex-direction: column; gap: 4px; }
     .modal:not(#pdf-modal-container) { max-width: min(100%, 760px) !important; max-height: 92vh; max-height: 92dvh; }
-    #tabbar, #more-sheet { display: none; }
     @media (max-width: 860px) {
       .top-actions { display: none; }
-      .fan-menu, .fan-overlay { display: none !important; }
-      body.is-authenticated #tabbar { display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 9000; background: rgba(255,255,255,.96); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-top: 1px solid var(--line); padding: 6px 4px calc(6px + env(safe-area-inset-bottom)); box-shadow: 0 -4px 16px rgba(0,0,0,.05); }
-      .tb-btn { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 2px; border: none; background: transparent; color: var(--gray); padding: 6px 2px; min-height: 48px; border-radius: 12px; font-size: 11px; font-weight: 600; }
-      .tb-btn svg { width: 22px; height: 22px; }
-      .tb-btn span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-      .tb-btn.active { color: var(--green-dark); background: var(--mint); }
-      body.is-authenticated #more-sheet { display: block; position: fixed; inset: 0; z-index: 9500; visibility: hidden; transition: visibility .25s; }
-      #more-sheet.open { visibility: visible; }
-      .more-bg { position: absolute; inset: 0; background: rgba(69,26,3,.4); opacity: 0; transition: opacity .2s; }
-      #more-sheet.open .more-bg { opacity: 1; }
-      .more-panel { position: absolute; left: 0; right: 0; bottom: 0; background: #fff; border-radius: 20px 20px 0 0; padding: 8px 12px calc(16px + env(safe-area-inset-bottom)); transform: translateY(100%); transition: transform .25s; max-height: 75vh; max-height: 75dvh; overflow-y: auto; }
-      #more-sheet.open .more-panel { transform: none; }
-      .more-grip { width: 40px; height: 4px; border-radius: 2px; background: var(--line); margin: 4px auto 10px; }
-      .more-item { display: flex; align-items: center; gap: 14px; width: 100%; min-height: 52px; padding: 0 12px; border: none; background: transparent; border-radius: 12px; font-size: 15px; font-weight: 600; color: var(--text); text-align: left; }
-      .more-item svg { width: 22px; height: 22px; flex-shrink: 0; color: var(--green-dark); }
-      .more-item.active { background: var(--mint); }
-      .more-item.danger, .more-item.danger svg { color: var(--red); }
-      #sync-dot { bottom: calc(72px + env(safe-area-inset-bottom)) !important; }
-      .content { padding-bottom: calc(84px + env(safe-area-inset-bottom)) !important; }
     }
+    /* Tia sáng nối nút menu tới từng module */
+    .fan-rays { position: absolute; left: 0; top: 0; width: 1px; height: 1px; overflow: visible; pointer-events: none; filter: drop-shadow(0 0 3px rgba(245,158,11,.55)); }
+    .fan-ray line { fill: none; stroke-linecap: round; }
+    .fan-ray-base { stroke: rgba(217,119,6,.30); stroke-width: 1.6; stroke-dasharray: 1; stroke-dashoffset: 1; opacity: 0; }
+    .fan-menu.open .fan-ray-base { opacity: 1; animation: fanRayIn .5s ease-out forwards; }
+    .fan-ray-glow { stroke: #fcd34d; stroke-width: 2.6; stroke-dasharray: 0.16 1; stroke-dashoffset: 0.16; opacity: 0; }
+    .fan-menu.open .fan-ray-glow { opacity: 1; animation: fanRayRun 1.7s linear .45s infinite; }
+    .fan-ray.active .fan-ray-base { stroke: rgba(245,158,11,.8); stroke-width: 2.2; }
+    .fan-ray.lit .fan-ray-base { stroke: #f59e0b; stroke-width: 3.2; transition: stroke-width .15s; }
+    .fan-ray.lit .fan-ray-glow { stroke: #fff3bf; stroke-width: 4; stroke-dasharray: 1 0; stroke-dashoffset: 0; animation: none; }
+    .fan-rays:has(.fan-ray.lit) { filter: drop-shadow(0 0 7px rgba(245,158,11,.95)); }
+    @keyframes fanRayIn { to { stroke-dashoffset: 0; } }
+    @keyframes fanRayRun { from { stroke-dashoffset: 0.16; } to { stroke-dashoffset: -1; } }
+    .fan-item.active { box-shadow: 0 0 0 2px rgba(245,158,11,.5), 0 0 14px rgba(245,158,11,.45); }
+    .fan-item.lit { background: #fff7e0; border-color: #f59e0b; box-shadow: 0 0 0 3px rgba(251,191,36,.6), 0 0 24px 8px rgba(245,158,11,.7); animation: fanLit .32s ease-out; }
+    @keyframes fanLit { from { box-shadow: 0 0 0 0 rgba(245,158,11,.9), 0 0 0 0 rgba(245,158,11,.6); } }
     @media (max-width: 768px) {
       .content { padding-top: 10px !important; padding-left: 12px !important; padding-right: 12px !important; }
       .topbar { padding: 0 !important; margin-bottom: 12px; }
@@ -3131,7 +3127,6 @@
         tabsToRender.push({ id: 'audit', label: '8. Lịch sử hoạt động', icon: 'audit' });
       }
       
-      if (typeof renderTabbar === 'function') renderTabbar(tabsToRender);
       const navEl = document.getElementById('nav');
       if(navEl) {
         navEl.innerHTML = [{ id: 'tongquan', label: 'Tổng quan', icon: 'dash' }, ...tabsToRender].map(t =>
@@ -3184,7 +3179,8 @@
         let R_outer = Math.min(180, maxR);
         let R_inner = Math.min(100, maxR * 0.55);
         
-        fanEl.innerHTML = fanTabs.map((t, index) => {
+        const _rays = [];
+        const _btns = fanTabs.map((t, index) => {
           const isOuter = index >= innerCount;
           const layerIndex = isOuter ? index - innerCount : index;
           const layerCount = isOuter ? outerCount : innerCount;
@@ -3202,38 +3198,22 @@
           let x = R * Math.cos(angleRad);
           let y = R * Math.sin(angleRad);
           
-          let onclickStr = `haptic(); switchTab('${t.id}', true); window.toggleFanMenu();`;
+          let onclickStr = `haptic(); window.fanPick(this, '${t.id}');`;
           const isActive = tab === t.id || (t.id === 'tongquan' && !fanTabs.find(ft => ft.id === tab && ft.id !== 'tongquan'));
           
           let shortLabel = t.label.includes('.') ? t.label.split('.')[1].trim() : t.label;
           
-          return `<button class="fan-item ${isActive ? 'active' : ''}" data-x="${x}" data-y="${y}" style="--x: ${x}px; --y: ${y}px;" onclick="${onclickStr}">${ICONS[t.icon] || ''}<span>${shortLabel}</span></button>`;
+          const _len = Math.hypot(x, y) || 1, _ux = x / _len, _uy = y / _len;
+          if (_len > 80) {
+            const c = (v) => v.toFixed(1);
+            const ln = (cls, extra) => `<line class="${cls}" pathLength="1" x1="${c(_ux * 36)}" y1="${c(_uy * 36)}" x2="${c(_ux * (_len - 30))}" y2="${c(_uy * (_len - 30))}" ${extra || ''}/>`;
+            _rays.push(`<g class="fan-ray ${isActive ? 'active' : ''}" data-id="${t.id}">${ln('fan-ray-base')}${ln('fan-ray-glow', `style="animation-delay:${(index * 0.15).toFixed(2)}s"`)}</g>`);
+          }
+          return `<button class="fan-item ${isActive ? 'active' : ''}" data-id="${t.id}" data-x="${x}" data-y="${y}" style="--x: ${x}px; --y: ${y}px;" onclick="${onclickStr}">${ICONS[t.icon] || ''}<span>${shortLabel}</span></button>`;
         }).join('');
+        fanEl.innerHTML = `<svg class="fan-rays" aria-hidden="true">${_rays.join('')}</svg>` + _btns;
       }
     }
-
-    window.renderTabbar = function (tabsToRender) {
-      const ids = ['tongquan', 'kehoach', 'nhatky', 'sanluong'];
-      const short = { tongquan: 'Tổng quan', kehoach: 'Lịch KT', nhatky: 'Nhật ký', sanluong: 'Sản lượng' };
-      const all = [{ id: 'tongquan', label: 'Tổng quan', icon: 'dash' }, ...tabsToRender];
-      const main = ids.map(id => all.find(t => t.id === id)).filter(Boolean);
-      const more = all.filter(t => !ids.includes(t.id));
-      const cur = typeof tab !== 'undefined' ? tab : 'tongquan';
-      const clean = l => String(l).replace(/^\d+\.\s*/, '');
-      let tb = document.getElementById('tabbar');
-      if (!tb) { tb = document.createElement('nav'); tb.id = 'tabbar'; tb.setAttribute('aria-label', 'Điều hướng chính'); document.body.appendChild(tb); }
-      let ms = document.getElementById('more-sheet');
-      if (!ms) { ms = document.createElement('div'); ms.id = 'more-sheet'; document.body.appendChild(ms); }
-      tb.innerHTML = main.map(t => `<button type="button" class="tb-btn ${cur === t.id ? 'active' : ''}" onclick="haptic(); toggleMoreSheet(false); switchTab('${t.id}', true)">${ICONS[t.icon] || ''}<span>${short[t.id] || clean(t.label)}</span></button>`).join('')
-        + (more.length ? `<button type="button" class="tb-btn ${more.some(t => t.id === cur) ? 'active' : ''}" onclick="haptic(); toggleMoreSheet()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="5" cy="12" r="1.2"></circle><circle cx="12" cy="12" r="1.2"></circle><circle cx="19" cy="12" r="1.2"></circle></svg><span>Thêm</span></button>` : '');
-      ms.innerHTML = `<div class="more-bg" onclick="toggleMoreSheet(false)"></div><div class="more-panel"><div class="more-grip"></div>`
-        + more.map(t => `<button type="button" class="more-item ${cur === t.id ? 'active' : ''}" onclick="toggleMoreSheet(false); switchTab('${t.id}', true)">${ICONS[t.icon] || ''}<span>${clean(t.label)}</span></button>`).join('')
-        + `<button type="button" class="more-item danger" onclick="toggleMoreSheet(false); doLogout()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg><span>Đăng xuất</span></button></div>`;
-    };
-    window.toggleMoreSheet = function (force) {
-      const ms = document.getElementById('more-sheet');
-      if (ms) ms.classList.toggle('open', force === undefined ? !ms.classList.contains('open') : force);
-    };
 
     let isPriorityOpen = false;
 
@@ -3255,6 +3235,17 @@
         }
       }
     });
+
+    window.fanPick = function (el, id) {
+      const menu = document.getElementById('fan-menu');
+      if (!menu || !menu.classList.contains('open')) { switchTab(id, true); return; }
+      if (menu.dataset.picking) return;
+      menu.dataset.picking = '1';
+      el.classList.add('lit');
+      const ray = document.querySelector('.fan-ray[data-id="' + id + '"]');
+      if (ray) ray.classList.add('lit');
+      setTimeout(() => { delete menu.dataset.picking; switchTab(id, true); window.toggleFanMenu(); }, 320);
+    };
 
     window.toggleFanMenu = function(e) {
       if (e) { e.preventDefault(); e.stopPropagation(); }
