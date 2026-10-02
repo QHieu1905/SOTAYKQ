@@ -1817,8 +1817,13 @@
         cursor: pointer; font-size: 12.5px; transition: filter .15s, transform .1s;
       }
       .tf-actions button:active { transform: scale(0.97); }
-      .tf-actions .tf-apply { color: #fff; }
-      .tf-actions .tf-apply:hover { filter: brightness(1.08); }
+      .tf-actions .tf-apply { 
+        color: #0f172a !important; 
+        background: #86efac !important; 
+        border: 2px solid #16a34a !important; 
+        border-radius: 12px;
+      }
+      .tf-actions .tf-apply:hover { filter: brightness(1.08); transform: translateY(-1px); }
       .tf-actions .tf-clear { background: #fef2f2; color: #ef4444; }
       .tf-actions .tf-clear:hover { background: #fee2e2; }
   </style>
@@ -3341,7 +3346,7 @@
               </label>
             </div>
             <div class="tf-actions">
-              <button class="tf-apply" onclick="window.${cfg.module}FilterOpen = false; render()" style="background:${color}">Áp dụng</button>
+              <button class="tf-apply" onclick="window.${cfg.module}FilterOpen = false; render()">Áp dụng</button>
               ${hasFilter ? `<button class="tf-clear" onclick="setMonthRange('', '${cfg.module}')">Xoá lọc</button>` : ''}
             </div>
           </div>
