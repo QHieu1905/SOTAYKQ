@@ -3456,6 +3456,109 @@
     }
 
     /* ================= 1. TỔNG QUAN ================= */
+    /* ================= TỔNG QUAN: KHÓA SỔ / DẢI CHỈ SỐ / XU HƯỚNG / ĐỐI CHIẾU TIẾN BỘ ================= */
+    const TQ_TOTAL_TCTD = 48;          // tổng số TCTD thuộc phạm vi theo dõi
+    const TQ_LOCK_MIN_UNITS = 45;      // số TCTD đã kiểm tra tối thiểu để khóa sổ Vòng 1 (45/48 = 93,75%)
+    const TQ_LOCK_MIN_PCT = 90;        // và độ phủ tối thiểu (%)
+    const TQ_EXEMPT_KEYWORDS = ['scb', 'shinhan', 'woori'];   // 03 TCTD ít giao dịch tiền mặt tại kho NHNN
+    const TQ_PROGRESS_EPS = 0.5;       // độ lệch (điểm %) coi là "ổn định" khi so Lần 1 với Lần 2
+    const TQ_ROUNDS = 4;               // tối đa 4 lần/năm, mỗi lần cách nhau 3 tháng (Lần 1 = T01-03, Lần 2 = T04-06, Lần 3 = T07-09, Lần 4 = T10-12)
+    const TQ_TREND_MONTHS = 10;        // biểu đồ xu hướng: Tháng 01 - Tháng 10
+    const TQ_TREND_DENOMS = [
+      ['all', 'Tất cả mệnh giá (Bình quân gia quyền)'],
+      ['500000', '500.000đ'], ['200000', '200.000đ'], ['100000', '100.000đ'],
+      ['50000', '50.000đ'], ['20000', '20.000đ'], ['10000', '10.000đ']
+    ];
+
+    function tqIsExempt(u) {
+      if (!u) return false;
+      if (u.exempt === true) return true;
+      const n = String(u.name || '').toLowerCase();
+      return TQ_EXEMPT_KEYWORDS.some(k => new RegExp('\\b' + k + '\\b', 'i').test(n));
+    }
+
+    function tqDenomVal(d) {
+      if (!d || d === 'none') return 0;
+      const m = { '500k': 500000, '200k': 200000, '100k': 100000, '50k': 50000, '20k': 20000, '10k': 10000, '5k': 5000 };
+      if (m[d]) return m[d];
+      const s = String(d);
+      if (/k$/i.test(s.trim())) return (Number(s.replace(/k/gi, '')) || 0) * 1000;
+      return Number(s.replace(/\./g, '').replace(/đ|d| /gi, '')) || 0;
+    }
+
+    // Phân vị tuyến tính (tương đương QUARTILE.INC của Excel). Mảng đã sắp tăng dần.
+    function tqQuantile(sorted, q) {
+      if (!sorted.length) return null;
+      const pos = (sorted.length - 1) * q;
+      const lo = Math.floor(pos), hi = Math.ceil(pos);
+      return sorted[lo] + (sorted[hi] - sorted[lo]) * (pos - lo);
+    }
+
+    const tqPct = v => (v == null || isNaN(v)) ? '—' : v.toFixed(2) + '%';
+
+    function tqTrendSvg(vals) {
+      const W = 560, H = 270, L = 46, R = 18, T = 28, B = 38;
+      const pw = W - L - R, ph = H - T - B;
+      const nonNull = vals.filter(v => v != null);
+      if (!nonNull.length) {
+        return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Chưa có dữ liệu"><text x="${W / 2}" y="${H / 2}" text-anchor="middle" fill="#9ca3af" font-size="14">Chưa có dữ liệu cho mệnh giá này</text></svg>`;
+      }
+      const maxV = Math.max(...nonNull);
+      const yMax = Math.max(7, Math.ceil(maxV + 1));
+      const step = yMax > 10 ? 2 : 1;
+      const x = i => L + 18 + (pw - 36) * (vals.length === 1 ? 0.5 : i / (vals.length - 1)); // chừa lề để nhãn điểm đầu không đè trục Y
+      const y = v => T + ph * (1 - v / yMax);
+      let grid = '';
+      for (let g = 0; g <= yMax; g += step) {
+        grid += `<line x1="${L}" y1="${y(g)}" x2="${W - R}" y2="${y(g)}" stroke="#f3e8d0" stroke-width="1"/>` +
+                `<text x="${L - 8}" y="${y(g) + 4}" text-anchor="end" fill="#92400e" font-size="11">${g}%</text>`;
+      }
+      let d = '', open = false;
+      vals.forEach((v, i) => { if (v == null) return; d += (open ? 'L' : 'M') + x(i).toFixed(1) + ',' + y(v).toFixed(1) + ' '; open = true; });
+      let pts = '', xl = '';
+      vals.forEach((v, i) => {
+        xl += `<text x="${x(i)}" y="${H - 14}" text-anchor="middle" fill="#78350f" font-size="11">T${String(i + 1).padStart(2, '0')}</text>`;
+        if (v == null) return;
+        const bad = v > 5;
+        pts += `<circle cx="${x(i)}" cy="${y(v)}" r="4.5" fill="${bad ? '#e11d48' : '#059669'}" stroke="#fff" stroke-width="1.5"><title>Tháng ${String(i + 1).padStart(2, '0')}: ${v.toFixed(2)}%</title></circle>` +
+               `<text x="${x(i)}" y="${y(v) - 10}" text-anchor="middle" fill="${bad ? '#e11d48' : '#047857'}" font-size="10.5" font-weight="700">${v.toFixed(2)}</text>`;
+      });
+      const y5 = y(5);
+      return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Biểu đồ tỷ lệ KĐTCLT theo tháng" style="display:block">` +
+        grid +
+        `<line x1="${L}" y1="${y5}" x2="${W - R}" y2="${y5}" stroke="#e11d48" stroke-width="1.8" stroke-dasharray="7 5"/>` +
+        `<path d="${d}" fill="none" stroke="#d97706" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>` +
+        pts + xl + `</svg>`;
+    }
+
+    function tqTrendInner(key) {
+      const T = window.__tqTrend;
+      if (!T) return '';
+      const s = T.series[key] || T.series.all;
+      const vals = T.labels.map((_, i) => s.chk[i] > 0 ? s.inv[i] / s.chk[i] * 100 : null);
+      const totChk = s.chk.reduce((a, b) => a + b, 0);
+      const totInv = s.inv.reduce((a, b) => a + b, 0);
+      const btns = TQ_TREND_DENOMS.map(([k, label]) => {
+        const on = k === key;
+        return `<button type="button" onclick="tqSetDenom('${k}')" aria-pressed="${on}" style="cursor:pointer; padding:9px 14px; min-height:40px; border-radius:999px; font:inherit; font-size:13px; font-weight:700; white-space:nowrap; border:1px solid ${on ? '#d97706' : '#fde68a'}; background:${on ? 'linear-gradient(135deg,#f59e0b,#d97706)' : '#fffbeb'}; color:${on ? '#fff' : '#92400e'}; box-shadow:${on ? '0 4px 12px rgba(217,119,6,0.25)' : 'none'};">${label}</button>`;
+      }).join('');
+      return `<div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px;">${btns}</div>` +
+        `<div style="display:flex; align-items:center; gap:8px; margin-bottom:6px; font-size:12px; color:#be123c; font-weight:700;"><svg width="28" height="8" aria-hidden="true"><line x1="0" y1="4" x2="28" y2="4" stroke="#e11d48" stroke-width="2" stroke-dasharray="6 4"/></svg>Ngưỡng 5.0% (TT NHNN)</div>` +
+        `<div class="tq-swipe-hint">← Vuốt ngang để xem đủ T01–T10 →</div>` +
+        `<div style="overflow-x:auto; -webkit-overflow-scrolling:touch;"><div style="min-width:500px; max-width:820px; margin:0 auto;">${tqTrendSvg(vals)}</div></div>` +
+        `<div style="display:flex; flex-wrap:wrap; gap:8px 18px; margin-top:12px; font-size:12.5px; color:#78350f;">` +
+          `<span>Tờ kiểm tra: <b>${totChk.toLocaleString('vi-VN')}</b></span>` +
+          `<span>Tờ KĐTCLT: <b style="color:#e11d48;">${totInv.toLocaleString('vi-VN')}</b></span>` +
+          `<span>Tỷ lệ: <b style="color:${totChk && totInv / totChk * 100 > 5 ? '#e11d48' : '#047857'};">${totChk ? tqPct(totInv / totChk * 100) : '—'}</b></span>` +
+        `</div>`;
+    }
+
+    window.tqSetDenom = function (key) {
+      window.__tqTrendKey = key;
+      const box = document.getElementById('tq-trend-box');
+      if (box) box.innerHTML = tqTrendInner(key);
+    };
+
     function renderTongquan() {
       // Tổng quan mặc định chỉ phản ánh dữ liệu của năm hiện tại.
       // Điều này đồng thời bảo đảm KPI không bị sai khi local cache còn dữ liệu các năm trước.
@@ -3663,6 +3766,194 @@
       const filteredInspectedUnitIds = new Set();
       filteredLogs.forEach(l => filteredInspectedUnitIds.add(l.unitId));
 
+      // ===== Các khối nghiệp vụ mới: dùng dữ liệu CẢ NĂM (không phụ thuộc bộ lọc thời gian ở trên) =====
+      const yearLogsAll = (data.logs || []).filter(l => l && l.date && l.date.startsWith(yearPrefix));
+      const exemptUnits = data.units.filter(tqIsExempt);
+      const exemptIds = new Set(exemptUnits.map(u => u.id));
+      const sheetsOf = log => [[log.denom1, log.amount1, log.invalidAmount1], [log.denom2, log.amount2, log.invalidAmount2]]
+        .map(([d, a, i]) => ({ val: tqDenomVal(d), chk: Number(a) || 0, inv: Number(i) || 0 }))
+        .filter(x => x.val > 0 && x.chk > 0);
+
+      // --- 1) Độ phủ & khóa sổ ---
+      const coveredIds = new Set(yearLogsAll.filter(l => l.unitId && !exemptIds.has(l.unitId) && data.units.some(u => u.id === l.unitId)).map(l => l.unitId));
+      const covCount = coveredIds.size;
+      const covPct = covCount / TQ_TOTAL_TCTD * 100;
+      const isLocked = covCount >= TQ_LOCK_MIN_UNITS && covPct >= TQ_LOCK_MIN_PCT;
+      const needMore = Math.max(0, TQ_LOCK_MIN_UNITS - covCount);
+      const exemptChips = (() => {
+        const chips = exemptUnits.map(u => {
+          const n = yearLogsAll.filter(l => l.unitId === u.id).length;
+          return `<span style="display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border-radius:999px; background:#fffbeb; border:1px solid #fde68a; color:#92400e; font-size:12.5px; font-weight:700;">${esc(u.name || u.code || '—')}${n ? ` <span style="color:#059669;">· đã có ${n} lượt</span>` : ''}</span>`;
+        });
+        TQ_EXEMPT_KEYWORDS.forEach(k => {
+          if (!exemptUnits.some(u => new RegExp('\\b' + k + '\\b', 'i').test(String(u.name || '')))) {
+            chips.push(`<span style="display:inline-flex; padding:6px 12px; border-radius:999px; background:#fff; border:1px dashed #fcd34d; color:#a16207; font-size:12.5px; font-weight:700;">${k.toUpperCase() === 'SCB' ? 'SCB' : k.charAt(0).toUpperCase() + k.slice(1)} · chưa gắn</span>`);
+          }
+        });
+        return chips.join('');
+      })();
+      const coverageHtml = `
+        <section style="background:linear-gradient(135deg,#fffbeb 0%,#fff 60%); border:1px solid #fde68a; border-left:4px solid ${isLocked ? '#059669' : '#f59e0b'}; border-radius:16px; padding:20px; box-shadow:0 10px 30px rgba(245,158,11,0.06); box-sizing:border-box; width:100%;">
+          <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px;">
+            <div>
+              <h3 style="margin:0; font-size:16px; font-weight:800; color:#1f2937;">Độ phủ kiểm tra chu kỳ Vòng 1</h3>
+              <div style="margin-top:4px; font-size:13px; color:#92400e;">Khóa sổ khi đạt ${TQ_LOCK_MIN_UNITS}/${TQ_TOTAL_TCTD} TCTD (≥ ${TQ_LOCK_MIN_PCT}%)</div>
+            </div>
+            <span style="display:inline-flex; align-items:center; gap:8px; padding:9px 16px; border-radius:999px; font-size:13.5px; font-weight:800; ${isLocked ? 'background:#ecfdf5; color:#047857; border:1px solid #a7f3d0;' : 'background:#fff7ed; color:#b45309; border:1px solid #fed7aa;'}">
+              ${isLocked
+                ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Đã Khóa Sổ Chu Kỳ Vòng 1'
+                : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>Đang thực hiện Vòng 1'}
+            </span>
+          </div>
+          <div style="display:flex; align-items:baseline; flex-wrap:wrap; gap:8px 14px; margin-bottom:10px;">
+            <span style="font-size:32px; font-weight:800; color:${isLocked ? '#047857' : '#d97706'}; font-variant-numeric:tabular-nums; letter-spacing:-1px;">${covCount}<span style="font-size:18px; color:#9ca3af; font-weight:700;"> / ${TQ_TOTAL_TCTD} TCTD</span></span>
+            <span style="font-size:15px; font-weight:700; color:#78350f;">Độ phủ ${covPct.toFixed(2)}%</span>
+            <span style="font-size:13px; color:#6b7280;">${isLocked ? 'Đã đạt ngưỡng.' : `Còn thiếu ${needMore} TCTD.`}</span>
+          </div>
+          <div style="position:relative; height:12px; background:#fef3c7; border-radius:99px; overflow:visible;">
+            <div style="height:100%; width:${Math.min(100, covPct).toFixed(2)}%; border-radius:99px; background:${isLocked ? 'linear-gradient(90deg,#34d399,#059669)' : 'linear-gradient(90deg,#fcd34d,#d97706)'};"></div>
+            <div style="position:absolute; left:${TQ_LOCK_MIN_PCT}%; top:-4px; bottom:-4px; width:2px; background:#e11d48;" title="Mốc ${TQ_LOCK_MIN_PCT}%"></div>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:11px; color:#a16207; margin-top:6px;"><span>0%</span><span style="position:relative; left:${TQ_LOCK_MIN_PCT > 90 ? 0 : -4}%; color:#e11d48; font-weight:700;">mốc ${TQ_LOCK_MIN_PCT}%</span><span>100%</span></div>
+          <div style="margin-top:18px; padding-top:16px; border-top:1px dashed #fde68a;">
+            <div style="font-size:13px; font-weight:800; color:#92400e; margin-bottom:4px;">Miễn trừ kế hoạch thường quy (${TQ_EXEMPT_KEYWORDS.length} TCTD)</div>
+            <div style="font-size:12.5px; color:#6b7280; margin-bottom:10px;">Giám sát đột xuất khi có lệnh nộp rút.</div>
+            <div style="display:flex; flex-wrap:wrap; gap:8px;">${exemptChips}</div>
+          </div>
+        </section>`;
+
+      // --- 2) Bảng 6 dải chỉ số cơ sở (45 TCTD, tính theo số tờ) ---
+      const unitAgg = {}, unitRound = {};
+      yearLogsAll.forEach(l => {
+        if (!l.unitId || exemptIds.has(l.unitId)) return;
+        const mo = Number(l.date.slice(5, 7)) || 1;
+        const rd = Math.min(TQ_ROUNDS, Math.ceil(mo / 3));
+        sheetsOf(l).forEach(s => {
+          const a = unitAgg[l.unitId] || (unitAgg[l.unitId] = { chk: 0, inv: 0 });
+          a.chk += s.chk; a.inv += s.inv;
+          const r = unitRound[l.unitId] || (unitRound[l.unitId] = Array.from({ length: TQ_ROUNDS + 1 }, () => ({ chk: 0, inv: 0 })));
+          r[rd].chk += s.chk; r[rd].inv += s.inv;
+        });
+      });
+      const rated = Object.keys(unitAgg).filter(id => unitAgg[id].chk > 0)
+        .map(id => ({ id, rate: unitAgg[id].inv / unitAgg[id].chk * 100 })).sort((a, b) => a.rate - b.rate);
+      const rv = rated.map(x => x.rate);
+      const qMin = rv.length ? rv[0] : null, qMax = rv.length ? rv[rv.length - 1] : null;
+      const qQ1 = tqQuantile(rv, 0.25), qMed = tqQuantile(rv, 0.5), qQ3 = tqQuantile(rv, 0.75);
+      const overThr = rv.filter(v => v > 5).length;
+      const qTile = (label, val, sub, c) => `
+        <div style="background:${c.bg}; border:1px solid ${c.bd}; border-radius:14px; padding:14px 14px 12px; min-width:0; box-sizing:border-box;">
+          <div style="font-size:11.5px; font-weight:800; letter-spacing:.3px; text-transform:uppercase; color:${c.lb};">${label}</div>
+          <div style="font-size:26px; font-weight:800; color:${c.fg}; font-variant-numeric:tabular-nums; letter-spacing:-.8px; margin:4px 0 2px;">${val}</div>
+          <div style="font-size:12px; color:#6b7280; line-height:1.35; overflow-wrap:anywhere;">${sub}</div>
+        </div>`;
+      const cEm = { bg: '#ecfdf5', bd: '#a7f3d0', lb: '#047857', fg: '#047857' };
+      const cAm = { bg: '#fffbeb', bd: '#fde68a', lb: '#b45309', fg: '#b45309' };
+      const cRo = { bg: '#fff1f2', bd: '#fecdd3', lb: '#be123c', fg: '#e11d48' };
+      const cCr = { bg: '#fefce8', bd: '#fde68a', lb: '#854d0e', fg: '#854d0e' };
+      const scaleMax = Math.max(qMax == null ? 0 : qMax, 5.5);
+      const mk = (v, color, t) => v == null ? '' : `<span title="${t}: ${tqPct(v)}" style="position:absolute; left:${(v / scaleMax * 100).toFixed(2)}%; top:50%; width:14px; height:14px; margin:-7px 0 0 -7px; border-radius:50%; background:${color}; border:2px solid #fff; box-shadow:0 1px 4px rgba(0,0,0,.25);"></span>`;
+      const quartileHtml = `
+        <section style="background:#fff; border:1px solid #fef3c7; border-left:4px solid #f59e0b; border-radius:16px; padding:20px; box-shadow:0 10px 30px rgba(245,158,11,0.04); box-sizing:border-box; width:100%;">
+          <h3 style="margin:0; font-size:16px; font-weight:800; color:#1f2937;">Bảng 6 dải chỉ số cơ sở tỷ lệ KĐTCLT</h3>
+          <div style="margin:4px 0 16px; font-size:13px; color:#92400e; font-weight:600;">${rv.length ? `Từ ${rv.length} TCTD${rv.length < 45 ? ' (tạm tính)' : ''}` : 'Chưa có dữ liệu'}</div>
+          ${rv.length ? `
+          <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px;">
+            ${qTile('Min · Thấp nhất', tqPct(qMin), esc(unitName(rated[0].id)), cEm)}
+            ${qTile('Q1 · Phân vị 25%', tqPct(qQ1), 'Nhóm Tiên tiến / Bông Sen Vàng', cEm)}
+            ${qTile('Median · Trung vị', tqPct(qMed), 'Mức chuẩn địa bàn', cAm)}
+            ${qTile('Q3 · Phân vị 75%', tqPct(qQ3), 'Ngưỡng bắt đầu rủi ro', cAm)}
+            ${qTile('Max · Cần phúc tra', tqPct(qMax), esc(unitName(rated[rated.length - 1].id)), cRo)}
+            ${qTile('Ngưỡng TT NHNN', '5.00%', `${overThr}/${rv.length} TCTD vượt`, cCr)}
+          </div>
+          <div style="position:relative; height:10px; border-radius:99px; margin:26px 8px 8px; background:linear-gradient(90deg,#a7f3d0 0%,#fde68a ${(5 / scaleMax * 100 * 0.7).toFixed(1)}%,#fecdd3 ${(5 / scaleMax * 100).toFixed(1)}%,#fda4af 100%);">
+            <div title="Ngưỡng 5.0%" style="position:absolute; left:${(5 / scaleMax * 100).toFixed(2)}%; top:-8px; bottom:-8px; border-left:2px dashed #e11d48;"></div>
+            ${mk(qMin, '#059669', 'Min')}${mk(qQ1, '#10b981', 'Q1')}${mk(qMed, '#d97706', 'Median')}${mk(qQ3, '#f59e0b', 'Q3')}${mk(qMax, '#e11d48', 'Max')}
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:11px; color:#a16207; margin:0 8px;"><span>0%</span><span>${tqPct(scaleMax)}</span></div>` : ''}
+        </section>`;
+
+      // --- 3) Xu hướng 10 tháng theo mệnh giá ---
+      const trendLabels = Array.from({ length: TQ_TREND_MONTHS }, (_, i) => 'T' + String(i + 1).padStart(2, '0'));
+      const trendSeries = {};
+      TQ_TREND_DENOMS.forEach(([k]) => { trendSeries[k] = { chk: Array(TQ_TREND_MONTHS).fill(0), inv: Array(TQ_TREND_MONTHS).fill(0) }; });
+      yearLogsAll.forEach(l => {
+        const mi = (Number(l.date.slice(5, 7)) || 0) - 1;
+        if (mi < 0 || mi >= TQ_TREND_MONTHS) return;
+        sheetsOf(l).forEach(s => {
+          trendSeries.all.chk[mi] += s.chk; trendSeries.all.inv[mi] += s.inv;
+          const k = String(s.val);
+          if (trendSeries[k]) { trendSeries[k].chk[mi] += s.chk; trendSeries[k].inv[mi] += s.inv; }
+        });
+      });
+      window.__tqTrend = { year, labels: trendLabels, series: trendSeries };
+      if (!trendSeries[window.__tqTrendKey]) window.__tqTrendKey = 'all';
+      const trendHtml = `
+        <section style="background:#fff; border:1px solid #fef3c7; border-left:4px solid #d97706; border-radius:16px; padding:20px; box-shadow:0 10px 30px rgba(217,119,6,0.04); box-sizing:border-box; width:100%;">
+          <h3 style="margin:0; font-size:16px; font-weight:800; color:#1f2937;">Xu hướng tỷ lệ KĐTCLT theo tháng (T01 – T10/${year})</h3>
+          <div style="margin:4px 0 16px; font-size:13px; color:#92400e; font-weight:600;">Tờ KĐTCLT / tờ kiểm tra theo tháng</div>
+          <div id="tq-trend-box">${tqTrendInner(window.__tqTrendKey)}</div>
+        </section>`;
+
+      // --- 4) Đối chiếu tiến bộ từng TCTD qua các lần kiểm tra (mỗi lần cách nhau 3 tháng, tối đa 4 lần/năm) ---
+      const nowQ = Math.min(TQ_ROUNDS, Math.ceil((new Date().getMonth() + 1) / 3));
+      const progRows = Object.keys(unitRound).map(id => {
+        const rs = unitRound[id];
+        const rates = [];
+        for (let k = 1; k <= TQ_ROUNDS; k++) rates[k] = rs[k].chk > 0 ? rs[k].inv / rs[k].chk * 100 : null;
+        const have = [];
+        for (let k = 1; k <= TQ_ROUNDS; k++) if (rates[k] != null) have.push(k);
+        let delta = null, st = 'wait';
+        if (have.length >= 2) {
+          delta = rates[have[have.length - 1]] - rates[have[have.length - 2]];   // lần mới nhất − lần liền trước
+          st = delta <= -TQ_PROGRESS_EPS ? 'up' : (delta >= TQ_PROGRESS_EPS ? 'down' : 'flat');
+        }
+        return { id, rs, rates, delta, st };
+      }).sort((x, y) => (x.delta == null) - (y.delta == null) || (y.delta || 0) - (x.delta || 0));
+      const cnt = { up: 0, flat: 0, down: 0, wait: 0 };
+      progRows.forEach(r => cnt[r.st]++);
+      const stPill = st => ({
+        up:   ['#ecfdf5', '#047857', '#a7f3d0', '▼ Tiến bộ'],
+        flat: ['#fffbeb', '#b45309', '#fde68a', '● Ổn định'],
+        down: ['#fff1f2', '#be123c', '#fecdd3', '▲ Buông lỏng'],
+        wait: ['#f3f4f6', '#6b7280', '#e5e7eb', 'Chưa đối chiếu']
+      }[st]);
+      const roundCols = Array.from({ length: TQ_ROUNDS }, (_, i) => i + 1);
+      const progBody = progRows.map(r => {
+        const [bg, fg, bd, tx] = stPill(r.st);
+        const dTxt = r.delta == null ? '—' : (r.delta > 0 ? '+' : '') + r.delta.toFixed(2);
+        const dCol = r.st === 'up' ? '#047857' : (r.st === 'down' ? '#e11d48' : '#6b7280');
+        const cells = roundCols.map(k => `<td style="padding:10px 12px; text-align:right; font-variant-numeric:tabular-nums; ${r.rates[k] != null && r.rates[k] > 5 ? 'color:#e11d48;' : ''}" title="${r.rs[k].chk ? r.rs[k].inv + '/' + r.rs[k].chk + ' tờ' : ''}"><b>${tqPct(r.rates[k])}</b></td>`).join('');
+        return `<tr style="border-top:1px solid #fef3c7;">
+          <td class="tq-sticky-col" style="padding:10px 12px; font-weight:700; color:#1f2937; font-size:13.5px; min-width:170px; max-width:240px; position:sticky; left:0; z-index:1; background:#fff;">${esc(unitName(r.id))}</td>
+          ${cells}
+          <td style="padding:10px 12px; text-align:right; font-weight:800; color:${dCol}; font-variant-numeric:tabular-nums; white-space:nowrap;">${dTxt}</td>
+          <td style="padding:10px 12px;"><span style="display:inline-block; padding:5px 10px; border-radius:999px; background:${bg}; color:${fg}; border:1px solid ${bd}; font-size:12px; font-weight:800; white-space:nowrap;">${tx}</span></td>
+        </tr>`;
+      }).join('');
+      const chip = (n, label, c) => `<span style="display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border-radius:999px; background:${c[0]}; color:${c[1]}; border:1px solid ${c[2]}; font-size:12.5px; font-weight:800;">${label}: ${n}</span>`;
+      const th = (t, al, first) => `<th style="padding:10px 12px; text-align:${al || 'right'}; white-space:nowrap; position:sticky; top:0; ${first ? 'left:0; z-index:3;' : 'z-index:2;'} background:#fffbeb;">${t}</th>`;
+      const progressHtml = `
+        <details open style="background:#fff; border:1px solid #d1fae5; border-left:4px solid #059669; border-radius:16px; padding:16px 20px; box-shadow:0 10px 30px rgba(5,150,105,0.04); box-sizing:border-box; width:100%;">
+          <summary style="list-style:none; cursor:pointer; outline:none;">
+            <h3 style="margin:0; font-size:16px; font-weight:800; color:#1f2937;">Đối chiếu tiến bộ theo lần kiểm tra</h3>
+            <div style="margin:4px 0 0; font-size:12.5px; color:#047857; font-weight:600;">R = tờ KĐTCLT / tờ kiểm tra. Độ lệch = lần mới nhất − lần trước (điểm %).</div>
+          </summary>
+          <div style="display:flex; flex-wrap:wrap; gap:8px; margin:14px 0;">
+            ${chip(cnt.up, 'Tiến bộ', ['#ecfdf5', '#047857', '#a7f3d0'])}${chip(cnt.flat, 'Ổn định', ['#fffbeb', '#b45309', '#fde68a'])}${chip(cnt.down, 'Buông lỏng', ['#fff1f2', '#be123c', '#fecdd3'])}${chip(cnt.wait, 'Chưa đối chiếu', ['#f3f4f6', '#6b7280', '#e5e7eb'])}
+          </div>
+          ${progRows.length ? `
+          <div class="tq-swipe-hint">← Vuốt ngang để xem đủ 4 lần →</div>
+          <div style="overflow:auto; max-height:460px; -webkit-overflow-scrolling:touch; border:1px solid #fef3c7; border-radius:12px;">
+            <table style="width:100%; min-width:680px; border-collapse:collapse; font-size:13px;">
+              <thead><tr style="color:#92400e; font-size:12px; text-transform:uppercase; letter-spacing:.3px;">
+                ${th('Đơn vị', 'left', true)}${roundCols.map(k => th('Lần ' + k + (k > nowQ ? ' <span style="opacity:.5;">·</span>' : ''))).join('')}${th('Độ lệch')}${th('Đánh giá', 'left')}
+              </tr></thead>
+              <tbody>${progBody}</tbody>
+            </table>
+          </div>` : '<div style="text-align:center; padding:20px; color:#9ca3af; background:#f9fafb; border-radius:12px; border:1px dashed #e5e7eb;">Chưa có dữ liệu</div>'}
+        </details>`;
+
       const htmlReport = `
       ${monthFilterHtml}
 
@@ -3794,8 +4085,19 @@
             </div>
           </details>
         </div>
+        ${coverageHtml}
+        ${quartileHtml}
+        ${trendHtml}
+        ${progressHtml}
         <style>
           details > summary::-webkit-details-marker { display: none; }
+          .tq-swipe-hint { display: none; text-align: center; font-size: 11.5px; color: #a16207; margin: 0 0 6px; }
+          .tq-sticky-col { box-shadow: 2px 0 4px -2px rgba(0,0,0,.08); }
+          @media (max-width: 640px) {
+            .tq-swipe-hint { display: block; }
+            .tq-sticky-col { min-width: 118px !important; max-width: 128px !important; font-size: 12px !important; padding: 8px 8px !important; line-height: 1.3; }
+            details table th, details table td { padding-left: 8px !important; padding-right: 8px !important; }
+          }
           details[open] summary .summary-arrow-gray { transform: rotate(180deg); }
           .spin { animation: spin 1s linear infinite; }
       @keyframes spin { 100% { transform: rotate(360deg); } }
