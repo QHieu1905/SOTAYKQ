@@ -1695,31 +1695,40 @@
       }
     }
     
-    .tq-grid { display: flex; gap: 24px; margin-bottom: 32px; width: 100%; align-items: stretch; }
-    .tq-card { flex: 1; background: #ffffff; border: 1px solid #f3f4f6; border-radius: 20px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 20px rgba(0,0,0,0.03); min-width: 0; display: flex; flex-direction: column; }
+    .tq-grid { display: flex; gap: 14px; margin-bottom: 14px; width: 100%; align-items: stretch; }
+    .tq-card { flex: 1; background: #ffffff; border: 1px solid #f3f4f6; border-radius: 16px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 20px rgba(0,0,0,0.03); min-width: 0; display: flex; flex-direction: column; }
     .tq-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,0,0,0.08); }
-    .tq-card-inner { padding: 24px; display: flex; align-items: center; gap: 20px; flex: 1; justify-content: flex-start; }
-    .tq-icon { width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .tq-icon svg { width: 28px; height: 28px; }
+    .tq-card-inner { padding: 12px 16px; display: flex; align-items: center; gap: 14px; flex: 1; justify-content: flex-start; }
+    .tq-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .tq-icon svg { width: 20px; height: 20px; }
     .tq-content { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
-    .tq-num { font-size: 28px; font-weight: 800; color: #1f2937; line-height: 1.2; display: flex; align-items: center; gap: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .tq-sub { font-size: 13px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .tq-tags { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
-    .tq-tag { font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 6px; border: 1px solid; white-space: nowrap; }
+    .tq-num { font-size: 22px; font-weight: 800; color: #1f2937; line-height: 1.2; display: flex; align-items: center; gap: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tq-sub { font-size: 11.5px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.4px; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tq-tags { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+    .tq-tag { font-size: 10.5px; font-weight: 700; padding: 2px 7px; border-radius: 6px; border: 1px solid; white-space: nowrap; }
 
     @media (max-width: 768px) {
-      .tq-grid { gap: 6px; margin-bottom: 24px; }
+      .tq-grid { gap: 6px; margin-bottom: 12px; }
       .tq-card { border-radius: 16px; }
-      .tq-card-inner { flex-direction: column; text-align: center; gap: 6px; padding: 12px 4px; justify-content: flex-start; }
-      .tq-icon { width: 42px; height: 42px; border-radius: 12px; margin: 0 auto; }
-      .tq-icon svg { width: 22px; height: 22px; }
+      .tq-card-inner { flex-direction: column; text-align: center; gap: 4px; padding: 8px 4px; justify-content: flex-start; }
+      .tq-icon { width: 32px; height: 32px; border-radius: 10px; margin: 0 auto; }
+      .tq-icon svg { width: 18px; height: 18px; }
       .tq-content { align-items: center; }
-      .tq-num { font-size: 20px; justify-content: center; white-space: normal; }
+      .tq-num { font-size: 18px; justify-content: center; white-space: normal; }
       .tq-sub { font-size: 9.5px; line-height: 1.3; margin-top: 2px; white-space: normal; color: #6b7280; font-weight: 700; }
       .tq-tags { justify-content: center; gap: 4px; margin-top: 8px; flex-direction: row; flex-wrap: wrap; width: 100%; }
       .tq-tag { font-size: 9.5px; padding: 3px 6px; border-radius: 6px; text-align: center; }
     }
     
+    /* Thu gọn phần đầu trang để thấy nội dung bên dưới */
+    .mobile-header.flex-mobile-header { padding: 6px 14px !important; }
+    .mobile-header.flex-mobile-header > div:first-child > div:first-child { width: 32px !important; height: 32px !important; }
+    .mobile-header.flex-mobile-header b { font-size: 13.5px !important; }
+    .mobile-header.flex-mobile-header b br { display: none; }
+    .mobile-header.flex-mobile-header span { font-size: 10.5px !important; margin-top: 0 !important; line-height: 1.25; }
+    .topbar { margin-bottom: 8px; }
+    .content { padding-top: 14px; }
+
     /* Fan Menu Bar */
     .fan-menu { position: fixed; bottom: 30px; left: 50%; margin-left: -35px; width: 70px; height: 70px; z-index: 9999; display: none; pointer-events: none; }
     .fan-overlay { position: fixed; inset: 0; background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); z-index: 9998; display: none; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
@@ -1941,7 +1950,7 @@
             <img onerror="this.hidden=true" src="./SO TAY KHO QUY_files/logo-ngan-hang-nha-nuoc-viet-nam.webp" alt="SBV" style="width: 100%; height: 100%; object-fit: contain;">
           </div>
           <div style="display:flex; flex-direction:column; line-height: 1.35; flex: 1; justify-content: center; align-items: center; text-align: center;">
-            <b style="font-size:14px; color:#854d0e; letter-spacing: -0.2px;">Sổ tay điện tử<br>Kiểm tra tuyển chọn tiền KĐTCLT</b>
+            <b style="font-size:14px; color:#854d0e; letter-spacing: -0.2px;">Sổ tay điện tử <br>Kiểm tra tuyển chọn tiền KĐTCLT</b>
             <span style="font-size:11px; color:#475569; font-weight: 600; margin-top: 2px;">Ngân hàng Nhà nước CN Khu vực 9</span>
             <span style="font-size:10px; color:#64748b; font-weight: 500;">Phòng Tiền tệ - Kho quỹ (KV01)</span>
           </div>
@@ -3496,35 +3505,78 @@
 
     const tqPct = v => (v == null || isNaN(v)) ? '—' : v.toFixed(2) + '%';
 
-    function tqTrendSvg(vals) {
-      const W = 560, H = 270, L = 46, R = 18, T = 28, B = 38;
+
+    /* ---- Mục có thể đóng/mở trong Tổng quan (nhớ trạng thái khi vẽ lại) ---- */
+    window.__tqOpen = window.__tqOpen || { cov: true, quart: true, trend: true, prog: false };
+    function tqSec(id, border, bg, head, body) {
+      const open = window.__tqOpen[id] !== false && !!window.__tqOpen[id];
+      return `<details class="tq-sec" data-sec="${id}" ${open ? 'open' : ''} ontoggle="tqSecToggle('${id}', this.open)" style="background:${bg}; border:1px solid #fde68a; border-left:4px solid ${border}; border-radius:16px; box-shadow:0 8px 24px rgba(217,119,6,0.05); box-sizing:border-box; width:100%;">
+        <summary style="list-style:none; cursor:pointer; outline:none; padding:12px 16px; display:flex; align-items:center; justify-content:space-between; gap:12px;">
+          <div style="min-width:0; flex:1;">${head}</div>
+          <span class="tq-chev" aria-hidden="true" style="flex-shrink:0; width:30px; height:30px; border-radius:50%; background:#f3f4f6; display:flex; align-items:center; justify-content:center; color:#6b7280; transition:transform .25s;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span>
+        </summary>
+        <div style="padding:0 16px 16px;">${body}</div>
+      </details>`;
+    }
+    window.tqSecToggle = function (id, open) {
+      window.__tqOpen[id] = !!open;
+      if (open && id === 'trend' && window.tqFitTrend) requestAnimationFrame(window.tqFitTrend);
+    };
+    window.tqSecAll = function (open) {
+      Object.keys(window.__tqOpen).forEach(k => { window.__tqOpen[k] = open; });
+      document.querySelectorAll('details.tq-sec').forEach(d => { d.open = open; });
+    };
+
+    /* Bề rộng biểu đồ xu hướng bám theo khung chứa -> vừa khít màn hình, không phải vuốt ngang */
+    function tqTrendW() {
+      const box = document.getElementById('tq-trend-box');
+      let w = box && box.clientWidth;
+      if (!w) { const cw = document.documentElement.clientWidth; w = cw > 768 ? cw - 330 : cw - 72; }
+      return Math.max(290, Math.min(760, Math.round(w)));
+    }
+    window.tqFitTrend = function () {
+      const box = document.getElementById('tq-trend-box');
+      if (!box || !box.clientWidth) return;
+      const svg = box.querySelector('svg[data-w]');
+      if (!svg || Math.abs(Number(svg.getAttribute('data-w')) - tqTrendW()) > 20) box.innerHTML = tqTrendInner(window.__tqTrendKey || 'all');
+    };
+    if (!window.__tqResizeBound) {
+      window.__tqResizeBound = true;
+      window.addEventListener('resize', () => { clearTimeout(window.__tqRt); window.__tqRt = setTimeout(() => window.tqFitTrend && window.tqFitTrend(), 150); });
+    }
+
+    function tqTrendSvg(vals, W) {
+      W = W || 560;
+      const cp = W < 460;                                   // màn hình hẹp: chữ/lề nhỏ hơn nhưng vẫn đọc được
+      const H = cp ? 230 : 270, L = cp ? 34 : 46, R = cp ? 10 : 18, T = cp ? 24 : 28, B = cp ? 28 : 38;
+      const fa = cp ? 9.5 : 11, fl = cp ? 9 : 10.5, dec = cp ? 1 : 2, pad = cp ? 10 : 18;
       const pw = W - L - R, ph = H - T - B;
       const nonNull = vals.filter(v => v != null);
       if (!nonNull.length) {
-        return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Chưa có dữ liệu"><text x="${W / 2}" y="${H / 2}" text-anchor="middle" fill="#9ca3af" font-size="14">Chưa có dữ liệu cho mệnh giá này</text></svg>`;
+        return `<svg data-w="${W}" viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Chưa có dữ liệu"><text x="${W / 2}" y="${H / 2}" text-anchor="middle" fill="#9ca3af" font-size="14">Chưa có dữ liệu cho mệnh giá này</text></svg>`;
       }
       const maxV = Math.max(...nonNull);
       const yMax = Math.max(7, Math.ceil(maxV + 1));
       const step = yMax > 10 ? 2 : 1;
-      const x = i => L + 18 + (pw - 36) * (vals.length === 1 ? 0.5 : i / (vals.length - 1)); // chừa lề để nhãn điểm đầu không đè trục Y
+      const x = i => L + pad + (pw - 2 * pad) * (vals.length === 1 ? 0.5 : i / (vals.length - 1)); // chừa lề để nhãn điểm đầu không đè trục Y
       const y = v => T + ph * (1 - v / yMax);
       let grid = '';
       for (let g = 0; g <= yMax; g += step) {
         grid += `<line x1="${L}" y1="${y(g)}" x2="${W - R}" y2="${y(g)}" stroke="#f3e8d0" stroke-width="1"/>` +
-                `<text x="${L - 8}" y="${y(g) + 4}" text-anchor="end" fill="#92400e" font-size="11">${g}%</text>`;
+                `<text x="${L - 6}" y="${y(g) + 4}" text-anchor="end" fill="#92400e" font-size="${fa}">${g}%</text>`;
       }
       let d = '', open = false;
       vals.forEach((v, i) => { if (v == null) return; d += (open ? 'L' : 'M') + x(i).toFixed(1) + ',' + y(v).toFixed(1) + ' '; open = true; });
       let pts = '', xl = '';
       vals.forEach((v, i) => {
-        xl += `<text x="${x(i)}" y="${H - 14}" text-anchor="middle" fill="#78350f" font-size="11">T${String(i + 1).padStart(2, '0')}</text>`;
+        xl += `<text x="${x(i)}" y="${H - 10}" text-anchor="middle" fill="#78350f" font-size="${fa}">T${String(i + 1).padStart(2, '0')}</text>`;
         if (v == null) return;
         const bad = v > 5;
-        pts += `<circle cx="${x(i)}" cy="${y(v)}" r="4.5" fill="${bad ? '#e11d48' : '#059669'}" stroke="#fff" stroke-width="1.5"><title>Tháng ${String(i + 1).padStart(2, '0')}: ${v.toFixed(2)}%</title></circle>` +
-               `<text x="${x(i)}" y="${y(v) - 10}" text-anchor="middle" fill="${bad ? '#e11d48' : '#047857'}" font-size="10.5" font-weight="700">${v.toFixed(2)}</text>`;
+        pts += `<circle cx="${x(i)}" cy="${y(v)}" r="${cp ? 3.5 : 4.5}" fill="${bad ? '#e11d48' : '#059669'}" stroke="#fff" stroke-width="1.5"><title>Tháng ${String(i + 1).padStart(2, '0')}: ${v.toFixed(2)}%</title></circle>` +
+               `<text x="${x(i)}" y="${y(v) - 8}" text-anchor="middle" fill="${bad ? '#e11d48' : '#047857'}" font-size="${fl}" font-weight="700">${v.toFixed(dec)}</text>`;
       });
       const y5 = y(5);
-      return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Biểu đồ tỷ lệ KĐTCLT theo tháng" style="display:block">` +
+      return `<svg data-w="${W}" viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Biểu đồ tỷ lệ KĐTCLT theo tháng" style="display:block">` +
         grid +
         `<line x1="${L}" y1="${y5}" x2="${W - R}" y2="${y5}" stroke="#e11d48" stroke-width="1.8" stroke-dasharray="7 5"/>` +
         `<path d="${d}" fill="none" stroke="#d97706" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>` +
@@ -3540,12 +3592,11 @@
       const totInv = s.inv.reduce((a, b) => a + b, 0);
       const btns = TQ_TREND_DENOMS.map(([k, label]) => {
         const on = k === key;
-        return `<button type="button" onclick="tqSetDenom('${k}')" aria-pressed="${on}" style="cursor:pointer; padding:9px 14px; min-height:40px; border-radius:999px; font:inherit; font-size:13px; font-weight:700; white-space:nowrap; border:1px solid ${on ? '#d97706' : '#fde68a'}; background:${on ? 'linear-gradient(135deg,#f59e0b,#d97706)' : '#fffbeb'}; color:${on ? '#fff' : '#92400e'}; box-shadow:${on ? '0 4px 12px rgba(217,119,6,0.25)' : 'none'};">${label}</button>`;
+        return `<button type="button" class="tq-dbtn" onclick="tqSetDenom('${k}')" aria-pressed="${on}" style="cursor:pointer; padding:9px 14px; min-height:40px; border-radius:999px; font:inherit; font-size:13px; font-weight:700; white-space:nowrap; border:1px solid ${on ? '#d97706' : '#fde68a'}; background:${on ? 'linear-gradient(135deg,#f59e0b,#d97706)' : '#fffbeb'}; color:${on ? '#fff' : '#92400e'}; box-shadow:${on ? '0 4px 12px rgba(217,119,6,0.25)' : 'none'};">${label}</button>`;
       }).join('');
       return `<div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px;">${btns}</div>` +
         `<div style="display:flex; align-items:center; gap:8px; margin-bottom:6px; font-size:12px; color:#be123c; font-weight:700;"><svg width="28" height="8" aria-hidden="true"><line x1="0" y1="4" x2="28" y2="4" stroke="#e11d48" stroke-width="2" stroke-dasharray="6 4"/></svg>Ngưỡng 5.0% (TT NHNN)</div>` +
-        `<div class="tq-swipe-hint">← Vuốt ngang để xem đủ T01–T10 →</div>` +
-        `<div style="overflow-x:auto; -webkit-overflow-scrolling:touch;"><div style="min-width:500px; max-width:820px; margin:0 auto;">${tqTrendSvg(vals)}</div></div>` +
+        `<div style="max-width:760px; margin:0 auto;">${tqTrendSvg(vals, tqTrendW())}</div>` +
         `<div style="display:flex; flex-wrap:wrap; gap:8px 18px; margin-top:12px; font-size:12.5px; color:#78350f;">` +
           `<span>Tờ kiểm tra: <b>${totChk.toLocaleString('vi-VN')}</b></span>` +
           `<span>Tờ KĐTCLT: <b style="color:#e11d48;">${totInv.toLocaleString('vi-VN')}</b></span>` +
@@ -3828,9 +3879,9 @@
       const recentLogs = [...filteredLogs].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 4);
 
       const monthFilterHtml = `
-        <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap: 16px; margin-bottom: 24px; padding: 0 4px; box-sizing: border-box; width: 100%;">
+        <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap: 10px; margin-bottom: 10px; padding: 0 4px; box-sizing: border-box; width: 100%;">
           <h2 style="font-size: 18px; font-weight: 800; color: #1f2937; margin: 0; display: flex; align-items: center; gap: 10px; letter-spacing: -0.2px;">
-             <div style="width: 38px; height: 38px; border-radius: 12px; background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 1px solid #bbf7d0; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.15);">
+             <div style="width: 30px; height: 30px; border-radius: 10px; background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 1px solid #bbf7d0; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.15);">
                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
              </div>
              Tổng quan
@@ -3873,9 +3924,7 @@
         });
         return chips.join('');
       })();
-      const coverageHtml = `
-        <section style="background:linear-gradient(135deg,#fffbeb 0%,#fff 60%); border:1px solid #fde68a; border-left:4px solid ${isLocked ? '#059669' : '#f59e0b'}; border-radius:16px; padding:20px; box-shadow:0 10px 30px rgba(245,158,11,0.06); box-sizing:border-box; width:100%;">
-          <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px;">
+      const coverageHtml = tqSec('cov', isLocked ? '#059669' : '#f59e0b', 'linear-gradient(135deg,#fffbeb 0%,#fff 60%)', `          <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px 12px; margin-bottom:0;">
             <div>
               <h3 style="margin:0; font-size:16px; font-weight:800; color:#1f2937;">Độ phủ kiểm tra chu kỳ Vòng 1</h3>
               <div style="margin-top:4px; font-size:13px; color:#92400e;">Khóa sổ khi đạt ${TQ_LOCK_MIN_UNITS}/${TQ_TOTAL_TCTD} TCTD (≥ ${TQ_LOCK_MIN_PCT}%)</div>
@@ -3886,7 +3935,7 @@
                 : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>Đang thực hiện Vòng 1'}
             </span>
           </div>
-          <div style="display:flex; align-items:baseline; flex-wrap:wrap; gap:8px 14px; margin-bottom:10px;">
+<div style="font-size:12.5px; color:#78350f; font-weight:700; margin-top:6px;">${covCount}/${TQ_TOTAL_TCTD} TCTD · ${covPct.toFixed(2)}%</div>`, `          <div style="display:flex; align-items:baseline; flex-wrap:wrap; gap:8px 14px; margin-bottom:10px;">
             <span style="font-size:32px; font-weight:800; color:${isLocked ? '#047857' : '#d97706'}; font-variant-numeric:tabular-nums; letter-spacing:-1px;">${covCount}<span style="font-size:18px; color:#9ca3af; font-weight:700;"> / ${TQ_TOTAL_TCTD} TCTD</span></span>
             <span style="font-size:15px; font-weight:700; color:#78350f;">Độ phủ ${covPct.toFixed(2)}%</span>
             <span style="font-size:13px; color:#6b7280;">${isLocked ? 'Đã đạt ngưỡng.' : `Còn thiếu ${needMore} TCTD.`}</span>
@@ -3901,7 +3950,7 @@
             <div style="font-size:12.5px; color:#6b7280; margin-bottom:10px;">Giám sát đột xuất khi có lệnh nộp rút.</div>
             <div style="display:flex; flex-wrap:wrap; gap:8px;">${exemptChips}</div>
           </div>
-        </section>`;
+`);
 
       // --- 2) Bảng 6 dải chỉ số cơ sở (45 TCTD, tính theo số tờ) ---
       const unitAgg = {}, unitRound = {};
@@ -3934,11 +3983,9 @@
       const cCr = { bg: '#fefce8', bd: '#fde68a', lb: '#854d0e', fg: '#854d0e' };
       const scaleMax = Math.max(qMax == null ? 0 : qMax, 5.5);
       const mk = (v, color, t) => v == null ? '' : `<span title="${t}: ${tqPct(v)}" style="position:absolute; left:${(v / scaleMax * 100).toFixed(2)}%; top:50%; width:14px; height:14px; margin:-7px 0 0 -7px; border-radius:50%; background:${color}; border:2px solid #fff; box-shadow:0 1px 4px rgba(0,0,0,.25);"></span>`;
-      const quartileHtml = `
-        <section style="background:#fff; border:1px solid #fef3c7; border-left:4px solid #f59e0b; border-radius:16px; padding:20px; box-shadow:0 10px 30px rgba(245,158,11,0.04); box-sizing:border-box; width:100%;">
-          <h3 style="margin:0; font-size:16px; font-weight:800; color:#1f2937;">Bảng 6 dải chỉ số cơ sở tỷ lệ KĐTCLT</h3>
-          <div style="margin:4px 0 16px; font-size:13px; color:#92400e; font-weight:600;">${rv.length ? `Từ ${rv.length} TCTD${rv.length < 45 ? ' (tạm tính)' : ''}` : 'Chưa có dữ liệu'}</div>
-          ${rv.length ? `
+      const quartileHtml = tqSec('quart', '#f59e0b', '#fff', `          <h3 style="margin:0; font-size:16px; font-weight:800; color:#1f2937;">Bảng 6 dải chỉ số cơ sở tỷ lệ KĐTCLT</h3>
+          <div style="margin:2px 0 0; font-size:12.5px; color:#92400e; font-weight:600;">${rv.length ? `Từ ${rv.length} TCTD${rv.length < 45 ? ' (tạm tính)' : ''} · Median ${tqPct(qMed)} · Q3 ${tqPct(qQ3)}` : 'Chưa có dữ liệu'}</div>
+`, `          ${rv.length ? `
           <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px;">
             ${qTile('Min · Thấp nhất', tqPct(qMin), esc(unitName(rated[0].id)), cEm)}
             ${qTile('Q1 · Phân vị 25%', tqPct(qQ1), 'Nhóm Tiên tiến / Bông Sen Vàng', cEm)}
@@ -3952,7 +3999,7 @@
             ${mk(qMin, '#059669', 'Min')}${mk(qQ1, '#10b981', 'Q1')}${mk(qMed, '#d97706', 'Median')}${mk(qQ3, '#f59e0b', 'Q3')}${mk(qMax, '#e11d48', 'Max')}
           </div>
           <div style="display:flex; justify-content:space-between; font-size:11px; color:#a16207; margin:0 8px;"><span>0%</span><span>${tqPct(scaleMax)}</span></div>` : ''}
-        </section>`;
+`);
 
       // --- 3) Xu hướng 10 tháng theo mệnh giá ---
       const trendLabels = Array.from({ length: TQ_TREND_MONTHS }, (_, i) => 'T' + String(i + 1).padStart(2, '0'));
@@ -3969,12 +4016,11 @@
       });
       window.__tqTrend = { year, labels: trendLabels, series: trendSeries };
       if (!trendSeries[window.__tqTrendKey]) window.__tqTrendKey = 'all';
-      const trendHtml = `
-        <section style="background:#fff; border:1px solid #fef3c7; border-left:4px solid #d97706; border-radius:16px; padding:20px; box-shadow:0 10px 30px rgba(217,119,6,0.04); box-sizing:border-box; width:100%;">
-          <h3 style="margin:0; font-size:16px; font-weight:800; color:#1f2937;">Xu hướng tỷ lệ KĐTCLT theo tháng (T01 – T10/${year})</h3>
-          <div style="margin:4px 0 16px; font-size:13px; color:#92400e; font-weight:600;">Tờ KĐTCLT / tờ kiểm tra theo tháng</div>
-          <div id="tq-trend-box">${tqTrendInner(window.__tqTrendKey)}</div>
-        </section>`;
+      const trAll = trendSeries.all, trChk = trAll.chk.reduce((a, b) => a + b, 0), trRate = trChk > 0 ? trAll.inv.reduce((a, b) => a + b, 0) / trChk * 100 : null;
+      const trendHtml = tqSec('trend', '#d97706', '#fff', `          <h3 style="margin:0; font-size:16px; font-weight:800; color:#1f2937;">Xu hướng tỷ lệ KĐTCLT theo tháng (T01 – T10/${year})</h3>
+          <div style="margin:2px 0 0; font-size:12.5px; color:#92400e; font-weight:600;">Tờ KĐTCLT / tờ kiểm tra theo tháng${trRate == null ? '' : ' · cả kỳ ' + tqPct(trRate)}</div>
+`, `          <div id="tq-trend-box">${tqTrendInner(window.__tqTrendKey)}</div>
+`);
 
       // --- 4) Đối chiếu tiến bộ từng TCTD qua các lần kiểm tra (mỗi lần cách nhau 3 tháng, tối đa 4 lần/năm) ---
       const nowQ = Math.min(TQ_ROUNDS, Math.ceil((new Date().getMonth() + 1) / 3));
@@ -3995,13 +4041,13 @@
       const th = (t, al, first, click, cls) => `<th class="${cls || ''}" ${click ? `onclick="${click}" role="button" tabindex="0" title="Bấm để đổi chiều sắp xếp"` : ''} style="padding:10px 12px; text-align:${al || 'right'}; white-space:nowrap; position:sticky; top:0; ${first ? 'left:0; z-index:3;' : 'z-index:2;'} background:#fffbeb; ${click ? 'cursor:pointer;' : ''}">${t}</th>`;
       const sortArrow = window.__tqProg.sort === 'asc' ? ' ▲' : (window.__tqProg.sort === 'desc' ? ' ▼' : '');
       const roundCols = Array.from({ length: TQ_ROUNDS }, (_, i) => i + 1);
-      const progressHtml = `
-        <details open style="background:#fff; border:1px solid #d1fae5; border-left:4px solid #059669; border-radius:16px; padding:16px 20px; box-shadow:0 10px 30px rgba(5,150,105,0.04); box-sizing:border-box; width:100%;">
-          <summary style="list-style:none; cursor:pointer; outline:none;">
-            <h3 style="margin:0; font-size:16px; font-weight:800; color:#1f2937;">Đối chiếu tiến bộ theo lần kiểm tra</h3>
+      const stCnt = { up: 0, flat: 0, down: 0, wait: 0 };
+      progRows.forEach(r => stCnt[r.st]++);
+      const progressHtml = tqSec('prog', '#059669', '#fff', `            <h3 style="margin:0; font-size:16px; font-weight:800; color:#1f2937;">Đối chiếu tiến bộ theo lần kiểm tra</h3>
             <div style="margin:4px 0 0; font-size:12.5px; color:#047857; font-weight:600;">R = tờ KĐTCLT / tờ kiểm tra. Độ lệch = lần mới nhất − lần trước (điểm %).</div>
-          </summary>
-          <div id="tq-prog-bar">${tqProgBarHtml()}</div>
+
+            <div style="display:flex; height:9px; border-radius:99px; overflow:hidden; background:#f3f4f6; margin-top:8px;" role="img" aria-label="Tỷ lệ các nhóm đánh giá">${[['up','#10b981'],['flat','#f59e0b'],['down','#f43f5e'],['wait','#d1d5db']].map(([k, c]) => stCnt[k] ? `<span title="${TQ_ST[k].label}: ${stCnt[k]}" style="flex:${stCnt[k]}; background:${c};"></span>` : '').join('')}</div>
+            <div style="font-size:11.5px; color:#6b7280; margin-top:4px;">Tiến bộ ${stCnt.up} · Ổn định ${stCnt.flat} · Buông lỏng ${stCnt.down} · Chưa đối chiếu ${stCnt.wait}</div>`, `          <div id="tq-prog-bar">${tqProgBarHtml()}</div>
           ${progRows.length ? `
           <div id="tq-prog-scroll" style="overflow:auto; max-height:460px; -webkit-overflow-scrolling:touch; border:1px solid #fef3c7; border-radius:12px;">
             <table style="width:100%; min-width:680px; border-collapse:collapse; font-size:13px;">
@@ -4011,8 +4057,9 @@
               <tbody id="tq-prog-body">${tqProgBodyHtml()}</tbody>
             </table>
           </div>` : '<div style="text-align:center; padding:20px; color:#9ca3af; background:#f9fafb; border-radius:12px; border:1px dashed #e5e7eb;">Chưa có dữ liệu</div>'}
-        </details>`;
+`);
 
+      requestAnimationFrame(() => window.tqFitTrend && window.tqFitTrend());
       const htmlReport = `
       ${monthFilterHtml}
 
@@ -4059,7 +4106,7 @@
         </div>
       </div>
 
-      <div style="display: flex; flex-direction: column; gap: 24px; width: 100%; box-sizing: border-box; overflow-x: hidden;">
+      <div style="display: flex; flex-direction: column; gap: 14px; width: 100%; box-sizing: border-box; overflow-x: hidden;">
         ${Object.keys(violatingUnitCounts).length > 0 ? `
         <details style="background: #ffffff; border: 1px solid #fee2e2; border-left: 4px solid #f43f5e; border-radius: 16px; padding: 16px; box-shadow: 0 10px 30px rgba(225, 29, 72, 0.05); transition: all 0.4s ease; box-sizing: border-box; width: 100%;" onmouseover="this.style.boxShadow='0 15px 40px rgba(225, 29, 72, 0.08)'" onmouseout="this.style.boxShadow='0 10px 30px rgba(225, 29, 72, 0.05)'">
           <summary style="list-style: none; outline: none; cursor: pointer;">
@@ -4144,12 +4191,18 @@
             </div>
           </details>
         </div>
+        <div style="display:flex; justify-content:flex-end; gap:8px; margin:-4px 0 -4px;">
+          <button type="button" onclick="tqSecAll(true)" style="cursor:pointer; min-height:34px; padding:4px 12px; border-radius:999px; border:1px solid #fde68a; background:#fffbeb; color:#92400e; font:inherit; font-size:12px; font-weight:800;">Mở tất cả</button>
+          <button type="button" onclick="tqSecAll(false)" style="cursor:pointer; min-height:34px; padding:4px 12px; border-radius:999px; border:1px solid #e5e7eb; background:#fff; color:#4b5563; font:inherit; font-size:12px; font-weight:800;">Thu gọn tất cả</button>
+        </div>
         ${coverageHtml}
         ${quartileHtml}
         ${trendHtml}
         ${progressHtml}
         <style>
           details > summary::-webkit-details-marker { display: none; }
+          details.tq-sec[open] > summary .tq-chev { transform: rotate(180deg); }
+          @media (max-width: 640px) { .tq-dbtn { font-size: 12px !important; padding: 6px 10px !important; min-height: 36px !important; } }
           .tq-swipe-hint { display: none; text-align: center; font-size: 11.5px; color: #a16207; margin: 0 0 6px; }
           .tq-sticky-col { box-shadow: 2px 0 4px -2px rgba(0,0,0,.08); }
           .tq-mini { display: none; margin-top: 3px; font-size: 11px; font-weight: 600; color: #9ca3af; line-height: 1.3; }
@@ -6284,10 +6337,10 @@
       
       const tabToCol = {
         'tongquan': ['units', 'logs', 'recoveries'],
-        'donvi': ['units', 'seals', 'signatures'], 
-        'kehoach': ['plans'], 
-        'nhatky': ['logs'],
-        'sanluong': ['inspections', 'recoveries'], 
+        'donvi': ['units', 'logs', 'seals', 'signatures'], 
+        'kehoach': ['units', 'plans', 'logs'], 
+        'nhatky': ['units', 'logs'],
+        'sanluong': ['units', 'logs', 'inspections', 'recoveries'], 
         'thuvien': ['docs']
       };
       
@@ -6361,6 +6414,10 @@
                        handleRemoteChange();
                        updateSyncUI(snapshot.metadata.fromCache);
                    }
+                }, err => {
+                   console.error('[Firestore] Listener lỗi ' + col + ' [' + scopeKey + ']:', err);
+                   try { delete window.activeListeners[col][scopeKey]; } catch (e) { }
+                   if (typeof showToast === 'function') showToast('Không tải được ' + col + ': ' + (err && (err.code || err.message) || 'lỗi'), 'red');
                 });
              }
           }
@@ -7894,7 +7951,7 @@
       if (mode === 'login') {
         formHtml = `
             <h2 style="margin-bottom:5px; color:var(--text); letter-spacing:-0.5px">\u0110\u0103ng nh\u1EADp</h2>
-            <p style="color:var(--gray); margin-bottom:20px; font-size:13px; line-height:1.4;">Sổ tay điện tử<br>Kiểm tra tuyển chọn tiền KĐTCLT</p>
+            <p style="color:var(--gray); margin-bottom:20px; font-size:13px; line-height:1.4;">Sổ tay điện tử <br>Kiểm tra tuyển chọn tiền KĐTCLT</p>
             <input type="text" id="login-username" autocomplete="username" autocapitalize="none" spellcheck="false" class="inp" placeholder="T\u00EAn \u0111\u0103ng nh\u1EADp" style="width:100%; margin-bottom:15px; box-sizing:border-box" onkeydown="if(event.key==='Enter'){event.preventDefault(); document.getElementById('login-password').focus();}">
             <input type="password" id="login-password" autocomplete="current-password" class="inp" placeholder="M\u1EADt kh\u1EA9u" style="width:100%; margin-bottom:20px; box-sizing:border-box" onkeydown="if(event.key==='Enter'){event.preventDefault(); doLogin();}">
             <button class="btn" style="background:var(--green);color:white;width:100%; padding:12px; font-size:15px; margin-bottom:15px; justify-content:center; border:none; border-radius:12px; cursor:pointer; font-weight:700; min-height:46px;" onclick="doLogin()">Đăng nhập</button>
