@@ -1728,6 +1728,8 @@
     .mobile-header.flex-mobile-header span { font-size: 10.5px !important; margin-top: 0 !important; line-height: 1.25; }
     .topbar { margin-bottom: 8px; }
     .content { padding-top: 14px; }
+    /* Màn hình rộng đã có nút "Đăng xuất" ở thanh tiêu đề -> ẩn nút đăng xuất trùng ở banner (≤860px thanh tiêu đề bị ẩn nên vẫn giữ nút này) */
+    @media (min-width: 861px) { .mobile-header .iconbtn-top[onclick*="doLogout"] { display: none !important; } }
 
     /* Fan Menu Bar */
     .fan-menu { position: fixed; bottom: 30px; left: 50%; margin-left: -35px; width: 70px; height: 70px; z-index: 9999; display: none; pointer-events: none; }
