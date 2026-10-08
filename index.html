@@ -3559,6 +3559,87 @@
       if (box) box.innerHTML = tqTrendInner(key);
     };
 
+    /* ---- Bảng đối chiếu tiến bộ: lọc theo đánh giá + sắp xếp theo độ lệch (không cần vẽ lại cả trang) ---- */
+    window.__tqProg = window.__tqProg || { st: 'all', sort: 'desc' };
+    const TQ_ST = {
+      up:   { bg: '#ecfdf5', fg: '#047857', bd: '#a7f3d0', label: 'Tiến bộ',        tag: '▼ Tiến bộ' },
+      flat: { bg: '#fffbeb', fg: '#b45309', bd: '#fde68a', label: 'Ổn định',        tag: '● Ổn định' },
+      down: { bg: '#fff1f2', fg: '#be123c', bd: '#fecdd3', label: 'Buông lỏng',     tag: '▲ Buông lỏng' },
+      wait: { bg: '#f3f4f6', fg: '#6b7280', bd: '#e5e7eb', label: 'Chưa đối chiếu', tag: 'Chưa đối chiếu' }
+    };
+
+    function tqProgRowHtml(r) {
+      const c = TQ_ST[r.st];
+      const dTxt = r.delta == null ? '—' : (r.delta > 0 ? '+' : '') + r.delta.toFixed(2);
+      const dCol = r.st === 'up' ? '#047857' : (r.st === 'down' ? '#e11d48' : '#6b7280');
+      let cells = '', mini = [];
+      for (let k = 1; k <= TQ_ROUNDS; k++) {
+        const v = r.rates[k];
+        if (v != null) mini.push('L' + k + ' ' + v.toFixed(2) + '%');
+        cells += `<td class="tq-col-lan" style="padding:10px 12px; text-align:right; font-variant-numeric:tabular-nums; ${v != null && v > 5 ? 'color:#e11d48;' : ''}" title="${r.rs[k].chk ? r.rs[k].inv + '/' + r.rs[k].chk + ' tờ' : ''}"><b>${tqPct(v)}</b></td>`;
+      }
+      return `<tr style="border-top:1px solid #fef3c7;">
+          <td class="tq-sticky-col" style="padding:10px 12px; font-weight:700; color:#1f2937; font-size:13.5px; min-width:170px; max-width:240px; position:sticky; left:0; z-index:1; background:#fff;">${esc(unitName(r.id))}<div class="tq-mini">${mini.join(' · ')}</div></td>
+          ${cells}
+          <td style="padding:10px 12px; text-align:right; font-weight:800; color:${dCol}; font-variant-numeric:tabular-nums; white-space:nowrap;">${dTxt}</td>
+          <td style="padding:10px 12px;"><span style="display:inline-block; padding:5px 10px; border-radius:999px; background:${c.bg}; color:${c.fg}; border:1px solid ${c.bd}; font-size:12px; font-weight:800; white-space:nowrap;">${c.tag}</span></td>
+        </tr>`;
+    }
+
+    function tqProgList() {
+      const P = window.__tqProg, rows = window.__tqProgRows || [];
+      const list = P.st === 'all' ? rows.slice() : rows.filter(r => r.st === P.st);
+      if (P.sort === 'name') list.sort((a, b) => String(unitName(a.id)).localeCompare(String(unitName(b.id)), 'vi'));
+      else list.sort((x, y) => (x.delta == null) - (y.delta == null) || (P.sort === 'asc' ? x.delta - y.delta : y.delta - x.delta));
+      return list;
+    }
+
+    function tqProgBodyHtml() {
+      const list = tqProgList();
+      if (!list.length) {
+        return `<tr><td colspan="${TQ_ROUNDS + 3}" style="padding:24px; text-align:center; color:#9ca3af;">Không có đơn vị phù hợp. <button type="button" onclick="tqProgReset()" style="cursor:pointer; margin-left:6px; padding:6px 12px; border-radius:999px; border:1px solid #a7f3d0; background:#ecfdf5; color:#047857; font:inherit; font-size:12.5px; font-weight:800;">Xóa lọc</button></td></tr>`;
+      }
+      return list.map(tqProgRowHtml).join('');
+    }
+
+    function tqProgBarHtml() {
+      const P = window.__tqProg, rows = window.__tqProgRows || [];
+      const n = { all: rows.length, up: 0, flat: 0, down: 0, wait: 0 };
+      rows.forEach(r => n[r.st]++);
+      const chip = (key, label, cnt, c) => {
+        const on = P.st === key;
+        return `<button type="button" onclick="tqProgSetStatus('${key}')" aria-pressed="${on}" style="cursor:pointer; display:inline-flex; align-items:center; gap:6px; min-height:40px; padding:6px 14px; border-radius:999px; font:inherit; font-size:12.5px; font-weight:800; background:${on ? c.fg : c.bg}; color:${on ? '#fff' : c.fg}; border:1px solid ${on ? c.fg : c.bd}; box-shadow:${on ? '0 4px 12px rgba(0,0,0,.15)' : 'none'};">${label}: ${cnt}</button>`;
+      };
+      const neutral = { bg: '#fff', fg: '#374151', bd: '#e5e7eb' };
+      const sel = (id, label, opts, val, fn) => `<label style="display:flex; align-items:center; gap:6px; flex:1 1 200px; min-width:0; font-size:12px; font-weight:800; color:#92400e;">${label}<select id="${id}" onchange="${fn}(this.value)" style="flex:1; min-width:0; min-height:40px; padding:6px 8px; border-radius:10px; border:1px solid #fde68a; background:#fffbeb; color:#78350f; font:inherit; font-size:13px; font-weight:700; cursor:pointer;">${opts.map(([v, t]) => `<option value="${v}" ${v === val ? 'selected' : ''}>${t}</option>`).join('')}</select></label>`;
+      return `<div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px 20px; margin:14px 0 8px;">
+          <div style="display:flex; flex-wrap:wrap; gap:8px;">
+            ${chip('all', 'Tất cả', n.all, neutral)}${chip('up', 'Tiến bộ', n.up, TQ_ST.up)}${chip('flat', 'Ổn định', n.flat, TQ_ST.flat)}${chip('down', 'Buông lỏng', n.down, TQ_ST.down)}${chip('wait', 'Chưa đối chiếu', n.wait, TQ_ST.wait)}
+          </div>
+          <div style="display:flex; flex-wrap:wrap; flex:1 1 320px; max-width:560px; gap:10px;">
+            ${sel('tq-prog-sort', 'Độ lệch', [['desc', 'Tăng nhiều nhất'], ['asc', 'Giảm nhiều nhất'], ['name', 'Theo tên']], P.sort, 'tqProgSetSort')}
+            ${sel('tq-prog-st', 'Đánh giá', [['all', 'Tất cả'], ['up', 'Tiến bộ'], ['flat', 'Ổn định'], ['down', 'Buông lỏng'], ['wait', 'Chưa đối chiếu']], P.st, 'tqProgSetStatus')}
+          </div>
+        </div>
+        <div style="font-size:12px; color:#6b7280; margin-bottom:8px;">Hiển thị ${tqProgList().length}/${n.all} đơn vị</div>`;
+    }
+
+    function tqProgRefresh() {
+      const bar = document.getElementById('tq-prog-bar'), body = document.getElementById('tq-prog-body');
+      if (bar) bar.innerHTML = tqProgBarHtml();
+      if (body) body.innerHTML = tqProgBodyHtml();
+      const ind = document.getElementById('tq-sort-ind'); if (ind) ind.textContent = window.__tqProg.sort === 'asc' ? ' ▲' : (window.__tqProg.sort === 'desc' ? ' ▼' : '');
+      const sc = document.getElementById('tq-prog-scroll'); if (sc) sc.scrollTop = 0;
+    }
+    window.tqProgSetStatus = function (st) {
+      const P = window.__tqProg;
+      P.st = (P.st === st && st !== 'all') ? 'all' : st;   // bấm lại chip đang chọn = bỏ lọc
+      tqProgRefresh();
+    };
+    window.tqProgSetSort = function (v) { window.__tqProg.sort = v; tqProgRefresh(); };
+    window.tqProgCycleSort = function () { const P = window.__tqProg; P.sort = P.sort === 'desc' ? 'asc' : 'desc'; tqProgRefresh(); };
+    window.tqProgReset = function () { window.__tqProg.st = 'all'; window.__tqProg.sort = 'desc'; tqProgRefresh(); };
+
     function renderTongquan() {
       // Tổng quan mặc định chỉ phản ánh dữ liệu của năm hiện tại.
       // Điều này đồng thời bảo đảm KPI không bị sai khi local cache còn dữ liệu các năm trước.
@@ -3910,46 +3991,24 @@
         }
         return { id, rs, rates, delta, st };
       }).sort((x, y) => (x.delta == null) - (y.delta == null) || (y.delta || 0) - (x.delta || 0));
-      const cnt = { up: 0, flat: 0, down: 0, wait: 0 };
-      progRows.forEach(r => cnt[r.st]++);
-      const stPill = st => ({
-        up:   ['#ecfdf5', '#047857', '#a7f3d0', '▼ Tiến bộ'],
-        flat: ['#fffbeb', '#b45309', '#fde68a', '● Ổn định'],
-        down: ['#fff1f2', '#be123c', '#fecdd3', '▲ Buông lỏng'],
-        wait: ['#f3f4f6', '#6b7280', '#e5e7eb', 'Chưa đối chiếu']
-      }[st]);
+      window.__tqProgRows = progRows;
+      const th = (t, al, first, click, cls) => `<th class="${cls || ''}" ${click ? `onclick="${click}" role="button" tabindex="0" title="Bấm để đổi chiều sắp xếp"` : ''} style="padding:10px 12px; text-align:${al || 'right'}; white-space:nowrap; position:sticky; top:0; ${first ? 'left:0; z-index:3;' : 'z-index:2;'} background:#fffbeb; ${click ? 'cursor:pointer;' : ''}">${t}</th>`;
+      const sortArrow = window.__tqProg.sort === 'asc' ? ' ▲' : (window.__tqProg.sort === 'desc' ? ' ▼' : '');
       const roundCols = Array.from({ length: TQ_ROUNDS }, (_, i) => i + 1);
-      const progBody = progRows.map(r => {
-        const [bg, fg, bd, tx] = stPill(r.st);
-        const dTxt = r.delta == null ? '—' : (r.delta > 0 ? '+' : '') + r.delta.toFixed(2);
-        const dCol = r.st === 'up' ? '#047857' : (r.st === 'down' ? '#e11d48' : '#6b7280');
-        const cells = roundCols.map(k => `<td style="padding:10px 12px; text-align:right; font-variant-numeric:tabular-nums; ${r.rates[k] != null && r.rates[k] > 5 ? 'color:#e11d48;' : ''}" title="${r.rs[k].chk ? r.rs[k].inv + '/' + r.rs[k].chk + ' tờ' : ''}"><b>${tqPct(r.rates[k])}</b></td>`).join('');
-        return `<tr style="border-top:1px solid #fef3c7;">
-          <td class="tq-sticky-col" style="padding:10px 12px; font-weight:700; color:#1f2937; font-size:13.5px; min-width:170px; max-width:240px; position:sticky; left:0; z-index:1; background:#fff;">${esc(unitName(r.id))}</td>
-          ${cells}
-          <td style="padding:10px 12px; text-align:right; font-weight:800; color:${dCol}; font-variant-numeric:tabular-nums; white-space:nowrap;">${dTxt}</td>
-          <td style="padding:10px 12px;"><span style="display:inline-block; padding:5px 10px; border-radius:999px; background:${bg}; color:${fg}; border:1px solid ${bd}; font-size:12px; font-weight:800; white-space:nowrap;">${tx}</span></td>
-        </tr>`;
-      }).join('');
-      const chip = (n, label, c) => `<span style="display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border-radius:999px; background:${c[0]}; color:${c[1]}; border:1px solid ${c[2]}; font-size:12.5px; font-weight:800;">${label}: ${n}</span>`;
-      const th = (t, al, first) => `<th style="padding:10px 12px; text-align:${al || 'right'}; white-space:nowrap; position:sticky; top:0; ${first ? 'left:0; z-index:3;' : 'z-index:2;'} background:#fffbeb;">${t}</th>`;
       const progressHtml = `
         <details open style="background:#fff; border:1px solid #d1fae5; border-left:4px solid #059669; border-radius:16px; padding:16px 20px; box-shadow:0 10px 30px rgba(5,150,105,0.04); box-sizing:border-box; width:100%;">
           <summary style="list-style:none; cursor:pointer; outline:none;">
             <h3 style="margin:0; font-size:16px; font-weight:800; color:#1f2937;">Đối chiếu tiến bộ theo lần kiểm tra</h3>
             <div style="margin:4px 0 0; font-size:12.5px; color:#047857; font-weight:600;">R = tờ KĐTCLT / tờ kiểm tra. Độ lệch = lần mới nhất − lần trước (điểm %).</div>
           </summary>
-          <div style="display:flex; flex-wrap:wrap; gap:8px; margin:14px 0;">
-            ${chip(cnt.up, 'Tiến bộ', ['#ecfdf5', '#047857', '#a7f3d0'])}${chip(cnt.flat, 'Ổn định', ['#fffbeb', '#b45309', '#fde68a'])}${chip(cnt.down, 'Buông lỏng', ['#fff1f2', '#be123c', '#fecdd3'])}${chip(cnt.wait, 'Chưa đối chiếu', ['#f3f4f6', '#6b7280', '#e5e7eb'])}
-          </div>
+          <div id="tq-prog-bar">${tqProgBarHtml()}</div>
           ${progRows.length ? `
-          <div class="tq-swipe-hint">← Vuốt ngang để xem đủ 4 lần →</div>
-          <div style="overflow:auto; max-height:460px; -webkit-overflow-scrolling:touch; border:1px solid #fef3c7; border-radius:12px;">
+          <div id="tq-prog-scroll" style="overflow:auto; max-height:460px; -webkit-overflow-scrolling:touch; border:1px solid #fef3c7; border-radius:12px;">
             <table style="width:100%; min-width:680px; border-collapse:collapse; font-size:13px;">
               <thead><tr style="color:#92400e; font-size:12px; text-transform:uppercase; letter-spacing:.3px;">
-                ${th('Đơn vị', 'left', true)}${roundCols.map(k => th('Lần ' + k + (k > nowQ ? ' <span style="opacity:.5;">·</span>' : ''))).join('')}${th('Độ lệch')}${th('Đánh giá', 'left')}
+                ${th('Đơn vị', 'left', true)}${roundCols.map(k => th('Lần ' + k, 'right', false, '', 'tq-col-lan')).join('')}${th('Độ lệch<span id="tq-sort-ind">' + sortArrow + '</span>', 'right', false, 'tqProgCycleSort()')}${th('Đánh giá', 'left')}
               </tr></thead>
-              <tbody>${progBody}</tbody>
+              <tbody id="tq-prog-body">${tqProgBodyHtml()}</tbody>
             </table>
           </div>` : '<div style="text-align:center; padding:20px; color:#9ca3af; background:#f9fafb; border-radius:12px; border:1px dashed #e5e7eb;">Chưa có dữ liệu</div>'}
         </details>`;
@@ -4093,10 +4152,15 @@
           details > summary::-webkit-details-marker { display: none; }
           .tq-swipe-hint { display: none; text-align: center; font-size: 11.5px; color: #a16207; margin: 0 0 6px; }
           .tq-sticky-col { box-shadow: 2px 0 4px -2px rgba(0,0,0,.08); }
+          .tq-mini { display: none; margin-top: 3px; font-size: 11px; font-weight: 600; color: #9ca3af; line-height: 1.3; }
           @media (max-width: 640px) {
             .tq-swipe-hint { display: block; }
-            .tq-sticky-col { min-width: 118px !important; max-width: 128px !important; font-size: 12px !important; padding: 8px 8px !important; line-height: 1.3; }
+            .tq-sticky-col { min-width: 120px !important; max-width: 150px !important; font-size: 12px !important; padding: 8px 8px !important; line-height: 1.3; }
             details table th, details table td { padding-left: 8px !important; padding-right: 8px !important; }
+            #tq-prog-scroll table { min-width: 0 !important; }
+            .tq-col-lan { display: none !important; }
+            .tq-mini { display: block !important; }
+            #tq-prog-scroll td span { font-size: 11px !important; padding: 4px 8px !important; }
           }
           details[open] summary .summary-arrow-gray { transform: rotate(180deg); }
           .spin { animation: spin 1s linear infinite; }
