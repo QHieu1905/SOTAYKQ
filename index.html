@@ -1728,6 +1728,8 @@
     .mobile-header.flex-mobile-header span { font-size: 10.5px !important; margin-top: 0 !important; line-height: 1.25; }
     .topbar { margin-bottom: 8px; }
     .content { padding-top: 14px; }
+    /* Chừa chỗ cuối trang để nút menu tròn nổi không che nội dung (điện thoại/máy tính bảng) */
+    @media (max-width: 860px) { .page { padding-bottom: 110px; } }
     /* Màn hình rộng đã có nút "Đăng xuất" ở thanh tiêu đề -> ẩn nút đăng xuất trùng ở banner (≤860px thanh tiêu đề bị ẩn nên vẫn giữ nút này) */
     @media (min-width: 861px) { .mobile-header .iconbtn-top[onclick*="doLogout"] { display: none !important; } }
 
@@ -3508,8 +3510,93 @@
     const tqPct = v => (v == null || isNaN(v)) ? '—' : v.toFixed(2) + '%';
 
 
+
+    /* ================= GỢI Ý KIỂM TRA BỔ SUNG (dùng chung Lịch kiểm tra + Tổng quan) ================= */
+    const TQ_BAD_BUNDLE_PCT = 5;   // một bó có tỷ lệ KĐTCLT vượt ngưỡng này thì cần kiểm tra bổ sung
+    const tqRoundOf = d => Math.min(4, Math.ceil((Number(String(d).slice(5, 7)) || 1) / 3));      // Vòng k = quý k: T01-03, T04-06, T07-09, T10-12
+    const tqRoundMonths = k => 'T' + String((k - 1) * 3 + 1).padStart(2, '0') + '–' + String(k * 3).padStart(2, '0');
+    function tqNow() { const d = new Date(); return { y: d.getFullYear(), q: Math.ceil((d.getMonth() + 1) / 3), d }; }
+    function tqDaysLeft(now) { return Math.max(0, Math.ceil((new Date(now.y, now.q * 3, 0, 23, 59, 59) - now.d) / 86400000)); }
+    function tqRoundLabel(k, y) { return k > 4 ? 'Vòng 1/' + (y + 1) : 'Vòng ' + k; }
+    function tqBundleRatio(l) {
+      const a = (Number(l.amount1) || 0) + (Number(l.amount2) || 0);
+      return a > 0 ? ((Number(l.invalidAmount1) || 0) + (Number(l.invalidAmount2) || 0)) / a * 100 : null;
+    }
+    // Xác định đơn vị có cần kiểm tra bổ sung hay không (theo thời điểm thực)
+    function tqNeedCheck(u, uLogs) {
+      const now = tqNow(), yp = String(now.y);
+      const yl = (uLogs || []).filter(l => l && l.date && l.date.startsWith(yp)).sort((a, b) => a.date.localeCompare(b.date));
+      const have = [false, false, false, false, false];
+      yl.forEach(l => { have[tqRoundOf(l.date)] = true; });
+      const overdue = [], cur = [];
+      for (let k = 2; k <= now.q; k++) if (!have[k]) (k < now.q ? overdue : cur).push(k);   // Vòng 2..hiện tại chưa có lượt kiểm tra nào
+      const last = yl.length ? yl[yl.length - 1] : null, lr = last ? tqBundleRatio(last) : null;
+      // Bó gần nhất vượt ngưỡng => còn "mở" cho tới khi có lượt kiểm tra sau đó
+      const bad = (lr != null && lr > TQ_BAD_BUNDLE_PCT) ? { date: last.date, ratio: lr, n: yl.filter(l => (tqBundleRatio(l) || 0) > TQ_BAD_BUNDLE_PCT).length } : null;
+      const target = have[now.q] ? now.q + 1 : now.q;   // lượt kiểm tra bổ sung sẽ được tính vào vòng nào
+      return { bad, overdue, cur, target, nowQ: now.q, y: now.y, daysLeft: tqDaysLeft(now), any: !!(bad || overdue.length || cur.length) };
+    }
+    const tqSugScore = nc => (nc.bad && (nc.overdue.length || nc.cur.length)) ? 0 : nc.bad ? 1 : nc.overdue.length ? 2 : 3;
+    function tqPill(bg, fg, bd, text) { return `<span style="display:inline-block; padding:3px 9px; border-radius:999px; background:${bg}; color:${fg}; border:1px solid ${bd}; font-size:11.5px; font-weight:800; white-space:nowrap;">${text}</span>`; }
+    function tqReasonPills(nc) {
+      const out = [];
+      if (nc.bad) out.push(tqPill('#fff1f2', '#be123c', '#fecdd3', `Tỷ lệ kiểm tra ${nc.bad.ratio.toFixed(2)}% &gt; 5% · ${nc.bad.date.slice(8, 10)}/${nc.bad.date.slice(5, 7)}${nc.bad.n > 1 ? ' · ' + nc.bad.n + ' lần' : ''}`));
+      if (nc.overdue.length) out.push(tqPill('#fff1f2', '#be123c', '#fecdd3', `Thiếu Vòng ${nc.overdue.join(', ')}`));
+      if (nc.cur.length) out.push(tqPill('#fffbeb', '#b45309', '#fde68a', `Chưa KT Vòng ${nc.nowQ} · còn ${nc.daysLeft} ngày`));
+      return out;
+    }
+
+    /* Danh sách gợi ý ở Tổng quan: lọc nhanh + xem thêm */
+    window.__tqSugF = window.__tqSugF || 'all';
+    window.__tqSugAll = !!window.__tqSugAll;
+    function tqSugRowHtml(x) {
+      const nc = x.nc;
+      return `<div style="display:flex; align-items:center; gap:10px; padding:10px 0; border-top:1px dashed #fde68a;">
+          <div style="flex:1 1 0; min-width:0;">
+            <div style="font-weight:700; color:#1f2937; font-size:13.5px; overflow-wrap:anywhere;">${esc(x.u.name)}</div>
+            <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:6px;">${tqReasonPills(nc).join('')}</div>
+            <div style="font-size:11.5px; color:#6b7280; margin-top:4px;">Kiểm tra bổ sung → tính vào ${tqRoundLabel(nc.target, nc.y)}</div>
+          </div>
+          <button type="button" onclick="window.goToLogAndOpenForm('${x.u.id}')" style="cursor:pointer; flex-shrink:0; min-height:38px; padding:6px 14px; border-radius:999px; border:none; background:linear-gradient(135deg,#f59e0b,#d97706); color:#fff; font:inherit; font-size:12.5px; font-weight:800; box-shadow:0 4px 10px rgba(217,119,6,.25);">Kiểm tra</button>
+        </div>`;
+    }
+    function tqSugBodyHtml() {
+      const all = window.__tqSug || [], F = window.__tqSugF, now = tqNow();
+      const cnt = { all: all.length, bad: 0, over: 0, cur: 0 };
+      all.forEach(x => { if (x.nc.bad) cnt.bad++; if (x.nc.overdue.length) cnt.over++; if (x.nc.cur.length) cnt.cur++; });
+      const list = all.filter(x => F === 'all' || (F === 'bad' && x.nc.bad) || (F === 'over' && x.nc.overdue.length) || (F === 'cur' && x.nc.cur.length));
+      const shown = window.__tqSugAll ? list : list.slice(0, 6);
+      const chip = (k, label, n, c) => { const on = F === k; return `<button type="button" onclick="tqSugSet('${k}')" aria-pressed="${on}" style="cursor:pointer; min-height:36px; padding:4px 12px; border-radius:999px; font:inherit; font-size:12.5px; font-weight:800; background:${on ? c : '#fff'}; color:${on ? '#fff' : c}; border:1px solid ${c};">${label}: ${n}</button>`; };
+      return `<div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:6px;">${chip('all', 'Tất cả', cnt.all, '#92400e')}${chip('bad', 'Tỷ lệ kiểm tra &gt; 5%', cnt.bad, '#be123c')}${chip('over', 'Quá hạn', cnt.over, '#be123c')}${chip('cur', 'Chưa KT Vòng ' + now.q, cnt.cur, '#b45309')}</div>` +
+        (shown.length ? shown.map(tqSugRowHtml).join('') : `<div style="padding:18px; text-align:center; color:#047857; font-weight:700; background:#ecfdf5; border-radius:12px;">Không có đơn vị nào cần kiểm tra bổ sung</div>`) +
+        (list.length > 6 ? `<div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:10px;"><button type="button" onclick="tqSugToggleAll()" style="cursor:pointer; min-height:36px; padding:4px 14px; border-radius:999px; border:1px solid #fde68a; background:#fffbeb; color:#92400e; font:inherit; font-size:12.5px; font-weight:800;">${window.__tqSugAll ? 'Thu gọn' : 'Xem thêm ' + (list.length - 6) + ' đơn vị'}</button><button type="button" onclick="switchTab('kehoach')" style="cursor:pointer; min-height:36px; padding:4px 14px; border-radius:999px; border:1px solid #e5e7eb; background:#fff; color:#4b5563; font:inherit; font-size:12.5px; font-weight:800;">Mở Lịch kiểm tra</button></div>` : '');
+    }
+    function tqSugRefresh() { const b = document.getElementById('tq-sug-body'); if (b) b.innerHTML = tqSugBodyHtml(); }
+    window.tqSugSet = function (k) { window.__tqSugF = (window.__tqSugF === k && k !== 'all') ? 'all' : k; tqSugRefresh(); };
+    window.tqSugToggleAll = function () { window.__tqSugAll = !window.__tqSugAll; tqSugRefresh(); };
+
+
+    /* ---- Khối thu gọn "Độ phủ + Dải chỉ số": ô tròn (điện thoại) / thanh một dòng (máy tính) ---- */
+    window.__tqCmpSel = window.__tqCmpSel || '';
+    function tqCmpPanelHtml() {
+      const D = window.__tqCmpData, k = window.__tqCmpSel;
+      if (!D || !k) return '';
+      const h = t => `<div style="font-size:13px; font-weight:800; color:#92400e; margin:2px 0 4px;">${t}</div>`;
+      if (k === 'all') return h('Độ phủ theo chu kỳ vòng') + D.covBody + `<div style="border-top:1px dashed #fde68a; margin:14px 0 10px;"></div>` + h('Bảng 6 dải chỉ số cơ sở tỷ lệ KĐTCLT') + D.quartBody;
+      if (k === 'q') return h('Bảng 6 dải chỉ số cơ sở tỷ lệ KĐTCLT') + D.quartBody;
+      return D.rows[Number(k) - 1] || '';
+    }
+    function tqCmpRefresh() {
+      const k = window.__tqCmpSel, panel = document.getElementById('tq-cmp-panel');
+      if (panel) panel.innerHTML = tqCmpPanelHtml();
+      document.querySelectorAll('.tq-rg').forEach(b => b.setAttribute('aria-pressed', b.dataset.k === k ? 'true' : 'false'));
+      document.querySelectorAll('.tq-stp').forEach(b => b.setAttribute('aria-expanded', k === 'all' ? 'true' : 'false'));
+      document.querySelectorAll('.tq-cmp-all').forEach(b => b.setAttribute('aria-pressed', k === 'all' ? 'true' : 'false'));
+    }
+    window.tqCmpSet = function (k) { window.__tqCmpSel = (window.__tqCmpSel === k) ? '' : k; tqCmpRefresh(); };
+
     /* ---- Mục có thể đóng/mở trong Tổng quan (nhớ trạng thái khi vẽ lại) ---- */
-    window.__tqOpen = window.__tqOpen || { cov: true, quart: true, trend: true, prog: false };
+    window.__tqOpen = window.__tqOpen || { sug: true, cov: true, quart: true, trend: true, prog: false };
     function tqSec(id, border, bg, head, body) {
       const open = window.__tqOpen[id] !== false && !!window.__tqOpen[id];
       return `<details class="tq-sec" data-sec="${id}" ${open ? 'open' : ''} ontoggle="tqSecToggle('${id}', this.open)" style="background:${bg}; border:1px solid #fde68a; border-left:4px solid ${border}; border-radius:16px; box-shadow:0 8px 24px rgba(217,119,6,0.05); box-sizing:border-box; width:100%;">
@@ -3908,12 +3995,18 @@
         .map(([d, a, i]) => ({ val: tqDenomVal(d), chk: Number(a) || 0, inv: Number(i) || 0 }))
         .filter(x => x.val > 0 && x.chk > 0);
 
-      // --- 1) Độ phủ & khóa sổ ---
-      const coveredIds = new Set(yearLogsAll.filter(l => l.unitId && !exemptIds.has(l.unitId) && data.units.some(u => u.id === l.unitId)).map(l => l.unitId));
-      const covCount = coveredIds.size;
-      const covPct = covCount / TQ_TOTAL_TCTD * 100;
-      const isLocked = covCount >= TQ_LOCK_MIN_UNITS && covPct >= TQ_LOCK_MIN_PCT;
-      const needMore = Math.max(0, TQ_LOCK_MIN_UNITS - covCount);
+      // --- 1) Độ phủ theo từng chu kỳ vòng (Vòng k = quý k, tính theo thời điểm thực) ---
+      const nowInfo = tqNow();
+      const roundCov = [null, new Set(), new Set(), new Set(), new Set()];
+      yearLogsAll.forEach(l => { if (l.unitId && !exemptIds.has(l.unitId) && data.units.some(u => u.id === l.unitId)) roundCov[tqRoundOf(l.date)].add(l.unitId); });
+      const dayLeftNow = tqDaysLeft(nowInfo);
+      const roundInfo = [1, 2, 3, 4].map(k => {
+        const n = roundCov[k].size, pct = n / TQ_TOTAL_TCTD * 100;
+        const locked = n >= TQ_LOCK_MIN_UNITS && pct >= TQ_LOCK_MIN_PCT;
+        const st = k > nowInfo.q ? 'future' : (locked ? 'locked' : (k < nowInfo.q ? 'overdue' : 'doing'));
+        return { k, n, pct, locked, st, need: Math.max(0, TQ_LOCK_MIN_UNITS - n) };
+      });
+      const curR = roundInfo[nowInfo.q - 1];
       const exemptChips = (() => {
         const chips = exemptUnits.map(u => {
           const n = yearLogsAll.filter(l => l.unitId === u.id).length;
@@ -3926,33 +4019,51 @@
         });
         return chips.join('');
       })();
-      const coverageHtml = tqSec('cov', isLocked ? '#059669' : '#f59e0b', 'linear-gradient(135deg,#fffbeb 0%,#fff 60%)', `          <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px 12px; margin-bottom:0;">
-            <div>
-              <h3 style="margin:0; font-size:16px; font-weight:800; color:#1f2937;">Độ phủ kiểm tra chu kỳ Vòng 1</h3>
-              <div style="margin-top:4px; font-size:13px; color:#92400e;">Khóa sổ khi đạt ${TQ_LOCK_MIN_UNITS}/${TQ_TOTAL_TCTD} TCTD (≥ ${TQ_LOCK_MIN_PCT}%)</div>
+      const rStyle = r => ({
+        future:  ['#f3f4f6', '#6b7280', '#e5e7eb', 'Chưa đến kỳ'],
+        locked:  ['#ecfdf5', '#047857', '#a7f3d0', 'Đã khóa sổ'],
+        overdue: ['#fff1f2', '#be123c', '#fecdd3', 'Quá hạn · thiếu ' + r.need],
+        doing:   ['#fff7ed', '#b45309', '#fed7aa', 'Đang thực hiện · còn ' + dayLeftNow + ' ngày']
+      }[r.st]);
+      const lockTick = (TQ_LOCK_MIN_UNITS / TQ_TOTAL_TCTD * 100).toFixed(2);
+      const roundRowArr = roundInfo.map(r => {
+        const [bg, fg, bd, tx] = rStyle(r);
+        return `<div style="padding:10px 0; border-top:1px dashed #fde68a;">
+            <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:6px 10px;">
+              <b style="font-size:13.5px; color:#1f2937;">Vòng ${r.k} <span style="font-weight:600; color:#a16207; font-size:12px;">· ${tqRoundMonths(r.k)}</span></b>
+              <span style="display:inline-block; padding:4px 10px; border-radius:999px; background:${bg}; color:${fg}; border:1px solid ${bd}; font-size:12px; font-weight:800;">${tx}</span>
             </div>
-            <span style="display:inline-flex; align-items:center; gap:8px; padding:9px 16px; border-radius:999px; font-size:13.5px; font-weight:800; ${isLocked ? 'background:#ecfdf5; color:#047857; border:1px solid #a7f3d0;' : 'background:#fff7ed; color:#b45309; border:1px solid #fed7aa;'}">
-              ${isLocked
-                ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Đã Khóa Sổ Chu Kỳ Vòng 1'
-                : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>Đang thực hiện Vòng 1'}
-            </span>
-          </div>
-<div style="font-size:12.5px; color:#78350f; font-weight:700; margin-top:6px;">${covCount}/${TQ_TOTAL_TCTD} TCTD · ${covPct.toFixed(2)}%</div>`, `          <div style="display:flex; align-items:baseline; flex-wrap:wrap; gap:8px 14px; margin-bottom:10px;">
-            <span style="font-size:32px; font-weight:800; color:${isLocked ? '#047857' : '#d97706'}; font-variant-numeric:tabular-nums; letter-spacing:-1px;">${covCount}<span style="font-size:18px; color:#9ca3af; font-weight:700;"> / ${TQ_TOTAL_TCTD} TCTD</span></span>
-            <span style="font-size:15px; font-weight:700; color:#78350f;">Độ phủ ${covPct.toFixed(2)}%</span>
-            <span style="font-size:13px; color:#6b7280;">${isLocked ? 'Đã đạt ngưỡng.' : `Còn thiếu ${needMore} TCTD.`}</span>
-          </div>
-          <div style="position:relative; height:12px; background:#fef3c7; border-radius:99px; overflow:visible;">
-            <div style="height:100%; width:${Math.min(100, covPct).toFixed(2)}%; border-radius:99px; background:${isLocked ? 'linear-gradient(90deg,#34d399,#059669)' : 'linear-gradient(90deg,#fcd34d,#d97706)'};"></div>
-            <div style="position:absolute; left:${TQ_LOCK_MIN_PCT}%; top:-4px; bottom:-4px; width:2px; background:#e11d48;" title="Mốc ${TQ_LOCK_MIN_PCT}%"></div>
-          </div>
-          <div style="display:flex; justify-content:space-between; font-size:11px; color:#a16207; margin-top:6px;"><span>0%</span><span style="position:relative; left:${TQ_LOCK_MIN_PCT > 90 ? 0 : -4}%; color:#e11d48; font-weight:700;">mốc ${TQ_LOCK_MIN_PCT}%</span><span>100%</span></div>
-          <div style="margin-top:18px; padding-top:16px; border-top:1px dashed #fde68a;">
+            <div style="display:flex; align-items:center; gap:10px; margin-top:6px;">
+              <div style="flex:1; position:relative; height:8px; background:#fef3c7; border-radius:99px;">
+                <div style="height:100%; width:${Math.min(100, r.pct).toFixed(2)}%; border-radius:99px; background:${r.locked ? 'linear-gradient(90deg,#34d399,#059669)' : 'linear-gradient(90deg,#fcd34d,#d97706)'};"></div>
+                <div style="position:absolute; left:${lockTick}%; top:-3px; bottom:-3px; width:2px; background:#e11d48;" title="Mốc khóa sổ ${TQ_LOCK_MIN_UNITS}/${TQ_TOTAL_TCTD}"></div>
+              </div>
+              <span style="font-size:12.5px; font-weight:800; color:#78350f; white-space:nowrap; font-variant-numeric:tabular-nums; min-width:96px; text-align:right;">${r.n}/${TQ_TOTAL_TCTD} · ${r.pct.toFixed(1)}%</span>
+            </div>
+          </div>`;
+      });
+      const roundRows = roundRowArr.join('');
+      const lockIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
+      const openIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>';
+      const covBodyHtml = `
+          ${roundRows}
+          <div style="margin-top:6px; padding-top:14px; border-top:1px dashed #fde68a;">
             <div style="font-size:13px; font-weight:800; color:#92400e; margin-bottom:4px;">Miễn trừ kế hoạch thường quy (${TQ_EXEMPT_KEYWORDS.length} TCTD)</div>
             <div style="font-size:12.5px; color:#6b7280; margin-bottom:10px;">Giám sát đột xuất khi có lệnh nộp rút.</div>
             <div style="display:flex; flex-wrap:wrap; gap:8px;">${exemptChips}</div>
-          </div>
-`);
+          </div>`;
+
+      // --- 1b) Gợi ý kiểm tra bổ sung: bó > 5% và đơn vị chưa đủ độ phủ các vòng 2-4 ---
+      window.__tqSug = data.units.filter(u => !tqIsExempt(u))
+        .map(u => ({ u, nc: tqNeedCheck(u, (data.logs || []).filter(l => l.unitId === u.id)) }))
+        .filter(x => x.nc.any)
+        .map(x => ({ ...x, score: tqSugScore(x.nc) }))
+        .sort((a, b) => a.score - b.score || String(a.u.name).localeCompare(String(b.u.name), 'vi'));
+      const sgBad = window.__tqSug.filter(x => x.nc.bad).length, sgOver = window.__tqSug.filter(x => x.nc.overdue.length).length, sgCur = window.__tqSug.filter(x => x.nc.cur.length).length;
+      const suggestHtml = tqSec('sug', '#e11d48', '#fff', `
+          <h3 style="margin:0; font-size:16px; font-weight:800; color:#1f2937;">Gợi ý kiểm tra bổ sung</h3>
+          <div style="margin:2px 0 0; font-size:12.5px; color:#be123c; font-weight:700;">${window.__tqSug.length} đơn vị · Tỷ lệ kiểm tra &gt; 5%: ${sgBad} · Quá hạn: ${sgOver} · Chưa KT Vòng ${nowInfo.q}: ${sgCur}</div>`,
+        `<div id="tq-sug-body">${tqSugBodyHtml()}</div>`);
 
       // --- 2) Bảng 6 dải chỉ số cơ sở (45 TCTD, tính theo số tờ) ---
       const unitAgg = {}, unitRound = {};
@@ -3985,9 +4096,7 @@
       const cCr = { bg: '#fefce8', bd: '#fde68a', lb: '#854d0e', fg: '#854d0e' };
       const scaleMax = Math.max(qMax == null ? 0 : qMax, 5.5);
       const mk = (v, color, t) => v == null ? '' : `<span title="${t}: ${tqPct(v)}" style="position:absolute; left:${(v / scaleMax * 100).toFixed(2)}%; top:50%; width:14px; height:14px; margin:-7px 0 0 -7px; border-radius:50%; background:${color}; border:2px solid #fff; box-shadow:0 1px 4px rgba(0,0,0,.25);"></span>`;
-      const quartileHtml = tqSec('quart', '#f59e0b', '#fff', `          <h3 style="margin:0; font-size:16px; font-weight:800; color:#1f2937;">Bảng 6 dải chỉ số cơ sở tỷ lệ KĐTCLT</h3>
-          <div style="margin:2px 0 0; font-size:12.5px; color:#92400e; font-weight:600;">${rv.length ? `Từ ${rv.length} TCTD${rv.length < 45 ? ' (tạm tính)' : ''} · Median ${tqPct(qMed)} · Q3 ${tqPct(qQ3)}` : 'Chưa có dữ liệu'}</div>
-`, `          ${rv.length ? `
+      const quartBodyHtml = `          ${rv.length ? `
           <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px;">
             ${qTile('Min · Thấp nhất', tqPct(qMin), esc(unitName(rated[0].id)), cEm)}
             ${qTile('Q1 · Phân vị 25%', tqPct(qQ1), 'Nhóm Tiên tiến / Bông Sen Vàng', cEm)}
@@ -4001,7 +4110,7 @@
             ${mk(qMin, '#059669', 'Min')}${mk(qQ1, '#10b981', 'Q1')}${mk(qMed, '#d97706', 'Median')}${mk(qQ3, '#f59e0b', 'Q3')}${mk(qMax, '#e11d48', 'Max')}
           </div>
           <div style="display:flex; justify-content:space-between; font-size:11px; color:#a16207; margin:0 8px;"><span>0%</span><span>${tqPct(scaleMax)}</span></div>` : ''}
-`);
+`;
 
       // --- 3) Xu hướng 10 tháng theo mệnh giá ---
       const trendLabels = Array.from({ length: TQ_TREND_MONTHS }, (_, i) => 'T' + String(i + 1).padStart(2, '0'));
@@ -4060,6 +4169,37 @@
             </table>
           </div>` : '<div style="text-align:center; padding:20px; color:#9ca3af; background:#f9fafb; border-radius:12px; border:1px dashed #e5e7eb;">Chưa có dữ liệu</div>'}
 `);
+
+      // --- Khối thu gọn cuối trang: ô tròn (điện thoại) / thanh một dòng (máy tính) ---
+      const cmpCol = { locked: '#047857', overdue: '#be123c', doing: '#b45309', future: '#9ca3af' };
+      window.__tqCmpData = { rows: roundRowArr, covBody: covBodyHtml, quartBody: quartBodyHtml };
+      const cmpSel = window.__tqCmpSel || '';
+      const cmpRing = (n, col, label, aria) => { const c = 2 * Math.PI * 18, d = c * Math.min(1, n / TQ_TOTAL_TCTD); return `<svg width="46" height="46" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="18" fill="none" stroke="#fef3c7" stroke-width="4"/><circle cx="22" cy="22" r="18" fill="none" stroke="${col}" stroke-width="4" stroke-linecap="round" stroke-dasharray="${d.toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 22 22)"/><text x="22" y="26" text-anchor="middle" font-size="12" font-weight="800" fill="#1f2937">${label}</text></svg>`; };
+      const cmpRings = roundInfo.map(r => `<button type="button" class="tq-rg" data-k="${r.k}" onclick="tqCmpSet('${r.k}')" aria-pressed="${cmpSel === String(r.k)}" aria-label="Vòng ${r.k}: ${r.n}/${TQ_TOTAL_TCTD} TCTD" style="cursor:pointer;">${cmpRing(r.n, cmpCol[r.st], r.n)}<small>Vòng ${r.k}</small></button>`).join('')
+        + `<span class="tq-vs"></span>`
+        + `<button type="button" class="tq-rg" data-k="q" onclick="tqCmpSet('q')" aria-pressed="${cmpSel === 'q'}" aria-label="Dải chỉ số" style="cursor:pointer;">${cmpRing(rv.length ? 48 : 0, '#d97706', rv.length ? qMed.toFixed(1) : '—')}<small>Median %</small></button>`;
+      const cmpSeg = roundInfo.map(r => `<i title="Vòng ${r.k}: ${r.n}/${TQ_TOTAL_TCTD}" style="background:${cmpCol[r.st]};"></i>`).join('');
+      const cmpStats = rv.length
+        ? `Median <b>${tqPct(qMed)}</b> · Q3 <b>${tqPct(qQ3)}</b> · Max <b style="color:${qMax > 5 ? '#e11d48' : 'inherit'};">${tqPct(qMax)}</b>`
+        : 'Chưa có dữ liệu dải chỉ số';
+      const compactHtml = `
+        <section style="background:#fff; border:1px solid #fde68a; border-radius:16px; padding:10px 12px; box-shadow:0 8px 24px rgba(217,119,6,0.05); box-sizing:border-box; width:100%;">
+          <div class="tq-cmp-b">
+            <button type="button" class="tq-stp" onclick="tqCmpSet('all')" aria-expanded="${cmpSel === 'all'}" style="cursor:pointer;">
+              <span style="font-weight:800; color:${cmpCol[curR.st] || '#b45309'};">${curR.locked ? 'Đã khóa sổ Vòng ' + curR.k : 'Vòng ' + curR.k + ' · ' + curR.n + '/' + TQ_TOTAL_TCTD}</span>
+              <span class="tq-seg" aria-hidden="true">${cmpSeg}</span>
+              <span style="font-size:12px; color:#6b7280;">${curR.locked ? '' : 'còn ' + dayLeftNow + ' ngày'}</span>
+              <span style="width:1px; height:18px; background:#fde68a;"></span>
+              <span style="font-size:13px; color:#78350f;">${cmpStats}</span>
+              <span class="tq-stp-chev" aria-hidden="true"></span>
+            </button>
+          </div>
+          <div class="tq-cmp-a">
+            <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:4px;">${cmpRings}</div>
+            <div style="text-align:center; margin-top:4px;"><button type="button" class="tq-cmp-all" onclick="tqCmpSet('all')" aria-pressed="${cmpSel === 'all'}" style="cursor:pointer; min-height:36px; padding:4px 14px; border-radius:999px; border:1px solid #fde68a; background:#fffbeb; color:#92400e; font:inherit; font-size:12.5px; font-weight:800;">Xem tất cả chi tiết</button></div>
+          </div>
+          <div id="tq-cmp-panel" class="tq-cmp-panel">${tqCmpPanelHtml()}</div>
+        </section>`;
 
       requestAnimationFrame(() => window.tqFitTrend && window.tqFitTrend());
       const htmlReport = `
@@ -4197,13 +4337,28 @@
           <button type="button" onclick="tqSecAll(true)" style="cursor:pointer; min-height:34px; padding:4px 12px; border-radius:999px; border:1px solid #fde68a; background:#fffbeb; color:#92400e; font:inherit; font-size:12px; font-weight:800;">Mở tất cả</button>
           <button type="button" onclick="tqSecAll(false)" style="cursor:pointer; min-height:34px; padding:4px 12px; border-radius:999px; border:1px solid #e5e7eb; background:#fff; color:#4b5563; font:inherit; font-size:12px; font-weight:800;">Thu gọn tất cả</button>
         </div>
-        ${coverageHtml}
-        ${quartileHtml}
+        ${suggestHtml}
         ${trendHtml}
         ${progressHtml}
+        ${compactHtml}
         <style>
           details > summary::-webkit-details-marker { display: none; }
           details.tq-sec[open] > summary .tq-chev { transform: rotate(180deg); }
+          .tq-cmp-a { display: none; }
+          .tq-cmp-panel:empty { display: none; }
+          .tq-cmp-panel { margin-top: 6px; padding: 4px 6px 4px; }
+          .tq-vs { width: 1px; align-self: stretch; background: #fde68a; margin: 4px 2px; }
+          .tq-stp { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 44px; padding: 6px 8px; border: 1px solid transparent; border-radius: 10px; background: transparent; font: inherit; text-align: left; flex-wrap: wrap; color: #1f2937; }
+          .tq-stp[aria-expanded="true"] { background: #fffbeb; border-color: #fde68a; }
+          .tq-stp-chev { margin-left: auto; width: 26px; height: 26px; border-radius: 50%; background: #f3f4f6; color: #6b7280; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+          .tq-stp-chev::before { content: '▼'; font-size: 10px; line-height: 1; }
+          .tq-stp[aria-expanded="true"] .tq-stp-chev::before { content: '▲'; }
+          .tq-seg { display: flex; gap: 2px; width: 72px; }
+          .tq-seg i { flex: 1; height: 8px; border-radius: 2px; }
+          .tq-rg { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 64px; padding: 6px 4px 4px; border-radius: 12px; border: 1px solid transparent; background: transparent; font: inherit; color: #1f2937; }
+          .tq-rg small { font-size: 11px; color: #6b7280; }
+          .tq-rg[aria-pressed="true"] { background: #fffbeb; border-color: #fde68a; }
+          @media (max-width: 640px) { .tq-cmp-a { display: block; } .tq-cmp-b { display: none; } .tq-rg { min-width: 0; flex: 1 1 0; padding: 6px 0 4px; } .tq-vs { display: none; } }
           @media (max-width: 640px) { .tq-dbtn { font-size: 12px !important; padding: 6px 10px !important; min-height: 36px !important; } }
           .tq-swipe-hint { display: none; text-align: center; font-size: 11.5px; color: #a16207; margin: 0 0 6px; }
           .tq-sticky-col { box-shadow: 2px 0 4px -2px rgba(0,0,0,.08); }
@@ -4351,6 +4506,7 @@
 
         let reasonsHtml = [];
         let score = 99;
+        const nc = tqIsExempt(u) ? null : tqNeedCheck(u, uLogs);
 
         if (recentLogs.length === 0) {
           reasonsHtml.push(pill('p-gray', 'Chưa KT (3 tháng)'));
@@ -4417,7 +4573,11 @@
           reasonsHtml.push(historyBlock);
         }
 
-        if (score < 99) {
+        if (nc && nc.any) {
+          reasonsHtml.unshift(`<div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:6px;">${tqReasonPills(nc).join('')}<span style="font-size:11.5px; color:#6b7280; align-self:center;">→ tính vào ${tqRoundLabel(nc.target, nc.y)}</span></div>`);
+          if (nc.bad || nc.overdue.length) score = Math.min(score, 1); else score = Math.min(score, 2);
+        }
+        if (score < 99 && !tqIsExempt(u)) {
           priorityList.push({ unit: u, reasonsHtml: reasonsHtml.join(' '), score: score });
         }
       });
@@ -4436,10 +4596,11 @@
             <details ${isPriorityOpen ? 'open' : ''} ontoggle="isPriorityOpen = this.open" style="margin-bottom:20px; background:#fffbeb; border:1px solid #fde68a; border-radius:12px; padding:16px; box-shadow: 0 4px 6px -1px rgba(217, 119, 6, 0.05); transition: all 0.3s ease;">
                <summary style="font-weight:700; color:#b45309; font-size:15.5px; display:flex; align-items:center; cursor:pointer; list-style:none; outline:none; gap: 8px; margin: 0;">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                  Danh sách gợi ý ưu tiên kiểm tra (Dựa trên 3 tháng gần nhất)
+                  Gợi ý ưu tiên kiểm tra
                   <span style="background: #fef3c7; color: #d97706; padding: 2px 8px; border-radius: 99px; font-size: 12px; margin-left: auto;">${filteredPriorityList.length} đơn vị</span>
                </summary>
                <div style="margin-top: 16px; padding-top: 16px; border-top: 1px dashed #fde68a; overflow-x: auto;">
+                 <div style="font-size:12px; color:#92400e; margin-bottom:10px;">Vòng ${tqNow().q} (${tqRoundMonths(tqNow().q)}) · còn ${tqDaysLeft(tqNow())} ngày. Gồm: tỷ lệ kiểm tra &gt; 5%, thiếu độ phủ Vòng 2–4, chưa KT 3 tháng.</div>
                  ${tbl(
           ['STT', 'Đơn vị', 'Lý do ưu tiên', 'Hành động'],
           filteredPriorityList.map((p, idx) => [
@@ -6354,14 +6515,14 @@
           const colRef = fbFirestore.collection("app_data").doc("main").collection(col);
           
           if (realtimeCols.includes(col)) {
-             const isOverviewScope = tabId === 'tongquan' && (col === 'logs' || col === 'recoveries');
+             const isOverviewScope = (tabId === 'tongquan' && (col === 'logs' || col === 'recoveries')) || (tabId === 'kehoach' && col === 'logs');   // cả năm để tính độ phủ từng vòng
              const currentYear = new Date().getFullYear();
              const scopeKey = isOverviewScope ? ('year-' + currentYear) : 'latest';
              window.activeListeners[col] = window.activeListeners[col] || {};
 
              if (!window.activeListeners[col][scopeKey]) {
                 const orderByField = (col === 'recoveries') ? 'month' : 'date';
-                const limitVal = isOverviewScope ? 200 : (window.collectionLimit[col] || 200);
+                const limitVal = isOverviewScope ? (col === 'logs' ? 1000 : 200) : (window.collectionLimit[col] || 200);
                 let query;
 
                 if (isOverviewScope) {
