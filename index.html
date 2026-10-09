@@ -3402,12 +3402,38 @@
     };
     // Quyền chỉnh sửa: admin luôn có; tài khoản role 'editor' có quyền khi KHÔNG bảo trì;
     // tài khoản role 'viewer' (hoặc chưa xác định) chỉ được xem.
+    // Vai trò lấy từ danh sách tài khoản hiện hành (phiên đăng nhập chỉ lưu username nên không có role).
+    // Không tìm thấy tài khoản hoặc chưa xác định => coi như chỉ được xem (mặc định an toàn).
+    window.currentRole = function () {
+      const user = getCurrentUser();
+      if (!user) return null;
+      if (user.username === 'admin') return 'admin';
+      const rec = (typeof data !== 'undefined' && data && Array.isArray(data.users)) ? data.users.find(x => x.username === user.username) : null;
+      return rec ? (rec.role || 'viewer') : 'viewer';
+    };
     window.canEdit = function () {
       const user = getCurrentUser();
       if (!user) return false;
       if (window.isAdmin()) return true;
       if (window.isMaintenanceOn()) return false;
-      return user.role === 'editor';
+      return window.currentRole() === 'editor';
+    };
+    // Chốt chặn trong chính các hàm thao tác (ẩn nút trên giao diện là chưa đủ, vì có thể gọi hàm trực tiếp).
+    window.requireEdit = function () {
+      if (window.canEdit()) return true;
+      if (typeof showToast === 'function') showToast(window.isMaintenanceOn() ? 'Hệ thống đang bảo trì, tạm thời chưa chỉnh sửa được.' : 'Tài khoản của bạn chỉ có quyền xem.', 'red');
+      return false;
+    };
+    window.requireAdmin = function () {
+      if (window.isAdmin()) return true;
+      if (typeof showToast === 'function') showToast('Chỉ quản trị viên (admin) được thực hiện thao tác này.', 'red');
+      return false;
+    };
+    // Gỡ khỏi giao diện mọi nút thao tác mà tài khoản hiện tại không có quyền dùng (chạy sau mỗi lần vẽ lại).
+    window.applyPermissionsUI = function () {
+      const strip = sel => document.querySelectorAll(sel).forEach(el => el.remove());
+      if (!window.isAdmin()) strip('[onclick*="removeRec("],[onclick*="removeUnit("],[onclick*="importJson("],[onclick*="cloudRestore("],[onclick*="deleteUser("]');
+      if (!window.canEdit()) strip('[onclick*="openForm("],[onclick*="goToLogAndOpenForm("],[onclick*="removeAttachedSig("],[onclick*="removeAttachedSeal("],[onclick*="removeAttachedDocFile("]');
     };
 
     function secHead(title, sub, addFn, addLabel) {
@@ -3476,7 +3502,7 @@
     const TQ_EXEMPT_KEYWORDS = ['scb', 'shinhan', 'woori'];   // 03 TCTD ít giao dịch tiền mặt tại kho NHNN
     const TQ_PROGRESS_EPS = 0.5;       // độ lệch (điểm %) coi là "ổn định" khi so Lần 1 với Lần 2
     const TQ_ROUNDS = 4;               // tối đa 4 lần/năm, mỗi lần cách nhau 3 tháng (Lần 1 = T01-03, Lần 2 = T04-06, Lần 3 = T07-09, Lần 4 = T10-12)
-    const TQ_TREND_MONTHS = 10;        // biểu đồ xu hướng: Tháng 01 - Tháng 10
+    const TQ_TREND_MONTHS = 12;        // biểu đồ xu hướng: đủ 12 tháng của năm; tháng chưa có dữ liệu để trống
     const TQ_TREND_DENOMS = [
       ['all', 'Tất cả mệnh giá (Bình quân gia quyền)'],
       ['500000', '500.000đ'], ['200000', '200.000đ'], ['100000', '100.000đ'],
@@ -3638,7 +3664,7 @@
       W = W || 560;
       const cp = W < 460;                                   // màn hình hẹp: chữ/lề nhỏ hơn nhưng vẫn đọc được
       const H = cp ? 230 : 270, L = cp ? 34 : 46, R = cp ? 10 : 18, T = cp ? 24 : 28, B = cp ? 28 : 38;
-      const fa = cp ? 9.5 : 11, fl = cp ? 9 : 10.5, dec = cp ? 1 : 2, pad = cp ? 10 : 18;
+      const fa = cp ? 9.5 : 11, fl = cp ? 8.5 : 10.5, dec = cp ? 1 : 2, pad = cp ? 8 : 18;
       const pw = W - L - R, ph = H - T - B;
       const nonNull = vals.filter(v => v != null);
       if (!nonNull.length) {
@@ -3658,7 +3684,7 @@
       vals.forEach((v, i) => { if (v == null) return; d += (open ? 'L' : 'M') + x(i).toFixed(1) + ',' + y(v).toFixed(1) + ' '; open = true; });
       let pts = '', xl = '';
       vals.forEach((v, i) => {
-        xl += `<text x="${x(i)}" y="${H - 10}" text-anchor="middle" fill="#78350f" font-size="${fa}">T${String(i + 1).padStart(2, '0')}</text>`;
+        xl += `<text x="${x(i)}" y="${H - 10}" text-anchor="middle" fill="#78350f" font-size="${fa}">${cp ? String(i + 1) : 'T' + String(i + 1).padStart(2, '0')}</text>`;
         if (v == null) return;
         const bad = v > 5;
         pts += `<circle cx="${x(i)}" cy="${y(v)}" r="${cp ? 3.5 : 4.5}" fill="${bad ? '#e11d48' : '#059669'}" stroke="#fff" stroke-width="1.5"><title>Tháng ${String(i + 1).padStart(2, '0')}: ${v.toFixed(2)}%</title></circle>` +
@@ -3708,6 +3734,30 @@
       wait: { bg: '#f3f4f6', fg: '#6b7280', bd: '#e5e7eb', label: 'Chưa đối chiếu', tag: 'Chưa đối chiếu' }
     };
 
+
+    /* ---- Chi tiết tỷ trọng theo mệnh giá của một đơn vị trong từng lần kiểm tra ---- */
+    window.__tqProgOpen = window.__tqProgOpen || {};
+    function tqWeightHtml(r) {
+      const fm = v => Number(v).toLocaleString('vi-VN');
+      let out = '';
+      for (let k = 1; k <= TQ_ROUNDS; k++) {
+        const g = r.rs[k];
+        if (!g || !g.chk) continue;
+        const dens = Object.keys(g.den || {}).map(Number).sort((a, b) => b - a);
+        const rows = dens.map(v => {
+          const d = g.den[v], rate = d.chk ? d.inv / d.chk * 100 : 0, w = d.chk / g.chk * 100, contrib = d.inv / g.chk * 100;
+          return `<tr><td>${fm(v)}đ</td><td>${fm(d.chk)}</td><td>${fm(d.inv)}</td><td${rate > 5 ? ' style="color:#e11d48;"' : ''}>${rate.toFixed(2)}%</td><td><b>${w.toFixed(1)}%</b></td><td class="tq-wc">${contrib.toFixed(2)}</td></tr>`;
+        }).join('');
+        out += `<div style="margin:0 0 12px;">
+          <div style="font-size:12.5px; font-weight:800; color:#92400e; margin-bottom:4px;">Lần ${k} (${tqRoundMonths(k)}) · R = ${tqPct(r.rates[k])}</div>
+          <table class="tq-wt"><thead><tr><th>Mệnh giá</th><th>Tờ KT</th><th>KĐTCLT</th><th>Tỷ lệ</th><th>Tỷ trọng</th><th class="tq-wc">Đóng góp</th></tr></thead><tbody>${rows}
+          <tr class="tq-wtot"><td>Tổng</td><td>${fm(g.chk)}</td><td>${fm(g.inv)}</td><td>${tqPct(r.rates[k])}</td><td>100%</td><td class="tq-wc">${r.rates[k].toFixed(2)}</td></tr></tbody></table>
+        </div>`;
+      }
+      return out + `<div style="font-size:11.5px; color:#6b7280;">Tờ KT = số tờ đã kiểm tra. Tỷ trọng = tờ KT của mệnh giá / tổng tờ KT. Đóng góp = tỷ trọng × tỷ lệ; cộng các đóng góp được R.</div>`;
+    }
+    window.tqProgToggle = function (id) { window.__tqProgOpen[id] = !window.__tqProgOpen[id]; tqProgRefresh(); };
+
     function tqProgRowHtml(r) {
       const c = TQ_ST[r.st];
       const dTxt = r.delta == null ? '—' : (r.delta > 0 ? '+' : '') + r.delta.toFixed(2);
@@ -3719,11 +3769,11 @@
         cells += `<td class="tq-col-lan" style="padding:10px 12px; text-align:right; font-variant-numeric:tabular-nums; ${v != null && v > 5 ? 'color:#e11d48;' : ''}" title="${r.rs[k].chk ? r.rs[k].inv + '/' + r.rs[k].chk + ' tờ' : ''}"><b>${tqPct(v)}</b></td>`;
       }
       return `<tr style="border-top:1px solid #fef3c7;">
-          <td class="tq-sticky-col" style="padding:10px 12px; font-weight:700; color:#1f2937; font-size:13.5px; min-width:170px; max-width:240px; position:sticky; left:0; z-index:1; background:#fff;">${esc(unitName(r.id))}<div class="tq-mini">${mini.join(' · ')}</div></td>
+          <td class="tq-sticky-col" style="padding:10px 12px; font-weight:700; color:#1f2937; font-size:13.5px; min-width:170px; max-width:240px; position:sticky; left:0; z-index:1; background:#fff;"><button type="button" class="tq-ubtn" onclick="tqProgToggle('${r.id}')" aria-expanded="${!!window.__tqProgOpen[r.id]}" title="Xem tỷ trọng theo mệnh giá"><span class="tq-uc">${window.__tqProgOpen[r.id] ? '▼' : '▶'}</span>${esc(unitName(r.id))}</button><div class="tq-mini">${mini.join(' · ')}</div></td>
           ${cells}
           <td style="padding:10px 12px; text-align:right; font-weight:800; color:${dCol}; font-variant-numeric:tabular-nums; white-space:nowrap;">${dTxt}</td>
           <td style="padding:10px 12px;"><span style="display:inline-block; padding:5px 10px; border-radius:999px; background:${c.bg}; color:${c.fg}; border:1px solid ${c.bd}; font-size:12px; font-weight:800; white-space:nowrap;">${c.tag}</span></td>
-        </tr>`;
+        </tr>${window.__tqProgOpen[r.id] ? `<tr><td colspan="${TQ_ROUNDS + 3}" style="padding:10px 14px 4px; background:#fffdf5;">${tqWeightHtml(r)}</td></tr>` : ''}`;
     }
 
     function tqProgList() {
@@ -4074,8 +4124,10 @@
         sheetsOf(l).forEach(s => {
           const a = unitAgg[l.unitId] || (unitAgg[l.unitId] = { chk: 0, inv: 0 });
           a.chk += s.chk; a.inv += s.inv;
-          const r = unitRound[l.unitId] || (unitRound[l.unitId] = Array.from({ length: TQ_ROUNDS + 1 }, () => ({ chk: 0, inv: 0 })));
+          const r = unitRound[l.unitId] || (unitRound[l.unitId] = Array.from({ length: TQ_ROUNDS + 1 }, () => ({ chk: 0, inv: 0, den: {} })));
           r[rd].chk += s.chk; r[rd].inv += s.inv;
+          const dd = r[rd].den[s.val] || (r[rd].den[s.val] = { chk: 0, inv: 0 });   // theo mệnh giá, để hiển thị tỷ trọng
+          dd.chk += s.chk; dd.inv += s.inv;
         });
       });
       const rated = Object.keys(unitAgg).filter(id => unitAgg[id].chk > 0)
@@ -4112,7 +4164,7 @@
           <div style="display:flex; justify-content:space-between; font-size:11px; color:#a16207; margin:0 8px;"><span>0%</span><span>${tqPct(scaleMax)}</span></div>` : ''}
 `;
 
-      // --- 3) Xu hướng 10 tháng theo mệnh giá ---
+      // --- 3) Xu hướng 12 tháng theo mệnh giá ---
       const trendLabels = Array.from({ length: TQ_TREND_MONTHS }, (_, i) => 'T' + String(i + 1).padStart(2, '0'));
       const trendSeries = {};
       TQ_TREND_DENOMS.forEach(([k]) => { trendSeries[k] = { chk: Array(TQ_TREND_MONTHS).fill(0), inv: Array(TQ_TREND_MONTHS).fill(0) }; });
@@ -4128,7 +4180,7 @@
       window.__tqTrend = { year, labels: trendLabels, series: trendSeries };
       if (!trendSeries[window.__tqTrendKey]) window.__tqTrendKey = 'all';
       const trAll = trendSeries.all, trChk = trAll.chk.reduce((a, b) => a + b, 0), trRate = trChk > 0 ? trAll.inv.reduce((a, b) => a + b, 0) / trChk * 100 : null;
-      const trendHtml = tqSec('trend', '#d97706', '#fff', `          <h3 style="margin:0; font-size:16px; font-weight:800; color:#1f2937;">Xu hướng tỷ lệ KĐTCLT theo tháng (T01 – T10/${year})</h3>
+      const trendHtml = tqSec('trend', '#d97706', '#fff', `          <h3 style="margin:0; font-size:16px; font-weight:800; color:#1f2937;">Xu hướng tỷ lệ KĐTCLT theo tháng (T01 – T12/${year})</h3>
           <div style="margin:2px 0 0; font-size:12.5px; color:#92400e; font-weight:600;">Tờ KĐTCLT / tờ kiểm tra theo tháng${trRate == null ? '' : ' · cả kỳ ' + tqPct(trRate)}</div>
 `, `          <div id="tq-trend-box">${tqTrendInner(window.__tqTrendKey)}</div>
 `);
@@ -4155,7 +4207,7 @@
       const stCnt = { up: 0, flat: 0, down: 0, wait: 0 };
       progRows.forEach(r => stCnt[r.st]++);
       const progressHtml = tqSec('prog', '#059669', '#fff', `            <h3 style="margin:0; font-size:16px; font-weight:800; color:#1f2937;">Đối chiếu tiến bộ theo lần kiểm tra</h3>
-            <div style="margin:4px 0 0; font-size:12.5px; color:#047857; font-weight:600;">R = tờ KĐTCLT / tờ kiểm tra. Độ lệch = lần mới nhất − lần trước (điểm %).</div>
+            <div style="margin:4px 0 0; font-size:12.5px; color:#047857; font-weight:600;">R = tờ KĐTCLT / tờ kiểm tra (gộp theo số tờ). Độ lệch = lần mới nhất − lần trước. Bấm tên đơn vị để xem tỷ trọng theo mệnh giá.</div>
 
             <div style="display:flex; height:9px; border-radius:99px; overflow:hidden; background:#f3f4f6; margin-top:8px;" role="img" aria-label="Tỷ lệ các nhóm đánh giá">${[['up','#10b981'],['flat','#f59e0b'],['down','#f43f5e'],['wait','#d1d5db']].map(([k, c]) => stCnt[k] ? `<span title="${TQ_ST[k].label}: ${stCnt[k]}" style="flex:${stCnt[k]}; background:${c};"></span>` : '').join('')}</div>
             <div style="font-size:11.5px; color:#6b7280; margin-top:4px;">Tiến bộ ${stCnt.up} · Ổn định ${stCnt.flat} · Buông lỏng ${stCnt.down} · Chưa đối chiếu ${stCnt.wait}</div>`, `          <div id="tq-prog-bar">${tqProgBarHtml()}</div>
@@ -4344,6 +4396,14 @@
         <style>
           details > summary::-webkit-details-marker { display: none; }
           details.tq-sec[open] > summary .tq-chev { transform: rotate(180deg); }
+          .tq-ubtn { display: inline-flex; align-items: flex-start; gap: 6px; padding: 0; border: none; background: none; font: inherit; font-weight: 700; color: inherit; text-align: left; cursor: pointer; }
+          .tq-uc { font-size: 9px; color: #a16207; margin-top: 4px; flex-shrink: 0; }
+          .tq-wt { width: 100%; max-width: 560px; border-collapse: collapse; font-size: 12.5px; }
+          .tq-wt th { text-align: right; padding: 5px 8px; background: #fffbeb; color: #92400e; font-size: 11px; text-transform: uppercase; white-space: nowrap; }
+          .tq-wt td { text-align: right; padding: 5px 8px; border-top: 1px solid #fef3c7; font-variant-numeric: tabular-nums; }
+          .tq-wt th:first-child, .tq-wt td:first-child { text-align: left; }
+          .tq-wt .tq-wtot td { font-weight: 800; background: #fffbeb; }
+          @media (max-width: 640px) { .tq-wt { table-layout: fixed; max-width: 100%; } .tq-wc { display: none; } .tq-wt th, .tq-wt td { padding: 5px 3px; font-size: 11.5px; white-space: nowrap; } .tq-wt th { font-size: 10px; text-transform: none; line-height: 1.2; } .tq-wt th:first-child, .tq-wt td:first-child { width: 27%; } }
           .tq-cmp-a { display: none; }
           .tq-cmp-panel:empty { display: none; }
           .tq-cmp-panel { margin-top: 6px; padding: 4px 6px 4px; }
@@ -5734,6 +5794,7 @@
     }
 
     async function cloudBackup() {
+      if (!window.requireAdmin()) return;
       if (!fbStorage) { alert('Chưa cấu hình Firebase Storage.'); return; }
       if (!confirm('Xác nhận: Tạo bản sao lưu toàn bộ dữ liệu hiện tại lên Cloud? Thao tác này sẽ ghi đè bản sao lưu cũ trên Cloud.')) return;
 
@@ -5778,6 +5839,7 @@
     }
 
     async function cloudRestore() {
+      if (!window.requireAdmin()) return;
       if (!fbStorage || !fbFirestore) { alert('Chưa cấu hình Firebase.'); return; }
       if (!confirm('CẢNH BÁO: Khôi phục dữ liệu từ bản sao lưu Cloud sẽ GHI ĐÈ toàn bộ dữ liệu đang có trên máy này. Bạn có chắc chắn muốn tiếp tục?')) return;
       showToast('Đang kiểm tra bản sao lưu...', 'green');
@@ -5888,6 +5950,7 @@
     }
 
     function importJson() {
+      if (!window.requireAdmin()) return;
       const input = document.createElement('input');
       input.type = 'file';
       input.accept = '.json';
@@ -6884,6 +6947,7 @@
     // thể bị treo/mất nếu người dùng khoá màn hình ngay sau đó), khiến thay đổi không kịp lên
     // server. Nay ghi thẳng và CHỜ xác nhận thật từ Firestore trước khi báo thành công.
     async function resetUserPassword(username, btnEl) {
+      if (!window.requireAdmin()) return;
       if (!confirm(`Khôi phục mật khẩu cho tài khoản "${username}" về mặc định "123456"?`)) return;
       const u = data.users.find(x => x.username === username);
       if (!u) return;
@@ -6906,6 +6970,7 @@
     }
 
     async function changeUserRole(username, newRole, btnEl) {
+      if (!window.requireAdmin()) return;
       const u = data.users.find(x => x.username === username);
       if (!u) return;
       if (u.role === newRole) return;
@@ -6951,6 +7016,7 @@
     }
 
     async function toggleMaintenanceMode(btnEl) {
+      if (!window.requireAdmin()) return;
       data.settings = data.settings || {};
       const turningOn = !data.settings.maintenanceMode;
       if (turningOn && !confirm('Bật chế độ Bảo trì?\n\nTất cả tài khoản (trừ admin) sẽ bị khoá thao tác thêm/sửa và chỉ xem được dữ liệu đã có sẵn trên máy (ngoại tuyến), không tải dữ liệu mới từ Cloud, cho tới khi bạn tắt bảo trì.')) return;
@@ -6974,6 +7040,7 @@
     }
 
     async function deleteUser(username, btnEl) {
+      if (!window.requireAdmin()) return;
       if (!confirm(`Bạn có chắc muốn xóa vĩnh viễn tài khoản "${username}"?`)) return;
       data.users = data.users.filter(x => x.username !== username);
       saveData();
@@ -7139,6 +7206,10 @@
     }
 
     /* ================= RENDER ================= */
+    (function () {   // bọc render: sau mỗi lần vẽ lại, gỡ các nút thao tác mà tài khoản không có quyền
+      const orig = render;
+      render = function () { const r = orig.apply(this, arguments); try { if (window.applyPermissionsUI && getCurrentUser()) window.applyPermissionsUI(); } catch (e) { console.warn('applyPermissionsUI', e); } return r; };
+    })();
     function render() {
       if (!getCurrentUser()) {
         renderLogin();
@@ -7184,6 +7255,7 @@
 
     /* ================= THAO TÁC DỮ LIỆU ================= */
     function removeRec(key, id) {
+      if (!window.requireAdmin()) return;
       if (!confirm('Xóa bản ghi này?')) return;
       const rec = data[key].find(x => x.id === id);
       let itemDesc = id;
@@ -7203,6 +7275,7 @@
       saveData(); render();
     }
     function removeUnit(id) {
+      if (!window.requireAdmin()) return;
       if (!confirm('Xóa đơn vị sẽ giữ nguyên các bản ghi cũ nhưng không hiển thị tên. Tiếp tục?')) return;
       const rec = data.units.find(x => x.id === id);
       const itemDesc = rec ? (rec.name || id) : id;
@@ -7213,6 +7286,7 @@
       saveData(); render();
     }
     window.removeAttachedSig = function (sigId) {
+      if (!window.requireEdit()) return;
       if (!confirm('Bạn có chắc muốn xoá file đính kèm này?')) return;
       const rec = data.signatures.find(x => x.id === sigId);
       const itemDesc = rec ? (rec.name || rec.title || sigId) : sigId;
@@ -7227,6 +7301,7 @@
       else { closeModal(); render(); }
     };
     window.removeAttachedSeal = function (sealId) {
+      if (!window.requireEdit()) return;
       if (!confirm('Bạn có chắc muốn xoá mẫu niêm phong này?')) return;
       const rec = data.seals.find(x => x.id === sealId);
       const itemDesc = rec ? (rec.name || rec.title || sealId) : sealId;
@@ -7255,6 +7330,7 @@
       }
     };
     window.removeAttachedDocFile = function (docId, fileId) {
+      if (!window.requireEdit()) return;
       if (!confirm('Bạn có chắc muốn xoá file này?')) return;
       const rec = data.docs.find(x => x.id === docId);
       if (rec) {
@@ -7360,6 +7436,7 @@
     };
 
     window.removeFormFile = function(index) {
+      if (!window.requireEdit()) return;
       if (confirm('Xóa file này khỏi danh sách đính kèm?')) {
         window.formLogFiles.splice(index, 1);
         renderFormFiles();
@@ -7708,14 +7785,17 @@
       saveData(); closeModal(); render();
     }
     function saveUnit() {
+      if (!window.requireEdit()) return;
       const name = gv('f-name').trim(); if (!name) { alert('Vui lòng nhập tên đơn vị.'); return; }
       upsert('units', { id: editing || uid(), name, code: gv('f-code').trim() });
     }
     function savePlan() {
+      if (!window.requireEdit()) return;
       if (!gv('f-unit')) return alert('Chọn đơn vị');
       upsert('plans', { id: editing || uid(), unitId: gv('f-unit'), week: gv('f-week'), status: gv('f-status'), note: gv('f-note') });
     }
     async function saveLog() {
+      if (!window.requireEdit()) return;
       if (!gv('f-unit')) return alert('Chọn đơn vị');
       const btnSave = document.querySelector('.modal-foot .btn');
       if (btnSave) {
@@ -7816,6 +7896,7 @@
       });
     }
     function saveInspection() {
+      if (!window.requireEdit()) return;
       if (!gv('f-unit')) return alert('Chọn đơn vị');
       upsert('inspections', {
         id: editing || uid(), date: gv('f-date'), unitId: gv('f-unit'),
@@ -7824,10 +7905,12 @@
       });
     }
     function saveRecovery() {
+      if (!window.requireEdit()) return;
       if (!gv('f-unit')) return alert('Chọn đơn vị');
       upsert('recoveries', { id: editing || uid(), month: gv('f-month'), unitId: gv('f-unit'), denom: gv('f-denom'), qty: gv('f-qty') });
     }
     async function saveDoc() {
+      if (!window.requireEdit()) return;
       const title = gv('f-title').trim(); if (!title) return alert('Nhập tên văn bản');
       const btnSave = document.querySelector('.modal-foot .btn');
       if (btnSave) { btnSave.disabled = true; btnSave.innerText = 'Đang xử lý...'; }
@@ -7920,6 +8003,7 @@
     }
 
     async function saveSeal() {
+      if (!window.requireEdit()) return;
       if (!gv('f-unit')) return alert('Chọn đơn vị');
       const btnSave = document.querySelector('.modal-foot .btn');
       if (btnSave) { btnSave.disabled = true; btnSave.innerText = 'Đang xử lý...'; }
@@ -8014,6 +8098,7 @@
     }
 
     async function saveSignature() {
+      if (!window.requireEdit()) return;
       if (!gv('f-unit')) return alert('Chọn đơn vị');
       const btnSave = document.querySelector('.modal-foot .btn');
       if (btnSave) { btnSave.disabled = true; btnSave.innerText = 'Đang xử lý...'; }
