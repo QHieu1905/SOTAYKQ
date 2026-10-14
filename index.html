@@ -3656,10 +3656,10 @@
     window.tqCmpSet = function (k) { window.__tqCmpSel = (window.__tqCmpSel === k) ? '' : k; tqCmpRefresh(); };
 
     /* ---- Mục có thể đóng/mở trong Tổng quan (nhớ trạng thái khi vẽ lại) ---- */
-    window.__tqOpen = window.__tqOpen || { sug: true, cov: true, quart: true, trend: true, prog: false };
+    window.__tqOpen = window.__tqOpen || { viol: false, sen: false, xoi: false, sug: false, cov: false, quart: false, trend: false, prog: false };   // mặc định thu gọn tất cả
     function tqSec(id, border, bg, head, body) {
       const open = window.__tqOpen[id] !== false && !!window.__tqOpen[id];
-      return `<details class="tq-sec" data-sec="${id}" ${open ? 'open' : ''} ontoggle="tqSecToggle('${id}', this.open)" style="background:${bg}; border:1px solid #fde68a; border-left:4px solid ${border}; border-radius:16px; box-shadow:0 8px 24px rgba(217,119,6,0.05); box-sizing:border-box; width:100%;">
+      return `<details class="tq-sec" data-sec="${id}" ${open ? 'open' : ''} ontoggle="tqSecToggle('${id}', this.open)" style="background:${bg}; border:1px solid #fde68a; border-radius:16px; box-shadow:0 8px 24px rgba(217,119,6,0.05); box-sizing:border-box; width:100%;">
         <summary style="list-style:none; cursor:pointer; outline:none; padding:12px 16px; display:flex; align-items:center; justify-content:space-between; gap:12px;">
           <div style="min-width:0; flex:1;">${head}</div>
           <span class="tq-chev" aria-hidden="true" style="flex-shrink:0; width:30px; height:30px; border-radius:50%; background:#f3f4f6; display:flex; align-items:center; justify-content:center; color:#6b7280; transition:transform .25s;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span>
@@ -3672,8 +3672,11 @@
       if (open && id === 'trend' && window.tqFitTrend) requestAnimationFrame(window.tqFitTrend);
     };
     window.tqSecAll = function (open) {
-      Object.keys(window.__tqOpen).forEach(k => { window.__tqOpen[k] = open; });
-      document.querySelectorAll('details.tq-sec').forEach(d => { d.open = open; });
+      ['viol', 'sen', 'xoi', 'sug', 'cov', 'quart', 'trend', 'prog'].forEach(k => { window.__tqOpen[k] = open; });
+      document.querySelectorAll('#pg-tongquan details.tq-sec').forEach(d => { d.open = open; });
+      window.__tqCmpSel = open ? 'all' : '';                // khối độ phủ + dải chỉ số ở cuối trang
+      if (window.tqCmpRefresh) window.tqCmpRefresh();
+      if (open && window.tqFitTrend) requestAnimationFrame(window.tqFitTrend);
     };
 
     /* Bề rộng biểu đồ xu hướng bám theo khung chứa -> vừa khít màn hình, không phải vuốt ngang */
@@ -4337,8 +4340,12 @@
       </div>
 
       <div style="display: flex; flex-direction: column; gap: 14px; width: 100%; box-sizing: border-box; overflow-x: hidden;">
+        <div style="display:flex; justify-content:flex-end; gap:8px; margin:0 0 -4px;">
+          <button type="button" onclick="tqSecAll(true)" style="cursor:pointer; min-height:34px; padding:4px 12px; border-radius:999px; border:1px solid #fde68a; background:#fffbeb; color:#92400e; font:inherit; font-size:12px; font-weight:800;">Mở tất cả</button>
+          <button type="button" onclick="tqSecAll(false)" style="cursor:pointer; min-height:34px; padding:4px 12px; border-radius:999px; border:1px solid #e5e7eb; background:#fff; color:#4b5563; font:inherit; font-size:12px; font-weight:800;">Thu gọn tất cả</button>
+        </div>
         ${Object.keys(violatingUnitCounts).length > 0 ? `
-        <details style="background: #ffffff; border: 1px solid #fee2e2; border-left: 4px solid #f43f5e; border-radius: 16px; padding: 16px; box-shadow: 0 10px 30px rgba(225, 29, 72, 0.05); transition: all 0.4s ease; box-sizing: border-box; width: 100%;" onmouseover="this.style.boxShadow='0 15px 40px rgba(225, 29, 72, 0.08)'" onmouseout="this.style.boxShadow='0 10px 30px rgba(225, 29, 72, 0.05)'">
+        <details class="tq-sec" data-sec="viol" ${window.__tqOpen.viol ? 'open' : ''} ontoggle="tqSecToggle('viol', this.open)" style="background: #ffffff; border: 1px solid #fee2e2; border-radius: 16px; padding: 16px; box-shadow: 0 10px 30px rgba(225, 29, 72, 0.05); transition: all 0.4s ease; box-sizing: border-box; width: 100%;" onmouseover="this.style.boxShadow='0 15px 40px rgba(225, 29, 72, 0.08)'" onmouseout="this.style.boxShadow='0 10px 30px rgba(225, 29, 72, 0.05)'">
           <summary style="list-style: none; outline: none; cursor: pointer;">
             <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
               <div style="display: flex; align-items: center; gap: 12px;">
@@ -4376,7 +4383,7 @@
 
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; box-sizing: border-box; width: 100%;">
           <!-- Panel 1: Top TCTD Thu Hồi -->
-          <details style="background: #ffffff; border: 1px solid #fef3c7; border-left: 4px solid #f59e0b; border-radius: 16px; padding: 16px; box-shadow: 0 10px 30px rgba(245, 158, 11, 0.03); transition: all 0.4s ease; box-sizing: border-box; width: 100%;" onmouseover="this.style.boxShadow='0 15px 40px rgba(245, 158, 11, 0.06)'" onmouseout="this.style.boxShadow='0 10px 30px rgba(245, 158, 11, 0.03)'">
+          <details class="tq-sec" data-sec="sen" ${window.__tqOpen.sen ? 'open' : ''} ontoggle="tqSecToggle('sen', this.open)" style="background: #ffffff; border: 1px solid #fef3c7; border-radius: 16px; padding: 16px; box-shadow: 0 10px 30px rgba(245, 158, 11, 0.03); transition: all 0.4s ease; box-sizing: border-box; width: 100%;" onmouseover="this.style.boxShadow='0 15px 40px rgba(245, 158, 11, 0.06)'" onmouseout="this.style.boxShadow='0 10px 30px rgba(245, 158, 11, 0.03)'">
             <summary style="list-style: none; cursor: pointer; outline: none; margin-bottom: 0;">
               <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                 <div style="display: flex; align-items: center; gap: 12px;">
@@ -4399,7 +4406,7 @@
           </details>
 
           <!-- Panel 2: Hoạt động gần đây -->
-          <details style="background: #ffffff; border: 1px solid #f3e8ff; border-left: 4px solid #8b5cf6; border-radius: 16px; padding: 16px; box-shadow: 0 10px 30px rgba(139, 92, 246, 0.03); transition: all 0.4s ease; box-sizing: border-box; width: 100%;" onmouseover="this.style.boxShadow='0 15px 40px rgba(139, 92, 246, 0.06)'" onmouseout="this.style.boxShadow='0 10px 30px rgba(139, 92, 246, 0.03)'">
+          <details class="tq-sec" data-sec="xoi" ${window.__tqOpen.xoi ? 'open' : ''} ontoggle="tqSecToggle('xoi', this.open)" style="background: #ffffff; border: 1px solid #f3e8ff; border-radius: 16px; padding: 16px; box-shadow: 0 10px 30px rgba(139, 92, 246, 0.03); transition: all 0.4s ease; box-sizing: border-box; width: 100%;" onmouseover="this.style.boxShadow='0 15px 40px rgba(139, 92, 246, 0.06)'" onmouseout="this.style.boxShadow='0 10px 30px rgba(139, 92, 246, 0.03)'">
             <summary style="list-style: none; cursor: pointer; outline: none; margin-bottom: 0;">
               <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                 <div style="display: flex; align-items: center; gap: 12px;">
@@ -4420,10 +4427,6 @@
                ${renderRateList(top10Worst, 'bad')}
             </div>
           </details>
-        </div>
-        <div style="display:flex; justify-content:flex-end; gap:8px; margin:-4px 0 -4px;">
-          <button type="button" onclick="tqSecAll(true)" style="cursor:pointer; min-height:34px; padding:4px 12px; border-radius:999px; border:1px solid #fde68a; background:#fffbeb; color:#92400e; font:inherit; font-size:12px; font-weight:800;">Mở tất cả</button>
-          <button type="button" onclick="tqSecAll(false)" style="cursor:pointer; min-height:34px; padding:4px 12px; border-radius:999px; border:1px solid #e5e7eb; background:#fff; color:#4b5563; font:inherit; font-size:12px; font-weight:800;">Thu gọn tất cả</button>
         </div>
         ${suggestHtml}
         ${trendHtml}
