@@ -1737,8 +1737,9 @@
     .fan-menu { position: fixed; bottom: 30px; left: 50%; margin-left: -35px; width: 70px; height: 70px; z-index: 9999; display: none; pointer-events: none; }
     .fan-overlay { position: fixed; inset: 0; background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); z-index: 9998; display: none; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
       .fan-overlay.open { display: block; opacity: 1; pointer-events: auto; }
-      .fan-btn { position: relative; width: 70px; height: 70px; border-radius: 50%; background: linear-gradient(135deg, var(--green-dark), var(--green)); color: white; border: none; box-shadow: 0 10px 25px rgba(180, 83, 9, 0.4); display: flex; align-items: center; justify-content: center; z-index: 10000; cursor: pointer; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); pointer-events: auto; touch-action: manipulation; }
-      .fan-btn svg { width: 34px; height: 34px; transition: transform 0.3s; pointer-events: none; }
+      .fan-btn { position: relative; width: 70px; height: 70px; border-radius: 50%; background: linear-gradient(135deg, var(--green-dark), var(--green)); color: white; border: none; box-shadow: 0 10px 25px rgba(180, 83, 9, 0.4); display: flex; align-items: center; justify-content: center; z-index: 10000; cursor: pointer; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); pointer-events: auto; touch-action: manipulation; -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; }
+      .fan-btn::before { content: ''; position: absolute; inset: -8px; border-radius: 50%; }   /* mở rộng vùng chạm thêm 8px */
+      .fan-btn svg { width: 34px; height: 34px; transition: transform 0.3s; }   /* bỏ pointer-events:none: trên iPhone vùng biểu tượng giữa nút bị 'thủng', chạm không ăn */
       .fan-btn.open svg { transform: rotate(45deg); }
       .fan-label { position: absolute; bottom: 82px; left: 50%; transform: translateX(-50%); background: var(--ink); color: white; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,0.15); pointer-events: none; transition: opacity 0.3s, transform 0.3s; }
       .fan-menu.open .fan-label { opacity: 0; transform: translate(-50%, 10px); }
@@ -4381,11 +4382,11 @@
         </details>
         ` : ''}
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; box-sizing: border-box; width: 100%;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; align-items: start; box-sizing: border-box; width: 100%;">
           <!-- Panel 1: Top TCTD Thu Hồi -->
           <details class="tq-sec" data-sec="sen" ${window.__tqOpen.sen ? 'open' : ''} ontoggle="tqSecToggle('sen', this.open)" style="background: #ffffff; border: 1px solid #fef3c7; border-radius: 16px; padding: 16px; box-shadow: 0 10px 30px rgba(245, 158, 11, 0.03); transition: all 0.4s ease; box-sizing: border-box; width: 100%;" onmouseover="this.style.boxShadow='0 15px 40px rgba(245, 158, 11, 0.06)'" onmouseout="this.style.boxShadow='0 10px 30px rgba(245, 158, 11, 0.03)'">
             <summary style="list-style: none; cursor: pointer; outline: none; margin-bottom: 0;">
-              <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+              <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
                 <div style="display: flex; align-items: center; gap: 12px;">
                   <div style="width: 44px; height: 44px; border-radius: 12px; background: #fffbeb; display: flex; align-items: center; justify-content: center; border: 1px solid #fef3c7; flex-shrink: 0;">
                     <img onerror="this.hidden=true" src="./SO TAY KHO QUY_files/bong_sen_vang.png" style="width: 24px; height: 24px; object-fit: contain;">
@@ -4398,6 +4399,7 @@
                     </div>
                   </div>
                 </div>
+                              <div style="width: 36px; height: 36px; background: #f3f4f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #6b7280; transition: transform 0.3s; flex-shrink: 0;" class="summary-arrow-gray"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></div>
               </div>
             </summary>
             <div style="margin-top: 24px; padding-top: 24px; border-top: 1px dashed #e5e7eb;">
@@ -4408,7 +4410,7 @@
           <!-- Panel 2: Hoạt động gần đây -->
           <details class="tq-sec" data-sec="xoi" ${window.__tqOpen.xoi ? 'open' : ''} ontoggle="tqSecToggle('xoi', this.open)" style="background: #ffffff; border: 1px solid #f3e8ff; border-radius: 16px; padding: 16px; box-shadow: 0 10px 30px rgba(139, 92, 246, 0.03); transition: all 0.4s ease; box-sizing: border-box; width: 100%;" onmouseover="this.style.boxShadow='0 15px 40px rgba(139, 92, 246, 0.06)'" onmouseout="this.style.boxShadow='0 10px 30px rgba(139, 92, 246, 0.03)'">
             <summary style="list-style: none; cursor: pointer; outline: none; margin-bottom: 0;">
-              <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+              <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
                 <div style="display: flex; align-items: center; gap: 12px;">
                   <div style="width: 44px; height: 44px; border-radius: 12px; background: #f3e8ff; display: flex; align-items: center; justify-content: center; border: 1px solid #e9d5ff; flex-shrink: 0;">
                     <img onerror="this.hidden=true" src="./SO TAY KHO QUY_files/mam_xoi_vang.png" style="width: 24px; height: 24px; object-fit: contain;">
@@ -4421,6 +4423,7 @@
                     </div>
                   </div>
                 </div>
+                              <div style="width: 36px; height: 36px; background: #f3f4f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #6b7280; transition: transform 0.3s; flex-shrink: 0;" class="summary-arrow-gray"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></div>
               </div>
             </summary>
             <div style="margin-top: 24px; padding-top: 24px; border-top: 1px dashed #e5e7eb;">
@@ -6052,9 +6055,28 @@
         };
       } catch (e) {
         console.error("Firebase Storage Upload Error:", e);
+        window.__lastUploadError = e;      // để báo đúng nguyên nhân cho người dùng
         return null;
       }
     }
+
+    // File luôn được lưu cục bộ trước; nếu đẩy lên Firebase Storage lỗi thì chỉ báo "chưa đồng bộ", kèm nguyên nhân.
+    window.reportUploadFailure = function (dot, uploadedCount, failedCount) {
+      const e = window.__lastUploadError, code = (e && (e.code || e.message)) || '';
+      let reason = 'chưa đồng bộ được lên máy chủ';
+      if (/unauthorized|permission|forbidden/i.test(code)) reason = 'Firebase Storage từ chối quyền ghi (kiểm tra Storage Rules)';
+      else if (/retry-limit|network|offline|unavailable|timeout/i.test(code)) reason = 'mất kết nối mạng';
+      else if (/quota/i.test(code)) reason = 'vượt dung lượng Firebase Storage';
+      else if (/unauthenticated/i.test(code)) reason = 'chưa xác thực với Firebase';
+      const msg = `Đã lưu ${uploadedCount + failedCount} file trên máy này; ${failedCount} file ${reason}.`;
+      if (dot) {
+        dot.className = 'sync-error';
+        dot.querySelector('.text').innerText = `${failedCount} file chưa đồng bộ`;
+        setTimeout(() => { if (dot.className === 'sync-error') dot.className = ''; }, 8000);
+      }
+      if (typeof showToast === 'function') showToast(msg, 'amber');
+      console.warn('[Upload]', msg, e || '');
+    };
 
     function findRecordByFileId(fileId) {
       for (const col of SYNC_COLLECTIONS) {
@@ -7901,8 +7923,7 @@
       Promise.all(uploadPromises).then(() => {
         if (dot) {
           if (failedCount > 0) {
-             dot.className = 'sync-error';
-             dot.querySelector('.text').innerText = `Tải xong ${uploadedCount}, lỗi ${failedCount} file`;
+             window.reportUploadFailure(dot, uploadedCount, failedCount);
           } else {
              dot.className = 'synced';
              dot.querySelector('.text').innerText = 'Đã tải xong file đính kèm';
@@ -8008,8 +8029,7 @@
       Promise.all(uploadPromises).then(() => {
         if (dot) {
           if (failedCount > 0) {
-             dot.className = 'sync-error';
-             dot.querySelector('.text').innerText = `Tải xong ${uploadedCount}, lỗi ${failedCount} file`;
+             window.reportUploadFailure(dot, uploadedCount, failedCount);
           } else {
              dot.className = 'synced';
              dot.querySelector('.text').innerText = 'Đã tải xong file đính kèm';
@@ -8103,8 +8123,7 @@
       Promise.all(uploadPromises).then(() => {
         if (dot) {
           if (failedCount > 0) {
-             dot.className = 'sync-error';
-             dot.querySelector('.text').innerText = `Tải xong ${uploadedCount}, lỗi ${failedCount} file`;
+             window.reportUploadFailure(dot, uploadedCount, failedCount);
           } else {
              dot.className = 'synced';
              dot.querySelector('.text').innerText = 'Đã tải xong file đính kèm';
@@ -8196,8 +8215,7 @@
       Promise.all(uploadPromises).then(() => {
         if (dot) {
           if (failedCount > 0) {
-             dot.className = 'sync-error';
-             dot.querySelector('.text').innerText = `Tải xong ${uploadedCount}, lỗi ${failedCount} file`;
+             window.reportUploadFailure(dot, uploadedCount, failedCount);
           } else {
              dot.className = 'synced';
              dot.querySelector('.text').innerText = 'Đã tải xong file đính kèm';
