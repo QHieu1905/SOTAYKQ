@@ -6063,12 +6063,12 @@
     // File luôn được lưu cục bộ trước; nếu đẩy lên Firebase Storage lỗi thì chỉ báo "chưa đồng bộ", kèm nguyên nhân.
     window.reportUploadFailure = function (dot, uploadedCount, failedCount) {
       const e = window.__lastUploadError, code = (e && (e.code || e.message)) || '';
-      let reason = 'chưa đồng bộ được lên máy chủ';
+      let reason = 'chưa rõ nguyên nhân';
       if (/unauthorized|permission|forbidden/i.test(code)) reason = 'Firebase Storage từ chối quyền ghi (kiểm tra Storage Rules)';
       else if (/retry-limit|network|offline|unavailable|timeout/i.test(code)) reason = 'mất kết nối mạng';
       else if (/quota/i.test(code)) reason = 'vượt dung lượng Firebase Storage';
       else if (/unauthenticated/i.test(code)) reason = 'chưa xác thực với Firebase';
-      const msg = `Đã lưu ${uploadedCount + failedCount} file trên máy này; ${failedCount} file ${reason}.`;
+      const msg = `Đã lưu ${uploadedCount + failedCount} file trên máy này, nhưng ${failedCount} file chưa lên được máy chủ: ${reason}.`;
       if (dot) {
         dot.className = 'sync-error';
         dot.querySelector('.text').innerText = `${failedCount} file chưa đồng bộ`;
