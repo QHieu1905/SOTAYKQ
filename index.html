@@ -1772,6 +1772,112 @@
       .nk-action-btn.edit { background: #e0f2fe; color: #0284c7; }
       .nk-action-btn.del { background: #fee2e2; color: #e11d48; }
 
+      /* ===== Lịch kiểm tra: ưu tiên trong ngày + gợi ý mệnh giá ===== */
+      .kq-hero { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; justify-content: space-between; background: linear-gradient(135deg, #fffbeb, #fff7ed); border: 1px solid #fde68a; border-radius: 18px; padding: 16px 18px; margin-bottom: 12px; }
+      .kq-hero-date { font-size: 12px; font-weight: 800; color: #b45309; text-transform: uppercase; letter-spacing: .4px; }
+      .kq-hero h2 { margin: 2px 0; font-size: 21px; font-weight: 800; color: #1f2937; letter-spacing: -.3px; }
+      .kq-hero-sub { font-size: 12.5px; color: #92400e; font-weight: 600; }
+      .kq-stats { display: flex; gap: 8px; }
+      .kq-stat { min-width: 86px; text-align: center; background: #fff; border: 1px solid #fde68a; border-radius: 14px; padding: 8px 12px; }
+      .kq-stat b { display: block; font-size: 24px; font-weight: 800; line-height: 1.1; font-variant-numeric: tabular-nums; }
+      .kq-stat span { font-size: 11px; font-weight: 700; color: #6b7280; }
+      .kq-chips { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 12px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+      .kq-chips::-webkit-scrollbar { display: none; }
+      .kq-chip-f { flex: 0 0 auto; cursor: pointer; min-height: 38px; padding: 4px 14px; border-radius: 999px; font: inherit; font-size: 12.5px; font-weight: 800; background: #fff; color: var(--c); border: 1px solid var(--c); touch-action: manipulation; }
+      .kq-chip-f.on { background: var(--c); color: #fff; }
+      .kq-wrap { display: grid; grid-template-columns: minmax(320px, 400px) minmax(0, 1fr); gap: 18px; align-items: start; }
+      .kq-left { display: flex; flex-direction: column; gap: 8px; max-height: calc(100vh - 250px); overflow-y: auto; padding: 2px 6px 6px 2px; }
+      .kq-detail-col { position: sticky; top: 12px; }
+      .kq-item { all: unset; box-sizing: border-box; display: flex; gap: 12px; align-items: flex-start; width: 100%; padding: 12px 12px 12px 14px; background: #fff; border: 1px solid #f1f5f9; border-left: 4px solid var(--tone, #e5e7eb); border-radius: 14px; cursor: pointer; transition: transform .18s, box-shadow .18s, background .18s; box-shadow: 0 2px 8px rgba(15, 23, 42, .03); touch-action: manipulation; }
+      .kq-item:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(15, 23, 42, .08); }
+      .kq-item:focus-visible { outline: 2px solid #d97706; outline-offset: 2px; }
+      .kq-item.on { background: #fffbeb; border-color: #fcd34d; border-left-color: var(--tone); box-shadow: 0 0 0 2px rgba(245, 158, 11, .22); }
+      .kq-item.done { opacity: .92; }
+      .kq-rank { flex: 0 0 28px; height: 28px; border-radius: 9px; background: #f3f4f6; color: #4b5563; font-weight: 800; font-size: 12.5px; display: flex; align-items: center; justify-content: center; font-variant-numeric: tabular-nums; }
+      .kq-item.done .kq-rank { background: #d1fae5; color: #047857; }
+      .kq-item-main { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+      .kq-item-name { font-weight: 800; color: #111827; font-size: 14px; line-height: 1.35; overflow-wrap: anywhere; }
+      .kq-pills, .kq-recs { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+      .kq-recs-l { font-size: 11.5px; font-weight: 700; color: #6b7280; }
+      .kq-go { flex: 0 0 auto; color: #9ca3af; margin-top: 4px; }
+      .kq-empty { padding: 22px 16px; text-align: center; color: #047857; font-weight: 700; background: #ecfdf5; border-radius: 14px; font-size: 13.5px; }
+      .kq-done { margin-top: 6px; display: flex; flex-direction: column; gap: 8px; }
+      .kq-done-h { all: unset; box-sizing: border-box; cursor: pointer; display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-radius: 12px; background: #ecfdf5; color: #047857; font-weight: 800; font-size: 13px; }
+      .kq-done-h:focus-visible { outline: 2px solid #059669; outline-offset: 2px; }
+
+      /* Chi tiết TCTD: bố cục tự co theo bề rộng khung chứa (container query) */
+      .kq-detail { container-type: inline-size; background: #fff; border: 1px solid #fde68a; border-radius: 18px; padding: 18px; box-shadow: 0 8px 24px rgba(217, 119, 6, .06); }
+      .kq-d-sub { font-size: 12px; font-weight: 800; color: #b45309; }
+      .kq-d-head h3 { margin: 2px 0 0; font-size: 18px; font-weight: 800; color: #111827; overflow-wrap: anywhere; line-height: 1.3; padding-right: 34px; }
+      .kq-sec-t { margin: 18px 0 8px; font-size: 13px; font-weight: 800; color: #1f2937; }
+      .kq-sec-s { font-weight: 600; color: #6b7280; font-size: 11.5px; }
+      .kq-rec { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; }
+      .kq-rec-tile { display: flex; gap: 12px; align-items: center; border: 1px solid; border-radius: 14px; padding: 12px 14px; }
+      .kq-rec-n { flex: 0 0 30px; height: 30px; border-radius: 50%; background: #111827; color: #fff; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+      .kq-rec-v { font-size: 20px; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.15; }
+      .kq-rec-a { font-size: 12px; font-weight: 800; margin-top: 1px; }
+      .kq-rec-t { font-size: 12px; color: #4b5563; margin-top: 3px; line-height: 1.35; }
+      .kq-den-head { display: none; }
+      .kq-den { display: grid; grid-template-columns: 1fr auto; grid-template-areas: "v act" "bar bar" "last n" "note note"; gap: 8px 10px; align-items: center; padding: 12px; border: 1px solid #f1f5f9; border-radius: 14px; margin-bottom: 8px; background: #fff; }
+      .kq-den.rec { border-color: #fcd34d; background: #fffbeb; }
+      .kq-den.fail { box-shadow: inset 4px 0 0 #e11d48; }
+      .kq-den-v { grid-area: v; display: flex; align-items: center; gap: 8px; min-width: 0; }
+      .kq-den-chip { display: inline-flex; align-items: center; justify-content: center; min-width: 46px; height: 28px; padding: 0 8px; border-radius: 8px; background: #111827; color: #fff; font-weight: 800; font-size: 13px; font-variant-numeric: tabular-nums; }
+      .kq-den-full { font-weight: 700; color: #374151; font-size: 13px; font-variant-numeric: tabular-nums; }
+      .kq-den-act { grid-area: act; display: flex; align-items: center; gap: 6px; justify-self: end; }
+      .kq-rn { width: 22px; height: 22px; border-radius: 50%; background: #d97706; color: #fff; font-size: 11.5px; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; }
+      .kq-den-bar { grid-area: bar; }
+      .kq-barwrap { display: flex; align-items: center; gap: 10px; }
+      .kq-bar { position: relative; flex: 1; height: 10px; border-radius: 99px; background: #f1f5f9; }
+      .kq-bar i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 99px; background: var(--bc); min-width: 3px; }
+      .kq-bar em { position: absolute; left: 50%; top: -3px; bottom: -3px; width: 2px; margin-left: -1px; background: #9ca3af; border-radius: 2px; }
+      .kq-rate { font-size: 14px; font-weight: 800; font-variant-numeric: tabular-nums; min-width: 58px; text-align: right; }
+      .kq-none { font-size: 12.5px; color: #9ca3af; font-weight: 600; }
+      .kq-den-last { grid-area: last; font-size: 12.5px; color: #374151; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+      .kq-den-n { grid-area: n; font-size: 12.5px; color: #374151; justify-self: end; }
+      .kq-den-n small { color: #be123c; font-weight: 700; }
+      .kq-l { color: #6b7280; font-size: 11.5px; font-weight: 600; margin-right: 4px; }
+      .kq-den.never .kq-den-last, .kq-den.never .kq-den-n, .kq-den.never .kq-den-note { display: none; }
+      .kq-den-note { grid-area: note; font-size: 12px; color: #6b7280; line-height: 1.35; }
+      .kq-foot { margin-top: 10px; font-size: 11.5px; color: #6b7280; line-height: 1.45; }
+      .kq-actions { display: flex; flex-wrap: nowrap; gap: 10px; margin-top: 14px; position: sticky; bottom: 0; padding: 12px 0 2px; background: linear-gradient(rgba(255, 255, 255, 0), #fff 28%); }
+      .kq-btn { flex: 1 1 0; min-width: 0; cursor: pointer; min-height: 46px; padding: 8px 16px; border-radius: 14px; border: 1px solid #e5e7eb; background: #fff; color: #374151; font: inherit; font-size: 14px; font-weight: 800; touch-action: manipulation; }
+      .kq-btn.pri { flex: 2.4 1 0; border: none; color: #fff; background: linear-gradient(135deg, #f59e0b, #d97706); box-shadow: 0 6px 14px rgba(217, 119, 6, .28); }
+      .kq-btn:focus-visible { outline: 2px solid #92400e; outline-offset: 2px; }
+      @container (min-width: 600px) {
+        .kq-l { display: none; }
+        .kq-den.never .kq-den-last, .kq-den.never .kq-den-n { display: block; }
+        .kq-den-head { display: grid; grid-template-columns: 130px 100px minmax(140px, 1fr) 118px minmax(150px, 1fr); gap: 10px; padding: 0 12px 6px; font-size: 11.5px; font-weight: 800; color: #6b7280; text-transform: uppercase; letter-spacing: .3px; }
+        .kq-den { grid-template-columns: 130px 100px minmax(140px, 1fr) 118px minmax(150px, 1fr); grid-template-areas: "v last bar n act" "note note note note note"; row-gap: 4px; }
+        .kq-den-act { justify-self: start; }
+        .kq-den-n { justify-self: start; }
+        .kq-den-note { padding-left: 2px; }
+      }
+      /* Bottom-sheet (điện thoại) / hộp thoại (máy tính) */
+      .kq-sheet { position: fixed; inset: 0; z-index: 10000; background: rgba(15, 23, 42, .45); display: flex; align-items: flex-end; justify-content: center; animation: kqFade .18s ease; }
+      .kq-sheet-panel { position: relative; width: 100%; max-width: 780px; max-height: 92vh; overflow-y: auto; background: #fff; border-radius: 22px 22px 0 0; padding: 8px 10px calc(10px + env(safe-area-inset-bottom)); animation: kqUp .26s cubic-bezier(.2, .8, .2, 1); overscroll-behavior: contain; }
+      .kq-sheet-panel .kq-detail { border: none; box-shadow: none; padding: 8px 6px 4px; }
+      .kq-grab { width: 42px; height: 4px; border-radius: 4px; background: #d1d5db; margin: 4px auto 0; }
+      .kq-x { position: absolute; top: 10px; right: 12px; z-index: 2; width: 38px; height: 38px; border-radius: 50%; border: none; background: #f3f4f6; color: #374151; font-size: 22px; line-height: 1; cursor: pointer; }
+      @keyframes kqFade { from { opacity: 0 } to { opacity: 1 } }
+      @keyframes kqUp { from { transform: translateY(40px); opacity: .6 } to { transform: none; opacity: 1 } }
+      @media (min-width: 861px) {
+        .kq-sheet { align-items: center; }
+        .kq-sheet-panel { border-radius: 22px; max-height: 88vh; padding: 14px; }
+        .kq-grab { display: none; }
+      }
+      @media (max-width: 860px) {
+        .kq-wrap { grid-template-columns: 1fr; }
+        .kq-detail-col { display: none; }
+        .kq-left { max-height: none; overflow: visible; padding: 0; }
+        .kq-item.on { background: #fff; border-color: #f1f5f9; box-shadow: 0 2px 8px rgba(15, 23, 42, .03); }
+        .kq-hero { padding: 14px; }
+        .kq-hero h2 { font-size: 19px; }
+        .kq-stats { width: 100%; }
+        .kq-stat { flex: 1; min-width: 0; padding: 8px 6px; }
+      }
+      @media (prefers-reduced-motion: reduce) { .kq-sheet, .kq-sheet-panel, .kq-item { animation: none; transition: none; } }
+
       @media (max-width: 860px) {
         #sync-dot { top: auto; bottom: 80px; right: 16px; }
         .desktop-only { display: none !important; }
@@ -3307,9 +3413,10 @@
       render();
       if (typeof window.loadTabData === 'function') window.loadTabData(id);
     }
-    window.goToLogAndOpenForm = function (unitId) {
+    window.goToLogAndOpenForm = function (unitId, d1, d2) {
+      window.__kqPrefill = d1 ? { d1: kqDenKey(d1), d2: d2 ? kqDenKey(d2) : 'none' } : null;   // mệnh giá gợi ý điền sẵn vào form
       switchTab('nhatky');
-      setTimeout(() => openForm('log', '', unitId), 10);
+      setTimeout(() => { openForm('log', '', unitId); window.__kqPrefill = null; }, 10);
     };
 
     window.goToViolationLog = function (unitId) {
@@ -3610,14 +3717,15 @@
     window.__tqSugF = window.__tqSugF || 'all';
     window.__tqSugAll = !!window.__tqSugAll;
     function tqSugRowHtml(x) {
-      const nc = x.nc;
+      const nc = x.nc, plan = kqDenomPlan(x.u.id), id = esc(x.u.id);
       return `<div style="display:flex; align-items:center; gap:10px; padding:10px 0; border-top:1px dashed #fde68a;">
-          <div style="flex:1 1 0; min-width:0;">
-            <div style="font-weight:700; color:#1f2937; font-size:13.5px; overflow-wrap:anywhere;">${esc(x.u.name)}</div>
-            <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:6px;">${tqReasonPills(nc).join('')}</div>
+          <div role="button" tabindex="0" title="Xem gợi ý mệnh giá" onclick="kqOpenUnit('${id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();kqOpenUnit('${id}')}" style="flex:1 1 0; min-width:0; cursor:pointer;">
+            <div style="font-weight:700; color:#1f2937; font-size:13.5px; overflow-wrap:anywhere;">${esc(x.u.name)} <span style="color:#b45309; font-size:12px; font-weight:800; white-space:nowrap;">Gợi ý mệnh giá ›</span></div>
+            <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:6px;">${tqReasonPills(nc).join('')}${x.missed && x.missed.length ? kqMissedPill(x.missed) : ''}</div>
+            <div style="margin-top:6px;">${kqRecLine(plan)}</div>
             <div style="font-size:11.5px; color:#6b7280; margin-top:4px;">Kiểm tra bổ sung → tính vào Quý ${nc.nowQ}</div>
           </div>
-          <button type="button" onclick="window.goToLogAndOpenForm('${x.u.id}')" style="cursor:pointer; flex-shrink:0; min-height:38px; padding:6px 14px; border-radius:999px; border:none; background:linear-gradient(135deg,#f59e0b,#d97706); color:#fff; font:inherit; font-size:12.5px; font-weight:800; box-shadow:0 4px 10px rgba(217,119,6,.25);">Kiểm tra</button>
+          <button type="button" onclick="kqGo('${id}')" style="cursor:pointer; flex-shrink:0; min-height:38px; padding:6px 14px; border-radius:999px; border:none; background:linear-gradient(135deg,#f59e0b,#d97706); color:#fff; font:inherit; font-size:12.5px; font-weight:800; box-shadow:0 4px 10px rgba(217,119,6,.25);">Kiểm tra</button>
         </div>`;
     }
     function tqSugBodyHtml() {
@@ -4143,12 +4251,9 @@
 
       // --- 1b) Gợi ý kiểm tra bổ sung: bó > 5% và đơn vị chưa đủ độ phủ các vòng 2-4 ---
       window.__tqSug = data.units.filter(u => !tqIsExempt(u))
-        .map(u => ({ u, nc: tqNeedCheck(u, (data.logs || []).filter(l => l.unitId === u.id)) }))
-        .filter(x => x.nc.any)
-        .sort((a, b) => a.nc.score - b.nc.score
-          || ((b.nc.prev ? b.nc.prev.rate : 0) - (a.nc.prev ? a.nc.prev.rate : 0))
-          || ((b.nc.curRate || 0) - (a.nc.curRate || 0))
-          || String(a.u.name).localeCompare(String(b.u.name), 'vi'));
+        .map(u => { const ul = (data.logs || []).filter(l => l.unitId === u.id), nc = tqNeedCheck(u, ul), missed = kqMissedPrev(ul); return { u, nc, missed, score: kqScore(nc, missed, false) }; })
+        .filter(x => x.score < 99)
+        .sort(kqCmp);
       const sgCur = window.__tqSug.filter(x => x.nc.notChecked).length, sgViol = window.__tqSug.filter(x => x.nc.prevViol || x.nc.curViol).length, sgFew = window.__tqSug.filter(x => x.nc.few).length;
       const suggestHtml = tqSec('sug', '#e11d48', '#fff', `
           <h3 style="margin:0; font-size:16px; font-weight:800; color:#1f2937;">Gợi ý kiểm tra bổ sung</h3>
@@ -4594,185 +4699,248 @@
     }
 
     /* ================= 3. KẾ HOẠCH & LỊCH KIỂM TRA ================= */
-    function renderKehoach() {
-      const noUnits = data.units.length === 0;
-      const list = byUnit(data.plans).filter(r => matchQ(unitName(r.unitId), r.week, r.note)).sort((a, b) => b.week.localeCompare(a.week));
+    /* ================= 2. LỊCH KIỂM TRA = ƯU TIÊN KIỂM TRA TRONG NGÀY + GỢI Ý MỆNH GIÁ =================
+       Dùng chung nguồn tính với "Gợi ý kiểm tra bổ sung" ở Tổng quan (tqNeedCheck) nên hai nơi luôn khớp nhau.
+       Gợi ý mệnh giá (500k → 10k) cho từng TCTD dựa vào KẾT QUẢ LẦN KIỂM TRA GẦN NHẤT của chính mệnh giá đó:
+         1) Lần trước không đạt (> 5%)            → kiểm tra lại mệnh giá đó (ưu tiên cao nhất, tỷ lệ cao xếp trước)
+         2) Mệnh giá chưa từng kiểm tra           → xếp theo thứ tự 500k → 10k
+         3) Mệnh giá đã đạt                       → luân phiên: mệnh giá có lần kiểm tra cũ nhất xếp trước
+         4) Mệnh giá đã kiểm tra trong hôm nay    → không gợi ý nữa
+       Mỗi bản ghi nhật ký có 2 mệnh giá nên lấy 2 mệnh giá đứng đầu làm gợi ý (điền sẵn vào form nhập). */
+    const KQ_DENS = [500000, 200000, 100000, 50000, 20000, 10000];
+    const kqDenKey = v => ({ 500000: '500.000d', 200000: '200.000d', 100000: '100.000d', 50000: '50.000d', 20000: '20.000d', 10000: '10.000d' }[v] || 'none');
+    const kqDenShort = v => (v / 1000) + 'k';
+    const kqDenFull = v => String(v).replace(/\B(?=(\d{3})+(?!\d))/g, '.') + 'đ';
+    const kqToday = () => { const d = new Date(), p = n => String(n).padStart(2, '0'); return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()); };
+    const kqFmtDate = s => { if (!s) return '—'; const y = s.slice(0, 4); return s.slice(8, 10) + '/' + s.slice(5, 7) + (y !== String(new Date().getFullYear()) ? '/' + y : ''); };
+    const kqIsMobile = () => window.matchMedia('(max-width: 860px)').matches;
+    const KQ_DIFF = { thua: 'Thừa', thieu: 'Thiếu', lan: 'Lẫn' };
+    window.__kq = window.__kq || { sel: '', f: 'all', doneOpen: false };
 
-      const baThangTruoc = new Date();
-      baThangTruoc.setMonth(baThangTruoc.getMonth() - 3);
-
-      const priorityList = [];
-      data.units.forEach(u => {
-        const uLogs = data.logs.filter(x => x.unitId === u.id).sort((a, b) => new Date(a.date) - new Date(b.date));
-        const nowK = tqNow();
-        const curQLogs = uLogs.filter(x => x.date && x.date.startsWith(String(nowK.y)) && tqRoundOf(x.date) === nowK.q);
-
-        let reasonsHtml = [];
-        let score = 99;
-        const nc = tqIsExempt(u) ? null : tqNeedCheck(u, uLogs);
-
-        // Chênh lệch lẫn/thiếu/thừa trong quý hiện tại: mức ưu tiên thấp nhất
-        let hasRecentDiff = curQLogs.some(l => l.diff === 'thua' || l.diff === 'thieu' || l.diff === 'lan' || l.diff2 === 'thua' || l.diff2 === 'thieu' || l.diff2 === 'lan');
-        if (hasRecentDiff) score = Math.min(score, 4);
-
-        if (uLogs.length > 0) {
-          let historyArr = uLogs.map((l, idx) => {
-            const amt1 = Number(l.amount1) || 1;
-            const inv1 = Number(l.invalidAmount1) || 0;
-            
-            const amt2Val = Number(l.amount2) || 0;
-            const inv2 = Number(l.invalidAmount2) || 0;
-            const hasData2 = amt2Val > 0;
-            
-            const totalAmt = amt1 + (hasData2 ? amt2Val : 0);
-            const totalInv = inv1 + (hasData2 ? inv2 : 0);
-            const totalRatio = (totalInv / totalAmt) * 100;
-            let isFail = totalRatio > 5.0;
-            let isDiff = l.diff === 'thua' || l.diff === 'thieu' || l.diff === 'lan' || l.diff2 === 'thua' || l.diff2 === 'thieu' || l.diff2 === 'lan';
-
-            let statusText = isFail ? 'Không đạt' : 'Đạt';
-            let color = isFail ? 'var(--red)' : 'var(--green-dark)';
-
-            let diffText = '';
-            if (isDiff) {
-              let t = l.diff !== 'khop' && l.diff ? l.diff : (l.diff2 !== 'khop' && l.diff2 ? l.diff2 : '');
-              if (t === 'thua') diffText = 'Thừa';
-              if (t === 'thieu') diffText = 'Thiếu';
-              if (t === 'lan') diffText = 'Lẫn';
-            }
-
-            let extra = diffText ? ` <span style="font-size:10px; color:#6b7280">(${diffText})</span>` : '';
-            return `<span style="white-space:nowrap; padding:2px 6px; border-radius:4px; font-size:12px; border:1px solid ${isFail ? '#fca5a5' : '#86efac'}; background:${isFail ? '#fef2f2' : '#f0fdf4'}">Lần ${idx + 1}: <b style="color:${color}">${statusText}</b>${extra}</span>`;
-          });
-
-          let onclick = `filterUnit = '${u.id}'; document.getElementById('filterUnit') && (document.getElementById('filterUnit').value = '${u.id}'); switchTab('nhatky');`;
-
-          let historyBlock = `<div onclick="${onclick}" title="Bấm để xem chi tiết lịch sử kiểm tra trong Nhật ký" style="cursor:pointer; display:inline-flex; flex-wrap:wrap; gap:6px; align-items:center; transition:0.2s; padding: 4px; border-radius: 6px;" onmouseover="this.style.background='#fef3c7'" onmouseout="this.style.background='transparent'">
-               ${historyArr.join('')}
-            </div>`;
-          reasonsHtml.push(historyBlock);
-        }
-
-        if (nc && nc.any) {
-          reasonsHtml.unshift(`<div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:6px;">${tqReasonPills(nc).join('')}<span style="font-size:11.5px; color:#6b7280; align-self:center;">→ tính vào Quý ${nc.nowQ}</span></div>`);
-          score = Math.min(score, nc.score);
-        }
-        if (score < 99 && !tqIsExempt(u)) {
-          priorityList.push({ unit: u, reasonsHtml: reasonsHtml.join(' '), score: score });
-        }
+    function kqDenomPlan(unitId, logsArg) {
+      const todayS = kqToday();
+      const logs = (logsArg || (data.logs || []).filter(l => l && l.unitId === unitId)).filter(l => l && l.date)
+        .slice().sort((a, b) => String(a.date).localeCompare(String(b.date)));
+      const by = {};
+      KQ_DENS.forEach(v => { by[v] = { val: v, n: 0, fails: 0, last: null, today: false, state: 'never', rank: 99, rec: false }; });
+      logs.forEach(l => {
+        [[l.denom1, l.amount1, l.invalidAmount1, l.diff], [l.denom2, l.amount2, l.invalidAmount2, l.diff2]].forEach(([d, a, i, df]) => {
+          const v = tqDenomVal(d), chk = Number(a) || 0, inv = Number(i) || 0, s = by[v];
+          if (!s || chk <= 0) return;
+          const rate = inv / chk * 100;
+          s.n++; if (rate > TQ_BAD_BUNDLE_PCT) s.fails++;
+          s.last = { date: l.date, rate, chk, inv, diff: KQ_DIFF[df] ? df : '' };
+          if (l.date === todayS) s.today = true;
+        });
       });
+      const rows = KQ_DENS.map(v => { const s = by[v]; s.state = !s.last ? 'never' : (s.last.rate > TQ_BAD_BUNDLE_PCT ? 'fail' : 'pass'); return s; });
+      const key = s => s.today ? [9, 0] : s.state === 'fail' ? [0, -s.last.rate] : s.state === 'never' ? [1, 0] : [2, Date.parse(s.last.date) || 0];
+      const ordered = rows.slice().sort((a, b) => {
+        const ka = key(a), kb = key(b);
+        return ka[0] - kb[0] || ka[1] - kb[1] || KQ_DENS.indexOf(a.val) - KQ_DENS.indexOf(b.val);
+      });
+      ordered.forEach((s, i) => { s.rank = i; s.rec = !s.today && i < 2; });
+      return { rows, by, rec: ordered.filter(s => s.rec).map(s => s.val), hasFail: rows.some(s => s.state === 'fail' && !s.today) };
+    }
 
-      let filteredPriorityList = priorityList;
-      if (filterUnit !== 'all') {
-        filteredPriorityList = priorityList.filter(p => p.unit.id === filterUnit);
-      } else if (query) {
-        filteredPriorityList = priorityList.filter(p => matchQ(p.unit.name, p.unit.code));
+    // Thứ tự ưu tiên: 1) chưa KT quý hiện tại  2) chưa KT ở các quý trước (trong năm)  3) vi phạm  4) mới KT 1–2 bó gần ngưỡng  5) có chênh lệch
+    function kqMissedPrev(uLogs) {
+      const now = tqNow(), yp = String(now.y), have = new Set(), m = [];
+      (uLogs || []).forEach(l => { if (l && l.date && l.date.startsWith(yp)) have.add(tqRoundOf(l.date)); });
+      for (let k = 1; k < now.q; k++) if (!have.has(k)) m.push(k);
+      return m;
+    }
+    function kqScore(nc, missed, hasDiff) {
+      if (nc.notChecked) return 1;
+      if (missed.length) return 2;
+      if (nc.curViol) return 3;
+      if (nc.few) return 4;
+      return hasDiff ? 5 : 99;
+    }
+    function kqCmp(a, b) {
+      return a.score - b.score
+        || b.missed.length - a.missed.length
+        || ((b.nc.prev ? b.nc.prev.rate : 0) - (a.nc.prev ? a.nc.prev.rate : 0))
+        || ((b.nc.curRate || 0) - (a.nc.curRate || 0))
+        || String(a.u.name).localeCompare(String(b.u.name), 'vi');
+    }
+    // Danh sách ưu tiên: dùng chung bộ tiêu chí của Tổng quan (+ nhóm "có chênh lệch" ở mức thấp nhất như trước đây)
+    function kqBuildList() {
+      const todayS = kqToday(), now = tqNow(), yp = String(now.y);
+      const isD = x => x === 'thua' || x === 'thieu' || x === 'lan';
+      const todo = [], done = [];
+      (data.units || []).forEach(u => {
+        if (tqIsExempt(u)) return;
+        if (filterUnit !== 'all' && u.id !== filterUnit) return;
+        if (filterUnit === 'all' && query && !matchQ(u.name, u.code)) return;
+        const uLogs = (data.logs || []).filter(l => l && l.unitId === u.id);
+        const nc = tqNeedCheck(u, uLogs);
+        const hasDiff = uLogs.some(l => l.date && l.date.startsWith(yp) && tqRoundOf(l.date) === now.q && (isD(l.diff) || isD(l.diff2)));
+        const doneToday = uLogs.some(l => l.date === todayS);
+        const missed = kqMissedPrev(uLogs), score = kqScore(nc, missed, hasDiff);
+        if (!doneToday && score >= 99) return;
+        (doneToday ? done : todo).push({ u, nc, hasDiff, missed, doneToday, score, plan: kqDenomPlan(u.id, uLogs) });
+      });
+      const cmp = kqCmp;
+      todo.sort(cmp); done.sort(cmp);
+      return { todo, done };
+    }
+    function kqItem(unitId) {
+      const u = (data.units || []).find(x => x.id === unitId); if (!u) return null;
+      const uLogs = (data.logs || []).filter(l => l && l.unitId === u.id), todayS = kqToday();
+      return { u, nc: tqNeedCheck(u, uLogs), missed: kqMissedPrev(uLogs), hasDiff: false, doneToday: uLogs.some(l => l.date === todayS), plan: kqDenomPlan(u.id, uLogs), exempt: tqIsExempt(u) };
+    }
+
+    /* ---------- các mảnh giao diện ---------- */
+    function kqRecChip(plan, v) {
+      const s = plan.by[v];
+      const c = s.state === 'fail' ? ['#fff1f2', '#be123c', '#fecdd3', '↻ '] : s.state === 'never' ? ['#fffbeb', '#b45309', '#fde68a', ''] : ['#f0fdf4', '#047857', '#bbf7d0', ''];
+      return tqPill(c[0], c[1], c[2], c[3] + kqDenShort(v));
+    }
+    function kqRecLine(plan) {
+      if (!plan.rec.length) return '';
+      return `<span class="kq-recs"><span class="kq-recs-l">Gợi ý MG:</span>${plan.rec.map(v => kqRecChip(plan, v)).join('')}</span>`;
+    }
+    function kqMissedPill(m) { return tqPill('#fff7ed', '#c2410c', '#fed7aa', 'Chưa KT Quý ' + m.join(', ')); }
+    function kqReasons(it) {
+      const p = tqReasonPills(it.nc).slice();
+      if (it.missed && it.missed.length) p.push(kqMissedPill(it.missed));
+      if (it.hasDiff) p.push(tqPill('#eff6ff', '#1d4ed8', '#bfdbfe', 'Có chênh lệch Quý ' + it.nc.nowQ));
+      return p.join('');
+    }
+    function kqItemHtml(it, idx, selId, isDone) {
+      const tone = isDone ? '#10b981' : ({ 1: '#f59e0b', 2: '#f97316', 3: '#e11d48', 4: '#eab308', 5: '#3b82f6' }[it.score] || '#9ca3af');
+      const on = selId === it.u.id;
+      let body;
+      if (isDone) {
+        const t = it.plan.rows.filter(s => s.today).map(s => tqPill(s.last.rate > TQ_BAD_BUNDLE_PCT ? '#fff1f2' : '#f0fdf4', s.last.rate > TQ_BAD_BUNDLE_PCT ? '#be123c' : '#047857', s.last.rate > TQ_BAD_BUNDLE_PCT ? '#fecdd3' : '#bbf7d0', kqDenShort(s.val) + ' · ' + tqPct(s.last.rate))).join('');
+        body = `<span class="kq-pills">${t}</span>`;
+      } else {
+        body = `<span class="kq-pills">${kqReasons(it)}</span>${kqRecLine(it.plan)}`;
       }
-      filteredPriorityList.sort((a, b) => a.score - b.score);
+      return `<button type="button" class="kq-item${on ? ' on' : ''}${isDone ? ' done' : ''}" data-id="${esc(it.u.id)}" ${on ? 'aria-current="true"' : ''} style="--tone:${tone}" onclick="kqPick('${esc(it.u.id)}')">
+        <span class="kq-rank">${isDone ? '✓' : idx + 1}</span>
+        <span class="kq-item-main"><span class="kq-item-name">${esc(it.u.name)}</span>${body}</span>
+        <svg class="kq-go" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </button>`;
+    }
+    function kqNoteFor(s) {
+      if (s.today) return `Đã kiểm tra hôm nay (${tqPct(s.last.rate)})`;
+      if (s.state === 'fail') return `Lần trước ${tqPct(s.last.rate)} > ${TQ_BAD_BUNDLE_PCT}% → kiểm tra lại`;
+      if (s.state === 'never') return 'Chưa có kết quả nào → nên kiểm tra';
+      return s.rec ? `Lần trước ${tqPct(s.last.rate)} đạt → luân phiên (kiểm tra cũ nhất ${kqFmtDate(s.last.date)})` : `Đạt ${tqPct(s.last.rate)} → chưa cần kiểm tra lại`;
+    }
+    function kqDenRow(s) {
+      const bc = s.state === 'fail' ? '#e11d48' : (s.state === 'pass' && s.last.rate >= TQ_NEAR_PCT) ? '#f59e0b' : '#10b981';
+      const w = s.last ? Math.min(100, s.last.rate / 10 * 100) : 0;
+      const badge = s.today ? tqPill('#f0fdf4', '#047857', '#bbf7d0', 'Đã KT hôm nay')
+        : s.state === 'fail' ? tqPill('#fff1f2', '#be123c', '#fecdd3', 'Kiểm tra lại')
+          : s.state === 'never' ? tqPill('#fffbeb', '#b45309', '#fde68a', 'Chưa kiểm tra')
+            : s.rec ? tqPill('#eff6ff', '#1d4ed8', '#bfdbfe', 'Luân phiên') : tqPill('#f0fdf4', '#047857', '#bbf7d0', 'Đạt');
+      const diff = s.last && s.last.diff ? ' ' + tqPill('#eff6ff', '#1d4ed8', '#bfdbfe', KQ_DIFF[s.last.diff]) : '';
+      return `<div class="kq-den ${s.state}${s.rec ? ' rec' : ''}">
+        <div class="kq-den-v"><span class="kq-den-chip">${kqDenShort(s.val)}</span><span class="kq-den-full">${kqDenFull(s.val)}</span></div>
+        <div class="kq-den-act">${s.rec ? `<span class="kq-rn" title="Thứ tự gợi ý">${s.rank + 1}</span>` : ''}${badge}</div>
+        <div class="kq-den-bar">${s.last ? `<div class="kq-barwrap"><div class="kq-bar" role="img" aria-label="Tỷ lệ ${tqPct(s.last.rate)}"><i style="width:${w.toFixed(1)}%; --bc:${bc}"></i><em title="Ngưỡng ${TQ_BAD_BUNDLE_PCT}%"></em></div><b class="kq-rate" style="color:${bc}">${tqPct(s.last.rate)}</b></div>` : `<span class="kq-none">Chưa có dữ liệu</span>`}</div>
+        <div class="kq-den-last"><span class="kq-l">KT gần nhất</span><b>${s.last ? kqFmtDate(s.last.date) : '—'}</b>${diff}</div>
+        <div class="kq-den-n"><span class="kq-l">Số lần</span><b>${s.n}</b>${s.fails ? `<small> · ${s.fails} không đạt</small>` : ''}</div>
+        <div class="kq-den-note">${esc(kqNoteFor(s))}</div>
+      </div>`;
+    }
+    function kqDetailHtml(unitId) {
+      const it = kqItem(unitId);
+      if (!it) return `<div class="kq-empty">Không tìm thấy đơn vị.</div>`;
+      const p = it.plan, now = tqNow();
+      const recTiles = p.rec.length ? p.rec.map((v, i) => {
+        const s = p.by[v];
+        const c = s.state === 'fail' ? ['#fff1f2', '#fecdd3', '#be123c', 'Kiểm tra lại'] : s.state === 'never' ? ['#fffbeb', '#fde68a', '#b45309', 'Chưa kiểm tra'] : ['#eff6ff', '#bfdbfe', '#1d4ed8', 'Luân phiên'];
+        return `<div class="kq-rec-tile" style="background:${c[0]}; border-color:${c[1]}"><span class="kq-rec-n">${i + 1}</span><div style="min-width:0"><div class="kq-rec-v" style="color:${c[2]}">${kqDenFull(v)}</div><div class="kq-rec-a" style="color:${c[2]}">${c[3]}</div><div class="kq-rec-t">${esc(kqNoteFor(s))}</div></div></div>`;
+      }).join('') : `<div class="kq-rec-tile" style="background:#f0fdf4; border-color:#bbf7d0"><span class="kq-rec-n" style="background:#10b981">✓</span><div><div class="kq-rec-v" style="color:#047857">Đã kiểm tra đủ hôm nay</div><div class="kq-rec-t">Không còn mệnh giá nào cần gợi ý thêm.</div></div></div>`;
+      const reasons = it.exempt ? tqPill('#f3f4f6', '#4b5563', '#e5e7eb', 'Thuộc nhóm miễn trừ kế hoạch thường quy') : kqReasons(it);
+      const sid = esc(it.u.id);
+      return `<div class="kq-detail">
+        <div class="kq-d-head">
+          <div class="kq-d-sub">Quý ${now.q} (${tqRoundMonths(now.q)}) · còn ${tqDaysLeft(now)} ngày</div>
+          <h3>${esc(it.u.name)}</h3>
+          <div class="kq-pills" style="margin-top:8px">${reasons || tqPill('#f0fdf4', '#047857', '#bbf7d0', 'Không có cảnh báo trong Quý ' + now.q)}</div>
+        </div>
+        <div class="kq-sec-t">Gợi ý kiểm tra lần này</div>
+        <div class="kq-rec">${recTiles}</div>
+        <div class="kq-sec-t">Tổng hợp theo mệnh giá <span class="kq-sec-s">· kết quả lần kiểm tra gần nhất, vạch xám = ngưỡng ${TQ_BAD_BUNDLE_PCT}%</span></div>
+        <div class="kq-den-head" aria-hidden="true"><span>Mệnh giá</span><span>KT gần nhất</span><span>Tỷ lệ KĐTCLT</span><span>Số lần</span><span>Gợi ý</span></div>
+        ${p.rows.map(kqDenRow).join('')}
+        <div class="kq-foot">Không đạt (&gt; ${TQ_BAD_BUNDLE_PCT}%) → kiểm tra lại · đạt → luân phiên sang mệnh giá chưa kiểm tra hoặc kiểm tra cũ nhất. Chỉ mang tính tham khảo.</div>
+        <div class="kq-actions">
+          <button type="button" class="kq-btn pri" onclick="kqGo('${sid}')">Kiểm tra${p.rec.length ? ' · ' + p.rec.map(kqDenShort).join(' + ') : ' ngay'}</button>
+          <button type="button" class="kq-btn" onclick="kqLog('${sid}')">Nhật ký</button>
+        </div>
+      </div>`;
+    }
 
-      let priorityHtml = '';
-      if (filteredPriorityList.length > 0) {
-        priorityHtml = `
-            <details ${isPriorityOpen ? 'open' : ''} ontoggle="isPriorityOpen = this.open" style="margin-bottom:20px; background:#fffbeb; border:1px solid #fde68a; border-radius:12px; padding:16px; box-shadow: 0 4px 6px -1px rgba(217, 119, 6, 0.05); transition: all 0.3s ease;">
-               <summary style="font-weight:700; color:#b45309; font-size:15.5px; display:flex; align-items:center; cursor:pointer; list-style:none; outline:none; gap: 8px; margin: 0;">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                  Gợi ý ưu tiên kiểm tra
-                  <span style="background: #fef3c7; color: #d97706; padding: 2px 8px; border-radius: 99px; font-size: 12px; margin-left: auto;">${filteredPriorityList.length} đơn vị</span>
-               </summary>
-               <div style="margin-top: 16px; padding-top: 16px; border-top: 1px dashed #fde68a; overflow-x: auto;">
-                 <div style="font-size:12px; color:#92400e; margin-bottom:10px;">Quý ${tqNow().q} (${tqRoundMonths(tqNow().q)}) · còn ${tqDaysLeft(tqNow())} ngày. Ưu tiên: chưa KT quý này, đã vi phạm, 1–2 bó ≥ ${TQ_NEAR_PCT}%. Tự làm mới khi sang quý mới.</div>
-                 ${tbl(
-          ['STT', 'Đơn vị', 'Lý do ưu tiên', 'Hành động'],
-          filteredPriorityList.map((p, idx) => [
-            `<div style="text-align:center">${idx + 1}</div>`,
-            `<b>${esc(p.unit.name)}</b>`,
-            p.reasonsHtml,
-            `<div style="text-align:center"><button onclick="window.goToLogAndOpenForm('${p.unit.id}')" style="padding:4px 10px;font-size:12px;background:var(--green);color:#fff;border-radius:4px;border:none;cursor:pointer;font-weight:600">Kiểm tra</button></div>`
-          ])
-        )}
-               </div>
-            </details>
-         `;
-      }
+    /* ---------- trang chính ---------- */
+    function kqRootHtml() {
+      const K = window.__kq, L = kqBuildList(), now = tqNow(), d = new Date();
+      const WD = ['Chủ nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+      const dateTxt = WD[d.getDay()] + ', ' + String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear();
+      const cnt = { all: L.todo.length, cur: 0, miss: 0, viol: 0, few: 0, den: 0, diff: 0 };
+      L.todo.forEach(x => { if (x.nc.notChecked) cnt.cur++; if (x.missed.length) cnt.miss++; if (x.nc.prevViol || x.nc.curViol) cnt.viol++; if (x.nc.few) cnt.few++; if (x.plan.hasFail) cnt.den++; if (x.hasDiff) cnt.diff++; });
+      const F = K.f;
+      const vis = L.todo.filter(x => F === 'all' || (F === 'cur' && x.nc.notChecked) || (F === 'miss' && x.missed.length) || (F === 'viol' && (x.nc.prevViol || x.nc.curViol)) || (F === 'few' && x.nc.few) || (F === 'den' && x.plan.hasFail) || (F === 'diff' && x.hasDiff));
+      if (!vis.some(x => x.u.id === K.sel)) K.sel = vis.length ? vis[0].u.id : (L.done[0] ? L.done[0].u.id : '');
+      const chip = (k, label, n, c) => { const on = F === k; return `<button type="button" class="kq-chip-f${on ? ' on' : ''}" style="--c:${c}" aria-pressed="${on}" onclick="kqSetF('${k}')">${label}: ${n}</button>`; };
+      const chips = chip('all', 'Tất cả', cnt.all, '#92400e') + chip('cur', 'Chưa KT Quý ' + now.q, cnt.cur, '#b45309') + chip('miss', 'Chưa KT quý trước', cnt.miss, '#c2410c') + chip('viol', 'Đã vi phạm', cnt.viol, '#be123c') + chip('den', 'Có MG cần KT lại', cnt.den, '#e11d48') + chip('few', '1–2 bó ≥ ' + TQ_NEAR_PCT + '%', cnt.few, '#b45309') + chip('diff', 'Chênh lệch', cnt.diff, '#1d4ed8');
+      const listHtml = vis.length
+        ? vis.map((x, i) => kqItemHtml(x, i, K.sel, false)).join('')
+        : `<div class="kq-empty">${L.todo.length ? 'Không có đơn vị nào khớp bộ lọc này.' : `Không còn TCTD nào cần ưu tiên trong Quý ${now.q}.`}</div>`;
+      const doneHtml = L.done.length ? `<div class="kq-done">
+          <button type="button" class="kq-done-h" aria-expanded="${!!K.doneOpen}" onclick="kqToggleDone()">Đã kiểm tra hôm nay (${L.done.length}) <span>${K.doneOpen ? '▲' : '▼'}</span></button>
+          ${K.doneOpen ? L.done.map((x, i) => kqItemHtml(x, i, K.sel, true)).join('') : ''}</div>` : '';
+      const stat = (n, label, c) => `<div class="kq-stat"><b style="color:${c}">${n}</b><span>${label}</span></div>`;
+      return `<section class="kq-hero">
+          <div><div class="kq-hero-date">${dateTxt}</div><h2>Ưu tiên kiểm tra hôm nay</h2>
+          <div class="kq-hero-sub">Quý ${now.q} (${tqRoundMonths(now.q)}) · còn ${tqDaysLeft(now)} ngày · bấm vào TCTD để xem gợi ý mệnh giá</div></div>
+          <div class="kq-stats">${stat(L.todo.length, 'Cần ưu tiên', '#b45309')}${stat(L.done.length, 'Đã KT hôm nay', '#059669')}${stat(cnt.den, 'Có MG KT lại', '#e11d48')}</div>
+        </section>
+        <div class="kq-chips" role="group" aria-label="Lọc danh sách">${chips}</div>
+        <div class="kq-wrap">
+          <div class="kq-left" id="kq-left">${listHtml}${doneHtml}</div>
+          <div class="kq-detail-col"><div id="kq-detail">${K.sel ? kqDetailHtml(K.sel) : '<div class="kq-empty">Chọn một TCTD để xem gợi ý mệnh giá.</div>'}</div></div>
+        </div>`;
+    }
+    function kqRefresh() { const r = document.getElementById('kq-root'); if (r) r.innerHTML = kqRootHtml(); }
+    window.kqSetF = function (k) { window.__kq.f = (window.__kq.f === k && k !== 'all') ? 'all' : k; kqRefresh(); };
+    window.kqToggleDone = function () { window.__kq.doneOpen = !window.__kq.doneOpen; kqRefresh(); };
+    window.kqPick = function (id) {
+      try { haptic(); } catch (e) { }
+      if (kqIsMobile()) { kqOpenSheet(id); return; }
+      window.__kq.sel = id;
+      document.querySelectorAll('#kq-root .kq-item').forEach(b => { const on = b.dataset.id === id; b.classList.toggle('on', on); if (on) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current'); });
+      const d = document.getElementById('kq-detail'); if (d) d.innerHTML = kqDetailHtml(id);
+    };
+    // Bảng chi tiết dạng bottom-sheet (điện thoại) / hộp thoại giữa màn hình (máy tính) — dùng được từ cả Tổng quan
+    function kqOpenSheet(id) {
+      kqCloseSheet();
+      const s = document.createElement('div');
+      s.id = 'kq-sheet'; s.className = 'kq-sheet'; s.setAttribute('role', 'dialog'); s.setAttribute('aria-modal', 'true');
+      s.onclick = e => { if (e.target === s) kqCloseSheet(); };
+      s.innerHTML = `<div class="kq-sheet-panel"><div class="kq-grab"></div><button type="button" class="kq-x" aria-label="Đóng" onclick="kqCloseSheet()">×</button>${kqDetailHtml(id)}</div>`;
+      document.body.appendChild(s);
+      document.body.style.overflow = 'hidden';
+    }
+    window.kqCloseSheet = function () { const s = document.getElementById('kq-sheet'); if (s) s.remove(); document.body.style.overflow = ''; };
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') window.kqCloseSheet(); });
+    window.kqOpenUnit = function (id) {
+      if (tab === 'kehoach' && !kqIsMobile()) { window.kqPick(id); return; }
+      kqOpenSheet(id);
+    };
+    window.kqGo = function (id) {
+      const it = kqItem(id); kqCloseSheet();
+      window.goToLogAndOpenForm(id, it && it.plan.rec[0], it && it.plan.rec[1]);
+    };
+    window.kqLog = function (id) { kqCloseSheet(); filterUnit = id; switchTab('nhatky'); };
 
-      return `${filterBar()}
-  ${priorityHtml}
-  ${secHead('Lịch kiểm tra TCTD', 'Theo dõi định mức 3 đơn vị/tuần', noUnits ? null : "openForm('plan')", 'Thêm lịch KT')}
-  ${list.length === 0
-          ? emptyBox('dash', 'Chưa có lịch kiểm tra', 'Hãy lên lịch kiểm tra các TCTD.')
-          : (function() {
-              const mappedData = list.map((r, idx) => {
-                const uName = unitName(r.unitId) || 'Đơn vị chưa rõ';
-                const pStatus = pill(r.status === 'da' ? 'p-green' : 'p-amber', r.status === 'da' ? 'Đã kiểm tra' : 'Chưa kiểm tra');
-                const actsDesk = rowActs(`openForm('plan','${r.id}')`, `removeRec('plans','${r.id}')`, `window.goToLogAndOpenForm('${r.unitId}')`, 'plus', 'Kiểm tra ngay');
-                
-                const deskRow = [
-                  `<div style="text-align:center">${idx + 1}</div>`, 
-                  esc(r.week), 
-                  unitCell(r.unitId),
-                  pStatus,
-                  esc(r.note) || '—',
-                  actsDesk
-                ];
-                
-                const mobCard = `
-                  <div class="nk-card">
-                     <div class="nk-card-summary nk-summary-top" onclick="this.parentElement.classList.toggle('expanded'); haptic();">
-                        <div class="nk-stt">${idx + 1}</div>
-                        <div style="flex:1; min-width:0;">
-                           <div style="font-weight:700; color:#111827; font-size:14px; margin-bottom: 2px; display:flex; align-items:flex-start; gap:6px;">
-                             <span style="color:#7c3aed; display:flex; align-items:center; margin-top:2px; flex-shrink:0;">${ICONS.bank}</span>
-                             <span class="nk-title-clamp" title="${esc(uName)}">${esc(uName)}</span>
-                           </div>
-                           <div style="font-size:12px; color:#6b7280; font-weight:600; margin-bottom:4px;">Tuần: ${esc(r.week)}</div>
-                           <div>${pStatus}</div>
-                        </div>
-                        <div style="display:flex; align-items:center; gap:6px; margin-top:2px;">
-                           <svg class="nk-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                        </div>
-                     </div>
-                     <div class="nk-card-details">
-                        <div class="nk-detail-row" style="margin-bottom:12px; padding-top:4px;">
-                           <span style="font-size:12px; color:#6b7280; font-weight:600;">Ghi chú:</span>
-                           <span style="font-size:13px; color:var(--ink); line-height:1.4;">${esc(r.note) || '—'}</span>
-                        </div>
-                        <div style="display:flex; flex-direction:column; gap:8px; margin-top:16px;">
-                           <button class="nk-action-btn edit" style="width:100%; justify-content:center; background:var(--green); color:#fff; border-color:var(--green);" onclick="haptic(); window.goToLogAndOpenForm('${r.unitId}')">
-                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg> Kiểm tra ngay
-                           </button>
-                           <div style="display:flex; gap:8px;">
-                             <button class="nk-action-btn edit" style="flex:1; justify-content:center;" onclick="haptic(); openForm('plan','${r.id}')">
-                               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg> Sửa
-                             </button>
-                             <button class="nk-action-btn del" style="flex:1; justify-content:center;" onclick="haptic(); removeRec('plans','${r.id}')">
-                               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2-2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg> Xóa
-                             </button>
-                           </div>
-                        </div>
-                     </div>
-                  </div>
-                `;
-                return { deskRow, mobCard };
-              });
-              
-              return `
-                <div class="desktop-only">
-                  <div class="tbl-scroll">
-                    ${tbl(['STT', 'Tuần', 'Đơn vị', 'Trạng thái', 'Ghi chú', ''], mappedData.map(d => d.deskRow))}
-                  </div>
-                </div>
-                <div class="mobile-only">
-                  <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
-                    <button onclick="document.getElementById('pg-kehoach').querySelectorAll('.nk-card').forEach(c=>c.classList.toggle('expanded')); haptic();" style="background:#f3f4f6; border:none; padding:8px 16px; border-radius:12px; font-size:12px; font-weight:600; color:#4b5563; cursor:pointer; touch-action: manipulation;">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; margin-right:4px;"><polyline points="4 14 12 22 20 14"></polyline><polyline points="4 2 12 10 20 2"></polyline></svg> Đóng/Mở tất cả
-                    </button>
-                  </div>
-                  <div class="nk-cards-list">
-                    ${mappedData.map(d => d.mobCard).join('')}
-                  </div>
-                </div>
-              `;
-          })()}`;
+    function renderKehoach() {
+      return `<div id="kq-root">${kqRootHtml()}</div>`;
     }
 
     /* ================= 4. NHẬT KÝ KIỂM TRA BÓ TIỀN ================= */
@@ -5791,7 +5959,7 @@
         // để số liệu hiển thị đúng ngay lập tức.
         const tabToColMap = {
           tongquan: ['units', 'logs', 'recoveries'], donvi: ['units', 'seals', 'signatures'],
-          kehoach: ['plans'], nhatky: ['logs'], sanluong: ['inspections', 'recoveries'], thuvien: ['docs']
+          kehoach: ['units', 'logs'], nhatky: ['logs'], sanluong: ['inspections', 'recoveries'], thuvien: ['docs']
         };
         const colsToRefresh = tabToColMap[typeof tab !== 'undefined' ? tab : 'tongquan'] || [];
         for (const col of colsToRefresh) {
@@ -6603,7 +6771,7 @@
       const tabToCol = {
         'tongquan': ['units', 'logs', 'recoveries'],
         'donvi': ['units', 'logs', 'seals', 'signatures'], 
-        'kehoach': ['units', 'plans', 'logs'], 
+        'kehoach': ['units', 'logs'], 
         'nhatky': ['units', 'logs'],
         'sanluong': ['units', 'logs', 'inspections', 'recoveries'], 
         'thuvien': ['docs']
@@ -7555,7 +7723,7 @@
     </div>${F.foot("savePlan()")}`);
       }
       if (type === 'log') {
-        const r = id ? data.logs.find(x => x.id === id) : { date: today(), unitId: extra || '', amount1: '', invalidAmount1: '', denom1: '500.000d', amount2: '', invalidAmount2: '', denom2: 'none', diff: 'khop', diff2: 'khop' };
+        const r = id ? data.logs.find(x => x.id === id) : { date: today(), unitId: extra || '', amount1: '', invalidAmount1: '', denom1: (window.__kqPrefill && window.__kqPrefill.d1) || '500.000d', amount2: '', invalidAmount2: '', denom2: (window.__kqPrefill && window.__kqPrefill.d2) || 'none', diff: 'khop', diff2: 'khop' };
         const denomOpts = [['500.000d', '500.000đ'], ['200.000d', '200.000đ'], ['100.000d', '100.000đ'], ['50.000d', '50.000đ'], ['20.000d', '20.000đ'], ['10.000d', '10.000đ'], ['5.000d', '5.000đ'], ['2.000d', '2.000đ'], ['1.000d', '1.000đ']];
         const denom2Opts = [['none', 'Không kiểm tra'], ...denomOpts];
         const diffOpts = [['khop', 'Khớp đúng'], ['thua', 'Thừa tiền'], ['thieu', 'Thiếu tiền'], ['lan', 'Lẫn tiền đủ TCLT']];
