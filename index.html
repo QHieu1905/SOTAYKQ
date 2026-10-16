@@ -1878,6 +1878,64 @@
       }
       @media (prefers-reduced-motion: reduce) { .kq-sheet, .kq-sheet-panel, .kq-item { animation: none; transition: none; } }
 
+      /* ===== Nhập nhanh ngay trong gợi ý mệnh giá ===== */
+      .kq-quick-box { background: linear-gradient(145deg, #fffdf8, #fffbeb); border: 1.5px solid #fcd34d; border-radius: 16px; padding: 16px; margin: 14px 0 16px; box-shadow: 0 4px 16px rgba(217, 119, 6, 0.08); }
+      .kq-qbox-head { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px dashed #fde68a; }
+      .kq-qbox-title { display: flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 800; color: #92400e; text-transform: uppercase; letter-spacing: 0.3px; }
+      .kq-qbox-date-wrap { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: #78350f; }
+      .kq-qdate-inp { padding: 4px 8px; border-radius: 8px; border: 1px solid #fcd34d; font-family: inherit; font-size: 12.5px; font-weight: 600; color: #1f2937; background: #fff; outline: none; }
+      .kq-qdate-inp:focus { border-color: #d97706; box-shadow: 0 0 0 2px rgba(217, 119, 6, 0.2); }
+      .kq-qcards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-bottom: 14px; }
+      .kq-qcard { background: #fff; border: 1.5px solid #f1f5f9; border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 9px; box-shadow: 0 2px 6px rgba(0,0,0,0.03); transition: border-color 0.2s, box-shadow 0.2s; }
+      .kq-qcard:focus-within { border-color: #f59e0b; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.12); }
+      .kq-qcard-top { display: flex; justify-content: space-between; align-items: center; }
+      .kq-qcard-den { display: flex; align-items: center; gap: 8px; }
+      .kq-qfields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+      .kq-qfield { display: flex; flex-direction: column; gap: 4px; }
+      .kq-qfield label { font-size: 11px; font-weight: 700; color: #4b5563; text-transform: uppercase; letter-spacing: 0.2px; }
+      .kq-qinp { width: 100%; box-sizing: border-box; padding: 8px 10px; border-radius: 8px; border: 1.5px solid #e2e8f0; font-family: inherit; font-size: 15px; font-weight: 700; color: #111827; font-variant-numeric: tabular-nums; outline: none; background: #f8fafc; transition: all 0.2s ease; }
+      .kq-qinp:focus { background: #fff; border-color: #f59e0b; box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15); }
+      .kq-qinp.error { border-color: #ef4444 !important; background: #fff5f5 !important; color: #dc2626 !important; }
+      .kq-qrate-pill { font-size: 12.5px; font-weight: 800; padding: 6px 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; transition: all 0.25s ease; }
+      .kq-qrate-pill.pass { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+      .kq-qrate-pill.fail { background: #fef2f2 !important; color: #dc2626 !important; border: 1.5px solid #f87171 !important; animation: kqShake 0.3s ease-in-out; }
+      .kq-qrate-pill.error { background: #fef2f2; color: #b91c1c; border: 1.5px solid #ef4444; }
+      .kq-qrate-pill .rate-badge { font-size: 10.5px; padding: 2px 8px; border-radius: 999px; }
+      .kq-qrate-pill.pass .rate-badge { background: #dcfce7; color: #15803d; }
+      .kq-qrate-pill.fail .rate-badge { background: #fee2e2; color: #b91c1c; }
+      @keyframes kqShake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+      .kq-qdiff-sel { width: 100%; padding: 6px 8px; border-radius: 8px; border: 1px solid #e2e8f0; font-family: inherit; font-size: 12px; font-weight: 600; color: #374151; background: #fff; outline: none; }
+      .kq-qactions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+      .kq-qbtn-next { flex: 2 1 200px; cursor: pointer; min-height: 44px; padding: 8px 18px; border-radius: 12px; border: none; background: linear-gradient(135deg, #d97706, #b45309); color: #fff; font-family: inherit; font-size: 14px; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 14px rgba(217, 119, 6, 0.3); transition: transform 0.15s, box-shadow 0.15s, background 0.15s; }
+      .kq-qbtn-next:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(217, 119, 6, 0.4); background: linear-gradient(135deg, #f59e0b, #d97706); }
+      .kq-qbtn-next:active { transform: translateY(1px); }
+      .kq-qbtn-save { flex: 1 1 120px; cursor: pointer; min-height: 44px; padding: 8px 14px; border-radius: 12px; border: 1.5px solid #fcd34d; background: #fff; color: #92400e; font-family: inherit; font-size: 13.5px; font-weight: 800; transition: background 0.15s; }
+      .kq-qbtn-save:hover { background: #fef3c7; }
+      .kq-qbtn-more { cursor: pointer; min-height: 44px; padding: 8px 12px; border-radius: 12px; border: 1px solid #e2e8f0; background: #f8fafc; color: #475569; font-family: inherit; font-size: 12.5px; font-weight: 700; transition: background 0.15s, color 0.15s; }
+      .kq-qbtn-more:hover { background: #f1f5f9; color: #1e293b; }
+
+      /* ===== Hoàn tác 8 giây thay cho confirm ===== */
+      .kq-undo-bar { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); z-index: 35000; background: #1e293b; color: #fff; border-radius: 14px; box-shadow: 0 12px 32px rgba(15, 23, 42, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.1); overflow: hidden; opacity: 0; pointer-events: none; transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease; max-width: 92vw; width: auto; min-width: 320px; }
+      .kq-undo-bar.visible { transform: translateX(-50%) translateY(0); opacity: 1; pointer-events: auto; }
+      .kq-undo-content { display: flex; align-items: center; gap: 12px; padding: 10px 14px; }
+      .kq-undo-icon { color: #f59e0b; display: flex; align-items: center; flex-shrink: 0; }
+      .kq-undo-msg { font-size: 13.5px; font-weight: 600; color: #f1f5f9; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 240px; }
+      .kq-undo-btn { background: #f59e0b; color: #78350f; border: none; border-radius: 8px; padding: 6px 14px; font-family: inherit; font-weight: 800; font-size: 13px; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; transition: background 0.15s, transform 0.1s; }
+      .kq-undo-btn:hover { background: #fbbf24; }
+      .kq-undo-btn:active { transform: scale(0.97); }
+      .kq-undo-countdown { font-size: 11.5px; opacity: 0.85; }
+      .kq-undo-close { background: transparent; border: none; color: #94a3b8; font-size: 20px; line-height: 1; cursor: pointer; padding: 0 4px; transition: color 0.15s; }
+      .kq-undo-close:hover { color: #fff; }
+      .kq-undo-progress { height: 3px; background: rgba(255, 255, 255, 0.15); width: 100%; }
+      .kq-undo-bar-fill { height: 100%; background: #f59e0b; width: 100%; }
+      @media (max-width: 860px) { .kq-undo-bar { bottom: 84px; min-width: 290px; } }
+
+      /* ===== Trạng thái đồng bộ (Đã lưu / Chờ đồng bộ) ===== */
+      .kq-sync-tag { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px; white-space: nowrap; vertical-align: middle; }
+      .kq-sync-tag.synced { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+      .kq-sync-tag.pending { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; cursor: pointer; animation: kqPulse 2s infinite ease-in-out; }
+      @keyframes kqPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.65; } }
+
       @media (max-width: 860px) {
         #sync-dot { top: auto; bottom: 80px; right: 16px; }
         .desktop-only { display: none !important; }
@@ -3203,7 +3261,7 @@
     /* ================= TIỆN ÍCH ================= */
     const removeAccents = str => str ? str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/Đ/g, "D") : '';
     const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
-    const today = () => new Date().toISOString().slice(0, 10);
+    const today = () => { const d = new Date(), p = n => String(n).padStart(2, '0'); return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()); };
     const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const fmtDate = d => { if (!d) return '—'; const [y, m, dd] = d.split('-'); return dd + '/' + m + '/' + y; };
     const fmtVND = n => (Number(n) || 0).toLocaleString('vi-VN') + ' đ';
@@ -4860,33 +4918,331 @@
         <div class="kq-den-note">${esc(kqNoteFor(s))}</div>
       </div>`;
     }
+    window.kqQuickCalc = function (n) {
+      const amtInp = document.getElementById('kq-qamt-' + n);
+      const invInp = document.getElementById('kq-qinv-' + n);
+      const rateEl = document.getElementById('kq-qrate-' + n);
+      const warnEl = document.getElementById('kq-qwarn');
+      if (!amtInp || !invInp || !rateEl) return;
+
+      const amt = parseFloat(amtInp.value) || 0;
+      const inv = parseFloat(invInp.value) || 0;
+
+      // Chống nhập sai 1: inv > amt
+      if (amt > 0 && inv > amt) {
+        invInp.classList.add('error');
+        rateEl.className = 'kq-qrate-pill fail error';
+        rateEl.innerHTML = `<span>Lỗi: ${inv} > ${amt} tờ</span><span class="rate-badge">VƯỢT SỐ TỜ KT</span>`;
+        if (warnEl) {
+          warnEl.style.display = 'block';
+          warnEl.innerHTML = `⚠️ Cảnh báo: Số tờ KĐTCLT (${inv}) không thể lớn hơn số tờ kiểm tra (${amt})!`;
+        }
+        return;
+      }
+
+      invInp.classList.remove('error');
+      if (warnEl) warnEl.style.display = 'none';
+
+      if (amt <= 0) {
+        rateEl.className = 'kq-qrate-pill';
+        rateEl.innerHTML = `<span>Tỷ lệ: ---</span>`;
+        return;
+      }
+
+      const pct = (inv / amt) * 100;
+      if (pct > 5.0) {
+        rateEl.className = 'kq-qrate-pill fail';
+        rateEl.innerHTML = `<span>Tỷ lệ: <b>${pct.toFixed(2)}%</b></span><span class="rate-badge">KHÔNG ĐẠT (>5%)</span>`;
+      } else {
+        rateEl.className = 'kq-qrate-pill pass';
+        rateEl.innerHTML = `<span>Tỷ lệ: <b>${pct.toFixed(2)}%</b></span><span class="rate-badge">ĐẠT (≤5%)</span>`;
+      }
+    };
+
+    window.kqQuickToggleSkip2 = function (chk) {
+      const card2 = document.getElementById('kq-qcard-2');
+      if (!card2) return;
+      const inps = card2.querySelectorAll('input:not(#kq-qskip-2), select');
+      inps.forEach(el => { el.disabled = chk.checked; });
+      card2.style.opacity = chk.checked ? '0.45' : '1';
+    };
+
+    window.kqNextTodoUnit = function (currentId) {
+      const L = kqBuildList();
+      if (L.todo.length > 0) {
+        const nextItem = L.todo.find(x => x.u.id !== currentId) || L.todo[0];
+        if (nextItem) {
+          window.__kq.sel = nextItem.u.id;
+          kqRefresh();
+          if (kqIsMobile()) kqOpenSheet(nextItem.u.id);
+        }
+      } else {
+        if (typeof showToast === 'function') showToast('Tất cả TCTD ưu tiên đã hoàn thành hôm nay!', 'green');
+      }
+    };
+
+    window.kqSaveQuickLog = function (unitId, goToNext) {
+      if (!window.requireEdit()) return;
+      const it = kqItem(unitId);
+      if (!it) return alert('Không tìm thấy đơn vị.');
+
+      const dateInp = document.getElementById('kq-qdate');
+      const dateVal = dateInp ? dateInp.value : kqToday();
+      if (!dateVal) return alert('Vui lòng chọn ngày kiểm tra');
+
+      // Chống nhập sai 2: Ngày ở tương lai
+      if (dateVal > kqToday()) {
+        if (typeof showToast === 'function') showToast('Lỗi: Ngày kiểm tra không thể ở tương lai (' + dateVal + ')!', 'amber');
+        else alert('Lỗi: Ngày kiểm tra không thể ở tương lai (' + dateVal + ')!');
+        return;
+      }
+
+      const p = it.plan;
+      const d1 = p.rec[0];
+      const d2 = p.rec[1];
+
+      const amt1Inp = document.getElementById('kq-qamt-1');
+      const inv1Inp = document.getElementById('kq-qinv-1');
+      const diff1Sel = document.getElementById('kq-qdiff-1');
+
+      const amt1 = Number(amt1Inp ? amt1Inp.value : 1000) || 0;
+      const inv1 = Number(inv1Inp ? inv1Inp.value : 0) || 0;
+      const diff1 = diff1Sel ? diff1Sel.value : 'khop';
+
+      if (amt1 <= 0) {
+        if (typeof showToast === 'function') showToast('Vui lòng nhập số tờ kiểm tra MG 1', 'amber');
+        else alert('Vui lòng nhập số tờ kiểm tra MG 1');
+        return;
+      }
+
+      // Chống nhập sai 1: inv > amt
+      if (inv1 > amt1) {
+        if (typeof showToast === 'function') showToast(`Lỗi: Số tờ KĐTCLT (${inv1}) lớn hơn số tờ kiểm tra (${amt1}) ở MG 1!`, 'amber');
+        else alert(`Lỗi: Số tờ KĐTCLT (${inv1}) lớn hơn số tờ kiểm tra (${amt1}) ở MG 1!`);
+        return;
+      }
+
+      let hasD2 = false;
+      let amt2 = 0, inv2 = 0, diff2 = 'khop';
+      const skip2 = document.getElementById('kq-qskip-2') && document.getElementById('kq-qskip-2').checked;
+
+      if (d2 && !skip2) {
+        const amt2Inp = document.getElementById('kq-qamt-2');
+        const inv2Inp = document.getElementById('kq-qinv-2');
+        const diff2Sel = document.getElementById('kq-qdiff-2');
+
+        amt2 = Number(amt2Inp ? amt2Inp.value : 1000) || 0;
+        inv2 = Number(inv2Inp ? inv2Inp.value : 0) || 0;
+        diff2 = diff2Sel ? diff2Sel.value : 'khop';
+
+        if (amt2 > 0 || inv2 > 0) {
+          if (amt2 <= 0) {
+            if (typeof showToast === 'function') showToast('Vui lòng nhập số tờ kiểm tra MG 2', 'amber');
+            else alert('Vui lòng nhập số tờ kiểm tra MG 2');
+            return;
+          }
+          if (inv2 > amt2) {
+            if (typeof showToast === 'function') showToast(`Lỗi: Số tờ KĐTCLT (${inv2}) lớn hơn số tờ kiểm tra (${amt2}) ở MG 2!`, 'amber');
+            else alert(`Lỗi: Số tờ KĐTCLT (${inv2}) lớn hơn số tờ kiểm tra (${amt2}) ở MG 2!`);
+            return;
+          }
+          hasD2 = true;
+        }
+      }
+
+      // Chống nhập sai 3: Trùng TCTD và ngày đã có
+      const dup = (data.logs || []).find(l => l.unitId === unitId && l.date === dateVal);
+      if (dup) {
+        if (!confirm(`Cảnh báo trùng lặp: Đã có bản ghi kiểm tra của "${it.u.name}" vào ngày ${fmtDate(dateVal)}.\n\nBạn có chắc chắn muốn lưu thêm bản ghi này không?`)) {
+          return;
+        }
+      }
+
+      // Tạo bản ghi
+      const rec = {
+        id: uid(),
+        date: dateVal,
+        unitId: unitId,
+        denom1: kqDenKey(d1),
+        amount1: String(amt1),
+        invalidAmount1: String(inv1),
+        diff: diff1 || 'khop',
+        denom2: hasD2 ? kqDenKey(d2) : 'none',
+        amount2: hasD2 ? String(amt2) : '',
+        invalidAmount2: hasD2 ? String(inv2) : '',
+        diff2: hasD2 ? diff2 : 'khop',
+        files: []
+      };
+
+      upsert('logs', rec);
+
+      if (goToNext) {
+        // Tìm TCTD kế tiếp trong danh sách todo
+        const curL = kqBuildList();
+        if (curL.todo.length > 0) {
+          const nextItem = curL.todo.find(x => x.u.id !== unitId) || curL.todo[0];
+          if (nextItem) {
+            window.__kq.sel = nextItem.u.id;
+            kqRefresh();
+            if (kqIsMobile()) kqOpenSheet(nextItem.u.id);
+            if (typeof showToast === 'function') showToast(`✓ Đã lưu! Đã chuyển sang ${nextItem.u.name}`, 'green');
+            setTimeout(() => {
+              const nextInp = document.getElementById('kq-qinv-1');
+              if (nextInp) nextInp.focus();
+            }, 120);
+            return;
+          }
+        }
+        kqRefresh();
+        if (kqIsMobile()) kqCloseSheet();
+        if (typeof showToast === 'function') showToast('🎉 Tuyệt vời! Bạn đã hoàn thành toàn bộ danh sách ưu tiên hôm nay!', 'green');
+      } else {
+        kqRefresh();
+        if (kqIsMobile()) kqOpenSheet(unitId);
+        if (typeof showToast === 'function') showToast('✓ Đã lưu kết quả kiểm tra thành công!', 'green');
+      }
+    };
+
     function kqDetailHtml(unitId) {
       const it = kqItem(unitId);
       if (!it) return `<div class="kq-empty">Không tìm thấy đơn vị.</div>`;
       const p = it.plan, now = tqNow();
-      const recTiles = p.rec.length ? p.rec.map((v, i) => {
-        const s = p.by[v];
-        const c = s.state === 'fail' ? ['#fff1f2', '#fecdd3', '#be123c', 'Kiểm tra lại'] : s.state === 'never' ? ['#fffbeb', '#fde68a', '#b45309', 'Chưa kiểm tra'] : ['#eff6ff', '#bfdbfe', '#1d4ed8', 'Luân phiên'];
-        return `<div class="kq-rec-tile" style="background:${c[0]}; border-color:${c[1]}"><span class="kq-rec-n">${i + 1}</span><div style="min-width:0"><div class="kq-rec-v" style="color:${c[2]}">${kqDenFull(v)}</div><div class="kq-rec-a" style="color:${c[2]}">${c[3]}</div><div class="kq-rec-t">${esc(kqNoteFor(s))}</div></div></div>`;
-      }).join('') : `<div class="kq-rec-tile" style="background:#f0fdf4; border-color:#bbf7d0"><span class="kq-rec-n" style="background:#10b981">✓</span><div><div class="kq-rec-v" style="color:#047857">Đã kiểm tra đủ hôm nay</div><div class="kq-rec-t">Không còn mệnh giá nào cần gợi ý thêm.</div></div></div>`;
       const reasons = it.exempt ? tqPill('#f3f4f6', '#4b5563', '#e5e7eb', 'Thuộc nhóm miễn trừ kế hoạch thường quy') : kqReasons(it);
       const sid = esc(it.u.id);
+
+      let quickFormHtml = '';
+      if (p.rec.length > 0) {
+        const d1 = p.rec[0];
+        const d2 = p.rec[1];
+        const s1 = p.by[d1];
+        const s2 = d2 ? p.by[d2] : null;
+
+        const card1 = `
+          <div class="kq-qcard" id="kq-qcard-1">
+            <div class="kq-qcard-top">
+              <div class="kq-qcard-den">
+                <span class="kq-rn" style="background:#b45309;">1</span>
+                <span class="kq-den-chip">${kqDenFull(d1)}</span>
+                <span style="font-size:12px; font-weight:700; color:#b45309;">${s1.state === 'fail' ? 'Kiểm tra lại' : (s1.state === 'never' ? 'Chưa kiểm tra' : 'Luân phiên')}</span>
+              </div>
+            </div>
+            <div class="kq-qfields">
+              <div class="kq-qfield">
+                <label for="kq-qamt-1">Số tờ kiểm tra</label>
+                <input type="number" id="kq-qamt-1" value="1000" inputmode="numeric" pattern="[0-9]*" class="kq-qinp" oninput="kqQuickCalc(1)">
+              </div>
+              <div class="kq-qfield">
+                <label for="kq-qinv-1">Số tờ KĐTCLT</label>
+                <input type="number" id="kq-qinv-1" value="" inputmode="numeric" pattern="[0-9]*" placeholder="0" class="kq-qinp" oninput="kqQuickCalc(1)">
+              </div>
+            </div>
+            <div id="kq-qrate-1" class="kq-qrate-pill pass">
+              <span>Tỷ lệ: <b>0.00%</b></span><span class="rate-badge">ĐẠT (≤5%)</span>
+            </div>
+            <div class="kq-qfield">
+              <label for="kq-qdiff-1">Chênh lệch</label>
+              <select id="kq-qdiff-1" class="kq-qdiff-sel">
+                <option value="khop">Khớp đúng</option>
+                <option value="thua">Thừa tiền</option>
+                <option value="thieu">Thiếu tiền</option>
+                <option value="lan">Lẫn tiền đủ TCLT</option>
+              </select>
+            </div>
+          </div>
+        `;
+
+        const card2 = d2 ? `
+          <div class="kq-qcard" id="kq-qcard-2">
+            <div class="kq-qcard-top">
+              <div class="kq-qcard-den">
+                <span class="kq-rn" style="background:#78350f;">2</span>
+                <span class="kq-den-chip" style="background:#374151;">${kqDenFull(d2)}</span>
+                <span style="font-size:12px; font-weight:700; color:#4b5563;">${s2.state === 'fail' ? 'Kiểm tra lại' : (s2.state === 'never' ? 'Chưa kiểm tra' : 'Luân phiên')}</span>
+              </div>
+              <label style="font-size:11.5px; font-weight:700; color:#6b7280; display:inline-flex; align-items:center; gap:4px; cursor:pointer;">
+                <input type="checkbox" id="kq-qskip-2" onchange="kqQuickToggleSkip2(this)"> Bỏ qua
+              </label>
+            </div>
+            <div class="kq-qfields">
+              <div class="kq-qfield">
+                <label for="kq-qamt-2">Số tờ kiểm tra</label>
+                <input type="number" id="kq-qamt-2" value="1000" inputmode="numeric" pattern="[0-9]*" class="kq-qinp" oninput="kqQuickCalc(2)">
+              </div>
+              <div class="kq-qfield">
+                <label for="kq-qinv-2">Số tờ KĐTCLT</label>
+                <input type="number" id="kq-qinv-2" value="" inputmode="numeric" pattern="[0-9]*" placeholder="0" class="kq-qinp" oninput="kqQuickCalc(2)">
+              </div>
+            </div>
+            <div id="kq-qrate-2" class="kq-qrate-pill pass">
+              <span>Tỷ lệ: <b>0.00%</b></span><span class="rate-badge">ĐẠT (≤5%)</span>
+            </div>
+            <div class="kq-qfield">
+              <label for="kq-qdiff-2">Chênh lệch</label>
+              <select id="kq-qdiff-2" class="kq-qdiff-sel">
+                <option value="khop">Khớp đúng</option>
+                <option value="thua">Thừa tiền</option>
+                <option value="thieu">Thiếu tiền</option>
+                <option value="lan">Lẫn tiền đủ TCLT</option>
+              </select>
+            </div>
+          </div>
+        ` : '';
+
+        quickFormHtml = `
+          <div class="kq-quick-box">
+            <div class="kq-qbox-head">
+              <div class="kq-qbox-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                <span>Nhập nhanh kết quả kiểm tra</span>
+              </div>
+              <div class="kq-qbox-date-wrap">
+                <span>Ngày kiểm tra:</span>
+                <input type="date" id="kq-qdate" value="${kqToday()}" max="${kqToday()}" class="kq-qdate-inp">
+              </div>
+            </div>
+            <div id="kq-qwarn" style="display:none; padding:8px 12px; margin-bottom:12px; background:#fef2f2; border:1px solid #fecdd3; border-radius:10px; color:#b91c1c; font-size:12.5px; font-weight:700;"></div>
+            <div class="kq-qcards">${card1}${card2}</div>
+            <div class="kq-qactions">
+              <button type="button" class="kq-qbtn-next" onclick="kqSaveQuickLog('${sid}', true)">
+                <span>💾 Lưu &amp; sang TCTD kế tiếp</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              </button>
+              <button type="button" class="kq-qbtn-save" onclick="kqSaveQuickLog('${sid}', false)">Lưu bản ghi này</button>
+              <button type="button" class="kq-qbtn-more" onclick="kqGo('${sid}')" title="Mở form chi tiết có đính kèm file">Mở form đầy đủ...</button>
+              <button type="button" class="kq-qbtn-more" onclick="kqLog('${sid}')">Nhật ký</button>
+            </div>
+          </div>
+        `;
+      } else {
+        quickFormHtml = `
+          <div class="kq-rec" style="margin-top:12px; margin-bottom:14px;">
+            <div class="kq-rec-tile" style="background:#f0fdf4; border-color:#bbf7d0">
+              <span class="kq-rec-n" style="background:#10b981">✓</span>
+              <div>
+                <div class="kq-rec-v" style="color:#047857">Đã kiểm tra đủ hôm nay</div>
+                <div class="kq-rec-t">Không còn mệnh giá nào cần gợi ý thêm. Bạn có thể sang TCTD tiếp theo.</div>
+              </div>
+            </div>
+          </div>
+          <div class="kq-actions" style="margin-top:0; margin-bottom:14px;">
+            <button type="button" class="kq-btn pri" onclick="kqNextTodoUnit('${sid}')">Sang TCTD kế tiếp ›</button>
+            <button type="button" class="kq-btn" onclick="kqGo('${sid}')">Kiểm tra thêm...</button>
+            <button type="button" class="kq-btn" onclick="kqLog('${sid}')">Nhật ký</button>
+          </div>
+        `;
+      }
+
       return `<div class="kq-detail">
         <div class="kq-d-head">
           <div class="kq-d-sub">Quý ${now.q} (${tqRoundMonths(now.q)}) · còn ${tqDaysLeft(now)} ngày</div>
           <h3>${esc(it.u.name)}</h3>
           <div class="kq-pills" style="margin-top:8px">${reasons || tqPill('#f0fdf4', '#047857', '#bbf7d0', 'Không có cảnh báo trong Quý ' + now.q)}</div>
         </div>
-        <div class="kq-sec-t">Gợi ý kiểm tra lần này</div>
-        <div class="kq-rec">${recTiles}</div>
+        ${quickFormHtml}
         <div class="kq-sec-t">Tổng hợp theo mệnh giá <span class="kq-sec-s">· kết quả lần kiểm tra gần nhất, vạch xám = ngưỡng ${TQ_BAD_BUNDLE_PCT}%</span></div>
         <div class="kq-den-head" aria-hidden="true"><span>Mệnh giá</span><span>KT gần nhất</span><span>Tỷ lệ KĐTCLT</span><span>Số lần</span><span>Gợi ý</span></div>
         ${p.rows.map(kqDenRow).join('')}
         <div class="kq-foot">Không đạt (&gt; ${TQ_BAD_BUNDLE_PCT}%) → kiểm tra lại · đạt → luân phiên sang mệnh giá chưa kiểm tra hoặc kiểm tra cũ nhất. Chỉ mang tính tham khảo.</div>
-        <div class="kq-actions">
-          <button type="button" class="kq-btn pri" onclick="kqGo('${sid}')">Kiểm tra${p.rec.length ? ' · ' + p.rec.map(kqDenShort).join(' + ') : ' ngay'}</button>
-          <button type="button" class="kq-btn" onclick="kqLog('${sid}')">Nhật ký</button>
-        </div>
       </div>`;
     }
 
@@ -5048,6 +5404,7 @@
       ${list.length === 0
           ? emptyBox('box', 'Chưa có dữ liệu', 'Bấm Thêm bản ghi để bắt đầu.')
           : (function() {
+              const pendingLogsCount = (data.logs || []).filter(l => window.isPendingSync && window.isPendingSync('logs', l.id)).length;
               const mappedData = list.map((r, idx) => {
                 const amt1 = Number(r.amount1) || 1;
                 const inv1 = Number(r.invalidAmount1) || 0;
@@ -5119,9 +5476,11 @@
                   return pill('p-green', 'Đạt (≤5%)');
                 })();
 
+                const syncBadge = typeof window.getSyncBadgeHtml === 'function' ? window.getSyncBadgeHtml('logs', r.id) : '';
+
                 const deskRow = [
                   `<div style="text-align:center">${idx + 1}</div>`, fmtDate(r.date), unitCell(r.unitId), denomStr, amountStr, invStr, ratioStr,
-                  conclusionPill, fileHtml, rowActs(`openForm('log','${r.id}')`, `removeRec('logs','${r.id}')`)
+                  conclusionPill, syncBadge, fileHtml, rowActs(`openForm('log','${r.id}')`, `removeRec('logs','${r.id}')`)
                 ];
 
                 const mobCard = `
@@ -5133,9 +5492,10 @@
                           <div class="nk-title-clamp" title="${esc(unitName(r.unitId))}" style="font-weight:700; color:#111827; font-size:13px; flex:1; min-width:0;">${unitName(r.unitId)}</div>
                           <svg class="nk-chevron" style="flex-shrink:0; margin-top:2px;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
                         </div>
-                        <div class="nk-card-row2">
+                        <div class="nk-card-row2" style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
                           <span style="font-size:11px; color:#6b7280;">${fmtDate(r.date)}</span>
                           ${conclusionPill}
+                          ${syncBadge}
                         </div>
                       </div>
                     </div>
@@ -5175,7 +5535,7 @@
                 return { deskRow, mobCard };
               });
 
-              const deskTable = tbl(['STT', 'Ngày kiểm tra', 'Đơn vị', 'Mệnh giá', 'Số tờ kiểm tra', 'Số tờ KĐTCLT', 'Tỷ lệ', 'Kết luận', 'File', ''], mappedData.map(d => d.deskRow));
+              const deskTable = tbl(['STT', 'Ngày kiểm tra', 'Đơn vị', 'Mệnh giá', 'Số tờ kiểm tra', 'Số tờ KĐTCLT', 'Tỷ lệ', 'Kết luận', 'Đồng bộ', 'File', ''], mappedData.map(d => d.deskRow));
               const mobList = mappedData.map(d => d.mobCard).join('');
 
               return `
@@ -6413,11 +6773,25 @@
         badge.remove();
       }
     }
+    window.isPendingSync = function (col, id) {
+      const q = getPendingSyncQueue();
+      const key = col + '::' + id;
+      return q.some(x => (x.col + '::' + x.id) === key);
+    };
+
+    window.getSyncBadgeHtml = function (col, id) {
+      const isPending = window.isPendingSync(col, id);
+      if (isPending) {
+        return `<span class="kq-sync-tag pending" title="Bản ghi đang lưu trên thiết bị (chờ đồng bộ lên Cloud). Bấm để thử đồng bộ ngay" onclick="event.stopPropagation(); flushPendingSyncQueue(true);"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Chờ đồng bộ</span>`;
+      }
+      return `<span class="kq-sync-tag synced" title="Bản ghi đã lưu an toàn trên Cloud"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Đã lưu</span>`;
+    };
+
     async function flushPendingSyncQueue(showToastMsg) {
-      if (!fbFirestore) return;
+      if (!fbFirestore || !navigator.onLine) return;
       const q = getPendingSyncQueue();
       if (q.length === 0) return;
-      if (showToastMsg) showToast(`Đang thử đồng bộ lại ${q.length} thay đổi...`, 'green');
+      if (showToastMsg) showToast(`Đang gửi lại ${q.length} bản ghi chờ đồng bộ...`, 'green');
       for (const entry of q) {
         if (entry.col === '__usersMeta') {
           if (window.hasServerSyncedOnce) await syncUsersMetaToFirestore(entry.docData);
@@ -6425,11 +6799,21 @@
           await syncDocToFirestore(entry.col, entry.id, entry.docData, true);
         }
       }
+      updatePendingSyncBadge();
+      if (typeof render === 'function') render();
+      if (showToastMsg && getPendingSyncQueue().length === 0) {
+        showToast('✓ Đã đồng bộ tất cả dữ liệu lên Cloud thành công!', 'green');
+      }
     }
-    setInterval(() => { if (navigator.onLine) flushPendingSyncQueue(); }, 45000);
+    setInterval(() => { if (navigator.onLine) flushPendingSyncQueue(); }, 30000);
 
     async function syncDocToFirestore(col, id, docData, isRetry) {
-      if (!fbFirestore || isRemoteUpdating) return;
+      if (isRemoteUpdating) return;
+      if (!fbFirestore || !navigator.onLine) {
+        if (docData !== undefined) queuePendingSync(col, id, docData);
+        updatePendingSyncBadge();
+        return;
+      }
       const ref = fbFirestore.collection("app_data").doc("main").collection(col).doc(String(id));
       try {
         if (docData === null) {
@@ -6438,11 +6822,91 @@
           await ref.set(docData);
         }
         removeFromPendingSyncQueue(col, id);
+        updatePendingSyncBadge();
       } catch (err) {
-        console.error('Lỗi đồng bộ bản ghi lên Cloud, sẽ tự thử lại:', col, id, err);
+        console.error('Lỗi đồng bộ bản ghi lên Cloud, xếp hàng chờ gửi lại:', col, id, err);
         queuePendingSync(col, id, docData);
+        updatePendingSyncBadge();
       }
     }
+
+    /* ===== Cơ chế Hoàn tác (Undo) trong 8 giây thay cho confirm modal ===== */
+    let undoTimeoutId = null;
+    window.showUndoToast = function ({ message, onUndo, timeout = 8000 }) {
+      if (undoTimeoutId) {
+        clearTimeout(undoTimeoutId);
+        undoTimeoutId = null;
+      }
+      let bar = document.getElementById('kq-undo-bar');
+      if (!bar) {
+        bar = document.createElement('div');
+        bar.id = 'kq-undo-bar';
+        bar.className = 'kq-undo-bar';
+        document.body.appendChild(bar);
+      }
+
+      let timeLeft = Math.round(timeout / 1000);
+      bar.innerHTML = `
+        <div class="kq-undo-content">
+          <div class="kq-undo-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+          </div>
+          <div class="kq-undo-msg">${esc(message)}</div>
+          <button type="button" class="kq-undo-btn" id="kq-undo-action-btn">Hoàn tác <span class="kq-undo-countdown">(${timeLeft}s)</span></button>
+          <button type="button" class="kq-undo-close" aria-label="Đóng" onclick="kqDismissUndo()">×</button>
+        </div>
+        <div class="kq-undo-progress"><div class="kq-undo-bar-fill" id="kq-undo-fill"></div></div>
+      `;
+
+      bar.classList.add('visible');
+
+      const fill = document.getElementById('kq-undo-fill');
+      if (fill) {
+        fill.style.transition = 'none';
+        fill.style.width = '100%';
+        requestAnimationFrame(() => {
+          fill.style.transition = `width ${timeout}ms linear`;
+          fill.style.width = '0%';
+        });
+      }
+
+      const intervalId = setInterval(() => {
+        timeLeft--;
+        const cd = bar.querySelector('.kq-undo-countdown');
+        if (cd && timeLeft > 0) cd.textContent = `(${timeLeft}s)`;
+        if (timeLeft <= 0) clearInterval(intervalId);
+      }, 1000);
+
+      const btn = document.getElementById('kq-undo-action-btn');
+      if (btn) {
+        btn.onclick = () => {
+          clearInterval(intervalId);
+          if (undoTimeoutId) clearTimeout(undoTimeoutId);
+          undoTimeoutId = null;
+          bar.classList.remove('visible');
+          if (typeof onUndo === 'function') {
+            try {
+              onUndo();
+              if (typeof showToast === 'function') showToast('✓ Đã hoàn tác thành công', 'green');
+            } catch (e) {
+              console.error('Lỗi khi hoàn tác:', e);
+            }
+          }
+        };
+      }
+
+      undoTimeoutId = setTimeout(() => {
+        clearInterval(intervalId);
+        bar.classList.remove('visible');
+        undoTimeoutId = null;
+      }, timeout);
+    };
+
+    window.kqDismissUndo = function () {
+      const bar = document.getElementById('kq-undo-bar');
+      if (bar) bar.classList.remove('visible');
+      if (undoTimeoutId) { clearTimeout(undoTimeoutId); undoTimeoutId = null; }
+    };
 
     // FIX (2026-09): trước đây pushToFirestore() im lặng bỏ qua nếu lỗi mạng / bị treo tiến
     // trình (khoá màn hình di động ngay sau khi xoá tài khoản), khiến việc xoá KHÔNG BAO GIỜ
@@ -6606,7 +7070,13 @@
     
     window.addEventListener('online', () => {
         console.log('[Auto Resume] Mạng online trở lại');
+        if (typeof showToast === 'function') showToast('Đã có mạng trở lại. Đang tự động gửi lại dữ liệu chờ...', 'green');
+        if (typeof flushPendingSyncQueue === 'function') flushPendingSyncQueue(true);
         window.autoRefreshOnResume();
+    });
+    window.addEventListener('offline', () => {
+        console.log('Mất kết nối mạng (chế độ ngoại tuyến trong kho).');
+        if (typeof showToast === 'function') showToast('Mất kết nối mạng. Dữ liệu sẽ lưu trên máy và tự gửi lại khi có mạng.', 'amber');
     });
 
     function updateSyncUI(fromCache) {
@@ -7476,13 +7946,14 @@
     /* ================= THAO TÁC DỮ LIỆU ================= */
     function removeRec(key, id) {
       if (!window.requireAdmin()) return;
-      if (!confirm('Xóa bản ghi này?')) return;
-      const rec = data[key].find(x => x.id === id);
+      const recIndex = (data[key] || []).findIndex(x => x.id === id);
+      if (recIndex < 0) return;
+      const rec = JSON.parse(JSON.stringify(data[key][recIndex]));
       let itemDesc = id;
       if (rec) {
         itemDesc = rec.name || rec.title || rec.date || rec.week || rec.month || id;
         if (key === 'plans' || key === 'inspections') itemDesc = 'Tuần ' + rec.week;
-        if (key === 'logs') itemDesc = 'Ngày ' + rec.date;
+        if (key === 'logs') itemDesc = 'Ngày ' + (rec.date ? fmtDate(rec.date) : id);
         if (key === 'recoveries') itemDesc = 'Tháng ' + rec.month;
       }
       addAuditLog('Xóa', key, "Xóa dữ liệu: " + itemDesc);
@@ -7493,17 +7964,49 @@
       }
       syncDocToFirestore(key, id, null);
       saveData(); render();
+
+      if (typeof window.showUndoToast === 'function') {
+        window.showUndoToast({
+          message: `Đã xóa · ${itemDesc}`,
+          timeout: 8000,
+          onUndo: () => {
+            data[key].splice(recIndex, 0, rec);
+            addAuditLog('Hoàn tác', key, "Khôi phục dữ liệu: " + itemDesc);
+            if (['units', 'plans', 'docs', 'seals', 'signatures'].includes(key)) {
+               data.lastUpdated = data.lastUpdated || {};
+               data.lastUpdated[key] = firebase.firestore.FieldValue.serverTimestamp();
+            }
+            syncDocToFirestore(key, rec.id, rec);
+            saveData(); render();
+          }
+        });
+      }
     }
     function removeUnit(id) {
       if (!window.requireAdmin()) return;
-      if (!confirm('Xóa đơn vị sẽ giữ nguyên các bản ghi cũ nhưng không hiển thị tên. Tiếp tục?')) return;
-      const rec = data.units.find(x => x.id === id);
+      const recIndex = (data.units || []).findIndex(x => x.id === id);
+      if (recIndex < 0) return;
+      const rec = JSON.parse(JSON.stringify(data.units[recIndex]));
       const itemDesc = rec ? (rec.name || id) : id;
       addAuditLog('Xóa', 'units', "Xóa Đơn vị: " + itemDesc);
       data.units = data.units.filter(x => x.id !== id);
       data.lastUpdated = data.lastUpdated || {}; data.lastUpdated['units'] = firebase.firestore.FieldValue.serverTimestamp();
       syncDocToFirestore('units', id, null);
       saveData(); render();
+
+      if (typeof window.showUndoToast === 'function') {
+        window.showUndoToast({
+          message: `Đã xóa · TCTD ${itemDesc}`,
+          timeout: 8000,
+          onUndo: () => {
+            data.units.splice(recIndex, 0, rec);
+            addAuditLog('Hoàn tác', 'units', "Khôi phục Đơn vị: " + itemDesc);
+            data.lastUpdated = data.lastUpdated || {}; data.lastUpdated['units'] = firebase.firestore.FieldValue.serverTimestamp();
+            syncDocToFirestore('units', rec.id, rec);
+            saveData(); render();
+          }
+        });
+      }
     }
     window.removeAttachedSig = function (sigId) {
       if (!window.requireEdit()) return;
@@ -7573,7 +8076,7 @@
       field: (label, inner, span) => `<label class="f ${span ? 'span' : ''}"><span>${label}</span>${inner}</label>`,
       text: (id, val, ph) => `<input id="${id}" value="${esc(val)}" placeholder="${ph || ''}">`,
       num: (id, val, ph) => `<input id="${id}" type="number" min="0" value="${esc(val)}" placeholder="${ph || '0'}">`,
-      date: (id, val) => `<input id="${id}" type="date" value="${esc(val)}">`,
+      date: (id, val, maxVal) => `<input id="${id}" type="date" value="${esc(val)}" ${maxVal ? `max="${esc(maxVal)}"` : ''}>`,
       month: (id, val) => `<input id="${id}" type="month" value="${esc(val)}">`,
       week: (id, val) => `<input id="${id}" type="week" value="${esc(val)}">`,
       area: (id, val, ph) => `<textarea id="${id}" placeholder="${ph || ''}">${esc(val)}</textarea>`,
@@ -7736,18 +8239,18 @@
     </div>${F.foot("savePlan()")}`);
       }
       if (type === 'log') {
-        const r = id ? data.logs.find(x => x.id === id) : { date: today(), unitId: extra || '', amount1: '', invalidAmount1: '', denom1: (window.__kqPrefill && window.__kqPrefill.d1) || '500.000d', amount2: '', invalidAmount2: '', denom2: (window.__kqPrefill && window.__kqPrefill.d2) || 'none', diff: 'khop', diff2: 'khop' };
+        const r = id ? data.logs.find(x => x.id === id) : { date: today(), unitId: extra || '', amount1: '1000', invalidAmount1: '', denom1: (window.__kqPrefill && window.__kqPrefill.d1) || '500.000d', amount2: '', invalidAmount2: '', denom2: (window.__kqPrefill && window.__kqPrefill.d2) || 'none', diff: 'khop', diff2: 'khop' };
         const denomOpts = [['500.000d', '500.000đ'], ['200.000d', '200.000đ'], ['100.000d', '100.000đ'], ['50.000d', '50.000đ'], ['20.000d', '20.000đ'], ['10.000d', '10.000đ'], ['5.000d', '5.000đ'], ['2.000d', '2.000đ'], ['1.000d', '1.000đ']];
         const denom2Opts = [['none', 'Không kiểm tra'], ...denomOpts];
         const diffOpts = [['khop', 'Khớp đúng'], ['thua', 'Thừa tiền'], ['thieu', 'Thiếu tiền'], ['lan', 'Lẫn tiền đủ TCLT']];
         openModal(id ? 'Sửa Nhật ký kiểm tra bó tiền' : 'Thêm Nhật ký kiểm tra bó tiền', `<div class="fgrid">
-      ${F.field('Ngày kiểm tra', F.date('f-date', r.date))}
+      ${F.field('Ngày kiểm tra', F.date('f-date', r.date, today()))}
       ${F.field('Đơn vị', F.unitSel('f-unit', r.unitId))}
       <div class="span" style="font-weight:700;border-bottom:1px solid var(--line);padding-bottom:5px;margin-top:10px;color:var(--green-deep);text-transform:uppercase;font-size:12px;letter-spacing:0.5px;">Mệnh giá thứ 1</div>
       ${F.field('Mệnh giá 1', F.select('f-denom1', denomOpts, r.denom1 || '500.000d'))}
       <div class="span" style="display:none"></div>
-      ${F.field('Số tờ kiểm tra (MG 1)', `<input type="number" id="f-amount1" value="${r.amount1}" placeholder="VD: 1000" oninput="calcErr(1)" style="font-variant-numeric:tabular-nums; letter-spacing:-0.5px;">`)}
-      ${F.field('Số tờ KĐTCLT (MG 1)', `<input type="number" id="f-inv1" value="${r.invalidAmount1}" placeholder="VD: 10" oninput="calcErr(1)" style="font-variant-numeric:tabular-nums; letter-spacing:-0.5px;">`)}
+      ${F.field('Số tờ kiểm tra (MG 1)', `<input type="number" id="f-amount1" value="${r.amount1 || '1000'}" inputmode="numeric" pattern="[0-9]*" placeholder="1000" oninput="calcErr(1)" style="font-variant-numeric:tabular-nums; letter-spacing:-0.5px;">`)}
+      ${F.field('Số tờ KĐTCLT (MG 1)', `<input type="number" id="f-inv1" value="${r.invalidAmount1}" inputmode="numeric" pattern="[0-9]*" placeholder="0" oninput="calcErr(1)" style="font-variant-numeric:tabular-nums; letter-spacing:-0.5px;">`)}
       <div class="span" id="err-res1" style="font-size:13px; font-weight:700; padding:10px 14px; border-radius:10px; background:var(--hover); color:var(--text); display:flex; justify-content:space-between; align-items:center; transition:0.3s; margin-top:-5px; margin-bottom:5px;">Tỷ lệ lỗi: ---</div>
       ${F.field('Trạng thái kết luận 1', F.select('f-diff', diffOpts, r.diff || 'khop'), true)}
       <details class="span" style="background:#f9fafb; border:1px solid #e5e7eb; border-radius:12px; padding:12px 16px; margin-top:12px; transition:all 0.3s ease;">
@@ -7757,8 +8260,8 @@
          </summary>
          <div class="fgrid" style="margin-top:16px; padding-top:16px; border-top:1px dashed #e5e7eb;">
             ${F.field('Mệnh giá 2', F.select('f-denom2', denom2Opts, r.denom2 || 'none'), true)}
-            ${F.field('Số tờ kiểm tra (MG 2)', `<input type="number" id="f-amount2" value="${r.amount2}" placeholder="VD: 1000" oninput="calcErr(2)" style="font-variant-numeric:tabular-nums; letter-spacing:-0.5px;">`)}
-            ${F.field('Số tờ KĐTCLT (MG 2)', `<input type="number" id="f-inv2" value="${r.invalidAmount2}" placeholder="VD: 10" oninput="calcErr(2)" style="font-variant-numeric:tabular-nums; letter-spacing:-0.5px;">`)}
+            ${F.field('Số tờ kiểm tra (MG 2)', `<input type="number" id="f-amount2" value="${r.amount2 || (r.denom2 && r.denom2 !== 'none' ? '1000' : '')}" inputmode="numeric" pattern="[0-9]*" placeholder="1000" oninput="calcErr(2)" style="font-variant-numeric:tabular-nums; letter-spacing:-0.5px;">`)}
+            ${F.field('Số tờ KĐTCLT (MG 2)', `<input type="number" id="f-inv2" value="${r.invalidAmount2}" inputmode="numeric" pattern="[0-9]*" placeholder="0" oninput="calcErr(2)" style="font-variant-numeric:tabular-nums; letter-spacing:-0.5px;">`)}
             <div class="span" id="err-res2" style="font-size:13px; font-weight:700; padding:10px 14px; border-radius:10px; background:var(--hover); color:var(--text); display:flex; justify-content:space-between; align-items:center; transition:0.3s; margin-top:-5px; margin-bottom:5px;">Tỷ lệ lỗi: ---</div>
             ${F.field('Trạng thái kết luận 2', F.select('f-diff2', diffOpts, r.diff2 || 'khop'), true)}
          </div>
@@ -7903,18 +8406,32 @@
         res.innerHTML = 'Tỷ lệ lỗi: ---';
         res.style.background = 'var(--hover)';
         res.style.color = 'var(--text)';
+        res.style.border = 'none';
+        invInput.style.borderColor = '';
         return;
       }
 
+      if (inv > amt) {
+        invInput.style.borderColor = '#ef4444';
+        res.innerHTML = `<span style="letter-spacing:-0.5px; font-weight:800;">Lỗi: ${inv} > ${amt} tờ</span> <span style="color:#fff; padding: 4px 10px; border-radius: 999px; background: #dc2626; font-size:11px; font-weight:800;">KĐTCLT VƯỢT QUÁ SỐ KIỂM TRA</span>`;
+        res.style.background = '#fef2f2';
+        res.style.color = '#dc2626';
+        res.style.border = '1.5px solid #f87171';
+        return;
+      }
+
+      invInput.style.borderColor = '';
       const pct = (inv / amt) * 100;
       if (pct > 5) {
-        res.innerHTML = `<span style="letter-spacing:-0.5px">Tỷ lệ lỗi: ${pct.toFixed(2)}%</span> <span style="color:var(--red); padding: 4px 10px; border-radius: 999px; background: var(--red-soft); font-size:11px;">KHÔNG ĐẠT (>5%)</span>`;
+        res.innerHTML = `<span style="letter-spacing:-0.5px">Tỷ lệ lỗi: ${pct.toFixed(2)}%</span> <span style="color:var(--red); padding: 4px 10px; border-radius: 999px; background: var(--red-soft); font-size:11px; font-weight:800;">KHÔNG ĐẠT (>5%)</span>`;
         res.style.background = 'var(--red-soft)';
         res.style.color = 'var(--red)';
+        res.style.border = '1px solid #fecdd3';
       } else {
-        res.innerHTML = `<span style="letter-spacing:-0.5px">Tỷ lệ lỗi: ${pct.toFixed(2)}%</span> <span style="color:var(--safe); padding: 4px 10px; border-radius: 999px; background: var(--mint); font-size:11px;">ĐẠT (≤5%)</span>`;
+        res.innerHTML = `<span style="letter-spacing:-0.5px">Tỷ lệ lỗi: ${pct.toFixed(2)}%</span> <span style="color:var(--safe); padding: 4px 10px; border-radius: 999px; background: var(--mint); font-size:11px; font-weight:800;">ĐẠT (≤5%)</span>`;
         res.style.background = 'var(--mint)';
         res.style.color = 'var(--safe)';
+        res.style.border = '1px solid #bbf7d0';
       }
     };
 
@@ -7975,6 +8492,7 @@
       let detailsText = '';
       if (i >= 0) {
         const old = data[key][i];
+        const oldBackup = JSON.parse(JSON.stringify(old));
         let diffs = [];
         for (let k in rec) {
           if (!excludeKeys.includes(k) && JSON.stringify(rec[k]) !== JSON.stringify(old[k])) {
@@ -7985,6 +8503,22 @@
         detailsText = `Cập nhật ${uName ? 'TCTD ' + uName : (rec.name ? 'TCTD ' + rec.name : '')}. Thay đổi: ` + (diffs.length > 0 ? diffs.join(', ') : 'Không có thay đổi dữ liệu chính');
         data[key][i] = rec;
         addAuditLog('Sửa', key, detailsText);
+
+        if (typeof window.showUndoToast === 'function') {
+          window.showUndoToast({
+            message: `Đã sửa ${uName ? 'TCTD ' + uName : 'bản ghi'}`,
+            timeout: 8000,
+            onUndo: () => {
+              const curIdx = (data[key] || []).findIndex(x => x.id === rec.id);
+              if (curIdx >= 0) {
+                data[key][curIdx] = oldBackup;
+                addAuditLog('Hoàn tác', key, `Khôi phục trước khi sửa: ${uName || rec.id}`);
+                syncDocToFirestore(key, oldBackup.id, oldBackup);
+                saveData(); render();
+              }
+            }
+          });
+        }
       } else {
         let vals = [];
         for (let k in rec) {
@@ -7993,6 +8527,19 @@
         detailsText = `Thêm mới ${uName ? 'cho TCTD ' + uName : ''}. Dữ liệu: ` + vals.join(', ');
         data[key].push(rec);
         addAuditLog('Thêm', key, detailsText);
+
+        if (typeof window.showUndoToast === 'function') {
+          window.showUndoToast({
+            message: `Đã lưu ${uName ? 'TCTD ' + uName : 'bản ghi mới'}`,
+            timeout: 8000,
+            onUndo: () => {
+              data[key] = data[key].filter(x => x.id !== rec.id);
+              addAuditLog('Hoàn tác', key, `Hủy thêm mới: ${uName || rec.id}`);
+              syncDocToFirestore(key, rec.id, null);
+              saveData(); render();
+            }
+          });
+        }
       }
       
       const onceCols = ['units', 'plans', 'docs', 'seals', 'signatures'];
@@ -8016,14 +8563,48 @@
     }
     async function saveLog() {
       if (!window.requireEdit()) return;
-      if (!gv('f-unit')) return alert('Chọn đơn vị');
+      const unitId = gv('f-unit');
+      if (!unitId) return alert('Chọn đơn vị');
+      const logDate = gv('f-date');
+      if (!logDate) return alert('Chọn ngày kiểm tra');
+      if (logDate > today()) {
+        return alert('Lỗi: Ngày kiểm tra không thể ở tương lai (' + logDate + ')!');
+      }
+
+      const amt1 = Number(gv('f-amount1')) || 0;
+      const inv1 = Number(gv('f-inv1')) || 0;
+      if (amt1 <= 0) return alert('Vui lòng nhập số tờ kiểm tra (Mệnh giá 1)');
+      if (inv1 > amt1) {
+        return alert(`Lỗi: Số tờ KĐTCLT (${inv1}) lớn hơn số tờ kiểm tra (${amt1}) ở Mệnh giá 1!`);
+      }
+
+      const denom2 = gv('f-denom2');
+      const amt2 = Number(gv('f-amount2')) || 0;
+      const inv2 = Number(gv('f-inv2')) || 0;
+      if (denom2 && denom2 !== 'none' && (amt2 > 0 || inv2 > 0)) {
+        if (amt2 <= 0) return alert('Vui lòng nhập số tờ kiểm tra (Mệnh giá 2)');
+        if (inv2 > amt2) {
+          return alert(`Lỗi: Số tờ KĐTCLT (${inv2}) lớn hơn số tờ kiểm tra (${amt2}) ở Mệnh giá 2!`);
+        }
+      }
+
+      // Kiểm tra trùng TCTD và ngày đã có
+      const dup = (data.logs || []).find(x => x.unitId === unitId && x.date === logDate && x.id !== editing);
+      if (dup) {
+        const un = (data.units || []).find(u => u.id === unitId);
+        const uName = un ? un.name : 'đơn vị này';
+        if (!confirm(`Cảnh báo trùng lặp: Đã có bản ghi kiểm tra của "${uName}" vào ngày ${fmtDate(logDate)}.\n\nBạn có chắc chắn muốn lưu thêm bản ghi này không?`)) {
+          return;
+        }
+      }
+
       const btnSave = document.querySelector('.modal-foot .btn');
       if (btnSave) {
         btnSave.disabled = true;
         btnSave.innerText = 'Đang xử lý...';
       }
 
-      const rec = { id: editing || uid(), date: gv('f-date'), unitId: gv('f-unit'), denom1: gv('f-denom1'), amount1: gv('f-amount1'), invalidAmount1: gv('f-inv1'), denom2: gv('f-denom2'), amount2: gv('f-amount2'), invalidAmount2: gv('f-inv2'), diff: gv('f-diff'), diff2: gv('f-diff2'), };
+      const rec = { id: editing || uid(), date: logDate, unitId: unitId, denom1: gv('f-denom1'), amount1: String(amt1), invalidAmount1: String(inv1), denom2: denom2, amount2: (denom2 && denom2 !== 'none' && amt2 > 0) ? String(amt2) : '', invalidAmount2: (denom2 && denom2 !== 'none' && amt2 > 0) ? String(inv2) : '', diff: gv('f-diff'), diff2: gv('f-diff2'), };
 
       const newFilesToUpload = window.formLogFiles.filter(f => f.isNew);
       const oldFilesToKeep = window.formLogFiles.filter(f => !f.isNew);
