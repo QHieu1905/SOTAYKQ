@@ -2006,6 +2006,20 @@
       .nk-desk th { font-size: 10.5px; letter-spacing: 0; padding: 12px 6px; }
       .nk-desk td { padding: 10px 6px; }
     }
+
+    /* ===== Tinh chỉnh hình dạng (giữ nguyên bảng màu vàng chủ đạo): bo góc nhỏ, bóng nhẹ, bỏ hiệu ứng nảy ===== */
+    :root { --r: 12px; --shadow: 0 1px 2px rgba(16, 24, 40, .05); --shadow-md: 0 2px 6px rgba(16, 24, 40, .06); --shadow-lg: 0 8px 24px rgba(16, 24, 40, .10); }
+    .card, .tbl-card, .dash-panel, .kpi-card, .stat, .tq-card { border-radius: 12px !important; box-shadow: var(--shadow) !important; transform: none !important; transition: border-color .15s ease, background-color .15s ease !important; }
+    .card:hover, .dash-panel:hover, .kpi-card:hover, .tq-card:hover { transform: none !important; box-shadow: var(--shadow-md) !important; }
+    .tq-sec { border-radius: 12px !important; box-shadow: var(--shadow) !important; transition: border-color .15s ease !important; }
+    .navbtn { border-radius: 10px; transition: background-color .15s ease, color .15s ease, width .2s ease !important; }
+    .btn { border-radius: 10px !important; box-shadow: none !important; transform: none !important; font-weight: 600 !important; transition: background-color .15s ease !important; }
+    .btn:hover { transform: none !important; box-shadow: none !important; font-size: 13.5px; }
+    .pill, .tq-tag { border-radius: 6px !important; font-weight: 700 !important; }
+    input, select, textarea { border-radius: 8px !important; box-shadow: none !important; }
+    .modal { border-radius: 14px !important; }
+    @media (prefers-reduced-motion: reduce) { * { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+
   </style>
 </head>
 
@@ -3614,7 +3628,7 @@
     const TQ_ROUNDS = 4;               // tối đa 4 lần/năm, mỗi lần cách nhau 3 tháng (Lần 1 = T01-03, Lần 2 = T04-06, Lần 3 = T07-09, Lần 4 = T10-12)
     const TQ_TREND_MONTHS = 12;        // biểu đồ xu hướng: đủ 12 tháng của năm; tháng chưa có dữ liệu để trống
     const TQ_TREND_DENOMS = [
-      ['all', 'Tất cả mệnh giá (Bình quân gia quyền)'],
+      ['all', 'Bình quân các mệnh giá (Kiểm tra chọn mẫu)'],
       ['500000', '500.000đ'], ['200000', '200.000đ'], ['100000', '100.000đ'],
       ['50000', '50.000đ'], ['20000', '20.000đ'], ['10000', '10.000đ']
     ];
@@ -3697,7 +3711,7 @@
       const score = tier === 1 ? (prevViol ? 0 : 1) : tier === 2 ? 2 : tier === 3 ? 3 : 99;
       return { notChecked, prev, prevViol, curViol, curRate, few, tier, score, nowQ: now.q, target: now.q, y: now.y, daysLeft: tqDaysLeft(now), any: tier > 0 };
     }
-    function tqPill(bg, fg, bd, text) { return `<span style="display:inline-block; padding:3px 9px; border-radius:999px; background:${bg}; color:${fg}; border:1px solid ${bd}; font-size:11.5px; font-weight:800; white-space:nowrap;">${text}</span>`; }
+    function tqPill(bg, fg, bd, text) { return `<span style="display:inline-block; padding:2px 8px; border-radius:6px; background:${bg}; color:${fg}; border:1px solid ${bd}; font-size:12px; font-weight:700; white-space:nowrap;">${text}</span>`; }
     function tqReasonPills(nc) {
       const out = [], R = ['#fff1f2', '#be123c', '#fecdd3'], A = ['#fffbeb', '#b45309', '#fde68a'];
       if (nc.notChecked) {
@@ -3856,7 +3870,6 @@
         return `<button type="button" class="tq-dbtn" onclick="tqSetDenom('${k}')" aria-pressed="${on}" style="cursor:pointer; padding:9px 14px; min-height:40px; border-radius:999px; font:inherit; font-size:13px; font-weight:700; white-space:nowrap; border:1px solid ${on ? '#d97706' : '#fde68a'}; background:${on ? 'linear-gradient(135deg,#f59e0b,#d97706)' : '#fffbeb'}; color:${on ? '#fff' : '#92400e'}; box-shadow:${on ? '0 4px 12px rgba(217,119,6,0.25)' : 'none'};">${label}</button>`;
       }).join('');
       return `<div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px;">${btns}</div>` +
-        `<div style="display:flex; align-items:center; gap:8px; margin-bottom:6px; font-size:12px; color:#be123c; font-weight:700;"><svg width="28" height="8" aria-hidden="true"><line x1="0" y1="4" x2="28" y2="4" stroke="#e11d48" stroke-width="2" stroke-dasharray="6 4"/></svg>Ngưỡng 5.0% (TT NHNN)</div>` +
         `<div style="max-width:760px; margin:0 auto;">${tqTrendSvg(vals, tqTrendW())}</div>` +
         `<div style="display:flex; flex-wrap:wrap; gap:8px 18px; margin-top:12px; font-size:12.5px; color:#78350f;">` +
           `<span>Tờ kiểm tra: <b>${totChk.toLocaleString('vi-VN')}</b></span>` +
@@ -4701,15 +4714,15 @@
     /* ================= 3. KẾ HOẠCH & LỊCH KIỂM TRA ================= */
     /* ================= 2. LỊCH KIỂM TRA = ƯU TIÊN KIỂM TRA TRONG NGÀY + GỢI Ý MỆNH GIÁ =================
        Dùng chung nguồn tính với "Gợi ý kiểm tra bổ sung" ở Tổng quan (tqNeedCheck) nên hai nơi luôn khớp nhau.
-       Gợi ý mệnh giá (500k → 10k) cho từng TCTD dựa vào KẾT QUẢ LẦN KIỂM TRA GẦN NHẤT của chính mệnh giá đó:
+       Gợi ý mệnh giá (500.000đ → 10.000đ) cho từng TCTD dựa vào KẾT QUẢ LẦN KIỂM TRA GẦN NHẤT của chính mệnh giá đó:
          1) Lần trước không đạt (> 5%)            → kiểm tra lại mệnh giá đó (ưu tiên cao nhất, tỷ lệ cao xếp trước)
-         2) Mệnh giá chưa từng kiểm tra           → xếp theo thứ tự 500k → 10k
+         2) Mệnh giá chưa từng kiểm tra           → xếp theo thứ tự 500.000đ → 10.000đ
          3) Mệnh giá đã đạt                       → luân phiên: mệnh giá có lần kiểm tra cũ nhất xếp trước
          4) Mệnh giá đã kiểm tra trong hôm nay    → không gợi ý nữa
        Mỗi bản ghi nhật ký có 2 mệnh giá nên lấy 2 mệnh giá đứng đầu làm gợi ý (điền sẵn vào form nhập). */
     const KQ_DENS = [500000, 200000, 100000, 50000, 20000, 10000];
     const kqDenKey = v => ({ 500000: '500.000d', 200000: '200.000d', 100000: '100.000d', 50000: '50.000d', 20000: '20.000d', 10000: '10.000d' }[v] || 'none');
-    const kqDenShort = v => (v / 1000) + 'k';
+    const kqDenShort = v => String(v).replace(/\B(?=(\d{3})+(?!\d))/g, '.') + 'đ';   // 500.000đ … 10.000đ (đồng nhất toàn app)
     const kqDenFull = v => String(v).replace(/\B(?=(\d{3})+(?!\d))/g, '.') + 'đ';
     const kqToday = () => { const d = new Date(), p = n => String(n).padStart(2, '0'); return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()); };
     const kqFmtDate = s => { if (!s) return '—'; const y = s.slice(0, 4); return s.slice(8, 10) + '/' + s.slice(5, 7) + (y !== String(new Date().getFullYear()) ? '/' + y : ''); };
@@ -4839,7 +4852,7 @@
             : s.rec ? tqPill('#eff6ff', '#1d4ed8', '#bfdbfe', 'Luân phiên') : tqPill('#f0fdf4', '#047857', '#bbf7d0', 'Đạt');
       const diff = s.last && s.last.diff ? ' ' + tqPill('#eff6ff', '#1d4ed8', '#bfdbfe', KQ_DIFF[s.last.diff]) : '';
       return `<div class="kq-den ${s.state}${s.rec ? ' rec' : ''}">
-        <div class="kq-den-v"><span class="kq-den-chip">${kqDenShort(s.val)}</span><span class="kq-den-full">${kqDenFull(s.val)}</span></div>
+        <div class="kq-den-v"><span class="kq-den-chip">${kqDenFull(s.val)}</span></div>
         <div class="kq-den-act">${s.rec ? `<span class="kq-rn" title="Thứ tự gợi ý">${s.rank + 1}</span>` : ''}${badge}</div>
         <div class="kq-den-bar">${s.last ? `<div class="kq-barwrap"><div class="kq-bar" role="img" aria-label="Tỷ lệ ${tqPct(s.last.rate)}"><i style="width:${w.toFixed(1)}%; --bc:${bc}"></i><em title="Ngưỡng ${TQ_BAD_BUNDLE_PCT}%"></em></div><b class="kq-rate" style="color:${bc}">${tqPct(s.last.rate)}</b></div>` : `<span class="kq-none">Chưa có dữ liệu</span>`}</div>
         <div class="kq-den-last"><span class="kq-l">KT gần nhất</span><b>${s.last ? kqFmtDate(s.last.date) : '—'}</b>${diff}</div>
@@ -7786,7 +7799,7 @@
       }
       if (type === 'recovery') {
         const r = id ? data.recoveries.find(x => x.id === id) : { month: today().slice(0, 7), unitId: '', denom: '500k', qty: '' };
-        const denomOpts = Object.keys(DENOMS).map(k => [k, k]);
+        const denomOpts = Object.keys(DENOMS).map(k => [k, String(DENOMS[k]).replace(/\B(?=(\d{3})+(?!\d))/g, '.') + 'đ']);
         openModal(id ? 'Sửa sản lượng' : 'Thêm sản lượng thu hồi', `<div class="fgrid">
       ${F.field('Tháng', F.month('f-month', r.month))}
       ${F.field('Đơn vị', F.unitSel('f-unit', r.unitId))}
