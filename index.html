@@ -2059,6 +2059,57 @@
       .kq-sync-tag.pending { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; cursor: pointer; animation: kqPulse 2s infinite ease-in-out; }
       @keyframes kqPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.65; } }
 
+      /* ===== RÀ SOÁT UI/UX (2026-10) ===== */
+      /* Ô số: bỏ nút tăng/giảm, tránh lăn chuột làm đổi giá trị */
+      .kq-qinp::-webkit-outer-spin-button, .kq-qinp::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+      .kq-qinp { -moz-appearance: textfield; appearance: textfield; }
+      .kq-qinp.error:focus { box-shadow: 0 0 0 3px rgba(239, 68, 68, .18); }
+      .kq-qwarn { display: none; padding: 8px 12px; margin-bottom: 12px; background: #fef2f2; border: 1px solid #fecdd3; border-radius: 10px; color: #b91c1c; font-size: 12.5px; font-weight: 700; line-height: 1.45; }
+      .kq-qwarn.show { display: block; }
+      .kq-qwarn.soft { background: #fffbeb; border-color: #fde68a; color: #92400e; }
+      .kq-qwarn div + div { margin-top: 3px; }
+      .kq-qcard.skipped { opacity: .45; }
+      .kq-qrate-pill { gap: 8px; flex-wrap: wrap; }
+      .kq-qrate-pill .rate-badge { white-space: nowrap; }
+      /* Cột chi tiết bên phải (máy tính): biểu mẫu cao hơn màn hình vẫn cuộn được */
+      .kq-detail-col { max-height: calc(100vh - 24px); max-height: calc(100dvh - 24px); overflow-y: auto; overscroll-behavior: contain; }
+      /* Hàng nút luôn nằm ở đáy vùng cuộn để bấm "Lưu & sang TCTD kế tiếp" không phải kéo xuống */
+      .kq-quick-box .kq-qactions { position: sticky; bottom: 0; z-index: 3; margin: 0 -16px -16px; padding: 10px 16px 14px; background: linear-gradient(rgba(255, 251, 235, 0), #fffbeb 22%); border-radius: 0 0 16px 16px; }
+      .kq-sheet-panel { max-height: 92vh; max-height: 92dvh; }
+      @media (min-width: 861px) { .kq-sheet-panel { max-height: 88vh; max-height: 88dvh; } }
+      /* Thanh hoàn tác: cho phép 2 dòng, không tràn màn hình nhỏ, tránh thanh điều hướng/tai thỏ */
+      .kq-undo-bar { width: max-content; min-width: min(320px, 92vw); max-width: min(92vw, 520px); visibility: hidden; transition: transform .25s cubic-bezier(.16, 1, .3, 1), opacity .25s ease, visibility 0s linear .25s; }
+      .kq-undo-bar.visible { visibility: visible; transition-delay: 0s; }
+      .kq-undo-msg { white-space: normal; max-width: none; min-width: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.35; overflow-wrap: anywhere; }
+      .kq-undo-btn, .kq-undo-close { min-height: 36px; }
+      .kq-undo-close { min-width: 32px; }
+      /* Nhãn đồng bộ: bỏ hiệu ứng nhấp nháy lặp vô hạn trên từng dòng (gây xao nhãng và tốn pin) */
+      .kq-sync-tag.pending { animation: none; }
+      .kq-sync-tag.pending:focus-visible { outline: 2px solid #b45309; outline-offset: 2px; }
+      .nk-desk td .kq-sync-tag { white-space: nowrap; }
+      @media (max-width: 860px) {
+        /* iOS tự phóng to khi ô nhập < 16px → nâng lên 16px */
+        .kq-qinp, .kq-qdate-inp, .kq-qdiff-sel { font-size: 16px; min-height: 44px; }
+        .kq-qdate-inp { padding: 6px 10px; }
+        .kq-qbox-date-wrap { width: 100%; justify-content: space-between; }
+        .kq-quick-box { padding: 12px; margin: 10px 0 12px; }
+        .kq-quick-box .kq-qactions { margin: 0 -12px -12px; padding: 10px 12px calc(12px + env(safe-area-inset-bottom)); }
+        .kq-qbtn-next { flex: 1 1 100%; order: -1; }
+        .kq-qbtn-save, .kq-qbtn-more { flex: 1 1 0; min-width: 0; }
+        .kq-qbtn-more { padding: 8px 6px; }
+        .kq-qcards { grid-template-columns: 1fr; }
+        .kq-qfields { gap: 8px; }
+        /* Ba lớp nổi ở góc dưới (huy hiệu chờ đồng bộ, chấm đồng bộ, thanh hoàn tác) không đè lên nút menu giữa */
+        .kq-undo-bar { bottom: calc(104px + env(safe-area-inset-bottom)); }
+        #pending-sync-badge { bottom: calc(108px + env(safe-area-inset-bottom)) !important; right: 12px !important; max-width: calc(100vw - 24px); font-size: 12px !important; }
+        #sync-dot { bottom: calc(150px + env(safe-area-inset-bottom)); }
+        .kq-x { top: 8px; right: 8px; width: 40px; height: 40px; }
+      }
+      @media (max-width: 380px) {
+        .kq-qfield label { font-size: 10.5px; letter-spacing: 0; }
+        .kq-qcard { padding: 10px; }
+      }
+
       @media (max-width: 860px) {
         #sync-dot { top: auto; bottom: 80px; right: 16px; }
         .desktop-only { display: none !important; }
@@ -5071,11 +5122,37 @@
         <div class="kq-den-note">${esc(kqNoteFor(s))}</div>
       </div>`;
     }
+    // Biểu mẫu nhập nhanh có thể xuất hiện ở 2 nơi (cột phải + bottom-sheet) → luôn ưu tiên bản đang mở trong sheet
+    const kqQ = id => { const sh = document.getElementById('kq-sheet'); return (sh && sh.querySelector('#' + id)) || document.getElementById(id); };
+
+    // Kiểm tra tổng hợp: gom MỌI cảnh báo vào một khung (trước đây sửa ô này làm mất cảnh báo của ô kia)
+    window.kqQuickValidate = function () {
+      const warnEl = kqQ('kq-qwarn');
+      if (!warnEl) return { errors: [], notes: [] };
+      const errors = [], notes = [];
+      [1, 2].forEach(n => {
+        const a = kqQ('kq-qamt-' + n), v = kqQ('kq-qinv-' + n), skip = n === 2 && kqQ('kq-qskip-2') && kqQ('kq-qskip-2').checked;
+        if (!a || !v || skip) return;
+        const amt = parseFloat(a.value) || 0, inv = parseFloat(v.value) || 0;
+        const bad = amt > 0 && inv > amt;
+        v.classList.toggle('error', bad);
+        if (bad) errors.push(`Mệnh giá ${n}: số tờ KĐTCLT (${inv}) lớn hơn số tờ kiểm tra (${amt}).`);
+      });
+      const dEl = kqQ('kq-qdate'), unitId = warnEl.dataset.unit;
+      if (dEl && dEl.value) {
+        if (dEl.value > kqToday()) errors.push(`Ngày kiểm tra ${fmtDate(dEl.value)} ở tương lai.`);
+        else if ((data.logs || []).some(l => l.unitId === unitId && l.date === dEl.value)) notes.push(`Đã có bản ghi của TCTD này ngày ${fmtDate(dEl.value)} — lưu sẽ tạo thêm một bản ghi nữa.`);
+      }
+      warnEl.classList.toggle('show', errors.length + notes.length > 0);
+      warnEl.classList.toggle('soft', errors.length === 0);
+      warnEl.innerHTML = errors.concat(notes).map(t => `<div>${errors.includes(t) ? '⚠️' : 'ℹ️'} ${esc(t)}</div>`).join('');
+      return { errors, notes };
+    };
+
     window.kqQuickCalc = function (n) {
-      const amtInp = document.getElementById('kq-qamt-' + n);
-      const invInp = document.getElementById('kq-qinv-' + n);
-      const rateEl = document.getElementById('kq-qrate-' + n);
-      const warnEl = document.getElementById('kq-qwarn');
+      const amtInp = kqQ('kq-qamt-' + n);
+      const invInp = kqQ('kq-qinv-' + n);
+      const rateEl = kqQ('kq-qrate-' + n);
       if (!amtInp || !invInp || !rateEl) return;
 
       const amt = parseFloat(amtInp.value) || 0;
@@ -5086,15 +5163,12 @@
         invInp.classList.add('error');
         rateEl.className = 'kq-qrate-pill fail error';
         rateEl.innerHTML = `<span>Lỗi: ${inv} > ${amt} tờ</span><span class="rate-badge">VƯỢT SỐ TỜ KT</span>`;
-        if (warnEl) {
-          warnEl.style.display = 'block';
-          warnEl.innerHTML = `⚠️ Cảnh báo: Số tờ KĐTCLT (${inv}) không thể lớn hơn số tờ kiểm tra (${amt})!`;
-        }
+        kqQuickValidate();
         return;
       }
 
       invInp.classList.remove('error');
-      if (warnEl) warnEl.style.display = 'none';
+      kqQuickValidate();
 
       if (amt <= 0) {
         rateEl.className = 'kq-qrate-pill';
@@ -5113,11 +5187,12 @@
     };
 
     window.kqQuickToggleSkip2 = function (chk) {
-      const card2 = document.getElementById('kq-qcard-2');
+      const card2 = kqQ('kq-qcard-2');
       if (!card2) return;
       const inps = card2.querySelectorAll('input:not(#kq-qskip-2), select');
       inps.forEach(el => { el.disabled = chk.checked; });
-      card2.style.opacity = chk.checked ? '0.45' : '1';
+      card2.classList.toggle('skipped', chk.checked);
+      kqQuickValidate();
     };
 
     window.kqNextTodoUnit = function (currentId) {
@@ -5139,12 +5214,13 @@
       const it = kqItem(unitId);
       if (!it) return alert('Không tìm thấy đơn vị.');
 
-      const dateInp = document.getElementById('kq-qdate');
+      const dateInp = kqQ('kq-qdate');
       const dateVal = dateInp ? dateInp.value : kqToday();
       if (!dateVal) return alert('Vui lòng chọn ngày kiểm tra');
 
       // Chống nhập sai 2: Ngày ở tương lai
       if (dateVal > kqToday()) {
+        kqQuickValidate(); if (dateInp) dateInp.focus();
         if (typeof showToast === 'function') showToast('Lỗi: Ngày kiểm tra không thể ở tương lai (' + dateVal + ')!', 'amber');
         else alert('Lỗi: Ngày kiểm tra không thể ở tương lai (' + dateVal + ')!');
         return;
@@ -5154,9 +5230,9 @@
       const d1 = p.rec[0];
       const d2 = p.rec[1];
 
-      const amt1Inp = document.getElementById('kq-qamt-1');
-      const inv1Inp = document.getElementById('kq-qinv-1');
-      const diff1Sel = document.getElementById('kq-qdiff-1');
+      const amt1Inp = kqQ('kq-qamt-1');
+      const inv1Inp = kqQ('kq-qinv-1');
+      const diff1Sel = kqQ('kq-qdiff-1');
 
       const amt1 = Number(amt1Inp ? amt1Inp.value : 1000) || 0;
       const inv1 = Number(inv1Inp ? inv1Inp.value : 0) || 0;
@@ -5177,12 +5253,12 @@
 
       let hasD2 = false;
       let amt2 = 0, inv2 = 0, diff2 = 'khop';
-      const skip2 = document.getElementById('kq-qskip-2') && document.getElementById('kq-qskip-2').checked;
+      const skip2 = kqQ('kq-qskip-2') && kqQ('kq-qskip-2').checked;
 
       if (d2 && !skip2) {
-        const amt2Inp = document.getElementById('kq-qamt-2');
-        const inv2Inp = document.getElementById('kq-qinv-2');
-        const diff2Sel = document.getElementById('kq-qdiff-2');
+        const amt2Inp = kqQ('kq-qamt-2');
+        const inv2Inp = kqQ('kq-qinv-2');
+        const diff2Sel = kqQ('kq-qdiff-2');
 
         amt2 = Number(amt2Inp ? amt2Inp.value : 1000) || 0;
         inv2 = Number(inv2Inp ? inv2Inp.value : 0) || 0;
@@ -5227,22 +5303,26 @@
         files: []
       };
 
+      // Ghi nhớ vị trí hiện tại TRƯỚC khi lưu để chuyển đúng sang đơn vị đứng sau nó
+      const preList = kqBuildList().todo, preIdx = preList.findIndex(x => x.u.id === unitId);
+      const afterIds = preIdx >= 0 ? preList.slice(preIdx + 1).map(x => x.u.id) : [];
+
       upsert('logs', rec);
 
       if (goToNext) {
         // Tìm TCTD kế tiếp trong danh sách todo
         const curL = kqBuildList();
         if (curL.todo.length > 0) {
-          const nextItem = curL.todo.find(x => x.u.id !== unitId) || curL.todo[0];
+          const nextItem = curL.todo.find(x => afterIds.includes(x.u.id)) || curL.todo.find(x => x.u.id !== unitId) || curL.todo[0];
           if (nextItem) {
             window.__kq.sel = nextItem.u.id;
             kqRefresh();
             if (kqIsMobile()) kqOpenSheet(nextItem.u.id);
             if (typeof showToast === 'function') showToast(`✓ Đã lưu! Đã chuyển sang ${nextItem.u.name}`, 'green');
             setTimeout(() => {
-              const nextInp = document.getElementById('kq-qinv-1');
-              if (nextInp) nextInp.focus();
-            }, 120);
+              const nextInp = kqQ('kq-qinv-1');
+              if (nextInp) nextInp.focus({ preventScroll: false });
+            }, 150);
             return;
           }
         }
@@ -5282,7 +5362,7 @@
             <div class="kq-qfields">
               <div class="kq-qfield">
                 <label for="kq-qamt-1">Số tờ kiểm tra</label>
-                <input type="number" id="kq-qamt-1" value="1000" inputmode="numeric" pattern="[0-9]*" class="kq-qinp" oninput="kqQuickCalc(1)">
+                <input type="number" id="kq-qamt-1" value="1000" inputmode="numeric" pattern="[0-9]*" min="0" step="1" enterkeyhint="next" autocomplete="off" class="kq-qinp" oninput="kqQuickCalc(1)">
               </div>
               <div class="kq-qfield">
                 <label for="kq-qinv-1">Số tờ KĐTCLT</label>
@@ -5319,7 +5399,7 @@
             <div class="kq-qfields">
               <div class="kq-qfield">
                 <label for="kq-qamt-2">Số tờ kiểm tra</label>
-                <input type="number" id="kq-qamt-2" value="1000" inputmode="numeric" pattern="[0-9]*" class="kq-qinp" oninput="kqQuickCalc(2)">
+                <input type="number" id="kq-qamt-2" value="1000" inputmode="numeric" pattern="[0-9]*" min="0" step="1" enterkeyhint="next" autocomplete="off" class="kq-qinp" oninput="kqQuickCalc(2)">
               </div>
               <div class="kq-qfield">
                 <label for="kq-qinv-2">Số tờ KĐTCLT</label>
@@ -5350,10 +5430,10 @@
               </div>
               <div class="kq-qbox-date-wrap">
                 <span>Ngày kiểm tra:</span>
-                <input type="date" id="kq-qdate" value="${kqToday()}" max="${kqToday()}" class="kq-qdate-inp">
+                <input type="date" id="kq-qdate" value="${kqToday()}" max="${kqToday()}" class="kq-qdate-inp" onchange="kqQuickValidate()" aria-label="Ngày kiểm tra">
               </div>
             </div>
-            <div id="kq-qwarn" style="display:none; padding:8px 12px; margin-bottom:12px; background:#fef2f2; border:1px solid #fecdd3; border-radius:10px; color:#b91c1c; font-size:12.5px; font-weight:700;"></div>
+            <div id="kq-qwarn" class="kq-qwarn" role="alert" data-unit="${sid}"></div>
             <div class="kq-qcards">${card1}${card2}</div>
             <div class="kq-qactions">
               <button type="button" class="kq-qbtn-next" onclick="kqSaveQuickLog('${sid}', true)">
@@ -5426,7 +5506,7 @@
         <div class="kq-chips" role="group" aria-label="Lọc danh sách">${chips}</div>
         <div class="kq-wrap">
           <div class="kq-left" id="kq-left">${listHtml}${doneHtml}</div>
-          <div class="kq-detail-col"><div id="kq-detail">${K.sel ? kqDetailHtml(K.sel) : '<div class="kq-empty">Chọn một TCTD để xem gợi ý mệnh giá.</div>'}</div></div>
+          <div class="kq-detail-col"><div id="kq-detail">${kqIsMobile() ? '' : (K.sel ? kqDetailHtml(K.sel) : '<div class="kq-empty">Chọn một TCTD để xem gợi ý mệnh giá.</div>')}</div></div>
         </div>`;
     }
     function kqRefresh() { const r = document.getElementById('kq-root'); if (r) r.innerHTML = kqRootHtml(); }
@@ -5449,6 +5529,31 @@
       document.body.appendChild(s);
       document.body.style.overflow = 'hidden';
     }
+
+    // ---- Nhập nhanh: thao tác bàn phím & an toàn dữ liệu ----
+    (function () {
+      // Chọn toàn bộ số khi vào ô → gõ đè ngay (đặc biệt với mặc định 1000)
+      document.addEventListener('focusin', e => { const t = e.target; if (t && t.classList && t.classList.contains('kq-qinp')) setTimeout(() => { try { t.select(); } catch (_) { } }, 0); });
+      // Không cho lăn chuột làm đổi số; chặn ký tự e + - . trong ô số
+      document.addEventListener('wheel', e => { const t = document.activeElement; if (t && t.classList && t.classList.contains('kq-qinp') && t === e.target) t.blur(); }, { passive: true });
+      document.addEventListener('keydown', e => {
+        const t = e.target; if (!t || !t.classList || !t.classList.contains('kq-qinp')) return;
+        if (['e', 'E', '+', '-', '.', ','].includes(e.key)) { e.preventDefault(); return; }
+        if (e.key !== 'Enter') return;
+        e.preventDefault();
+        const box = t.closest('.kq-quick-box'); if (!box) return;
+        const fields = Array.from(box.querySelectorAll('.kq-qinp:not(:disabled)'));
+        const i = fields.indexOf(t);
+        if (i >= 0 && i < fields.length - 1) { fields[i + 1].focus(); return; }
+        const btn = box.querySelector('.kq-qbtn-next'); if (btn) btn.click();   // ô cuối + Enter = Lưu & sang TCTD kế tiếp
+      });
+      // Xoay màn hình / đổi cỡ cửa sổ qua mốc 860px → dựng lại để cột chi tiết và sheet không lệch nhau
+      let wasMobile = kqIsMobile();
+      window.matchMedia('(max-width: 860px)').addEventListener('change', () => {
+        const now = kqIsMobile(); if (now === wasMobile) return; wasMobile = now;
+        if (document.getElementById('kq-root') && !document.getElementById('kq-sheet')) kqRefresh();
+      });
+    })();
     window.kqCloseSheet = function () { const s = document.getElementById('kq-sheet'); if (s) s.remove(); document.body.style.overflow = ''; };
     document.addEventListener('keydown', e => { if (e.key === 'Escape') window.kqCloseSheet(); });
     window.kqOpenUnit = function (id) {
@@ -6935,7 +7040,7 @@
     window.getSyncBadgeHtml = function (col, id) {
       const isPending = window.isPendingSync(col, id);
       if (isPending) {
-        return `<span class="kq-sync-tag pending" title="Bản ghi đang lưu trên thiết bị (chờ đồng bộ lên Cloud). Bấm để thử đồng bộ ngay" onclick="event.stopPropagation(); flushPendingSyncQueue(true);"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Chờ đồng bộ</span>`;
+        return `<span class="kq-sync-tag pending" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();flushPendingSyncQueue(true);}" title="Bản ghi đang lưu trên thiết bị (chờ đồng bộ lên Cloud). Bấm để thử đồng bộ ngay" onclick="event.stopPropagation(); flushPendingSyncQueue(true);"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Chờ đồng bộ</span>`;
       }
       return `<span class="kq-sync-tag synced" title="Bản ghi đã lưu an toàn trên Cloud"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Đã lưu</span>`;
     };
@@ -6984,17 +7089,20 @@
     }
 
     /* ===== Cơ chế Hoàn tác (Undo) trong 8 giây thay cho confirm modal ===== */
-    let undoTimeoutId = null;
+    let undoTimeoutId = null, undoIntervalId = null;
     window.showUndoToast = function ({ message, onUndo, timeout = 8000 }) {
       if (undoTimeoutId) {
         clearTimeout(undoTimeoutId);
         undoTimeoutId = null;
       }
+      if (undoIntervalId) { clearInterval(undoIntervalId); undoIntervalId = null; }   // tránh đồng hồ của thông báo cũ ghi đè thông báo mới
       let bar = document.getElementById('kq-undo-bar');
       if (!bar) {
         bar = document.createElement('div');
         bar.id = 'kq-undo-bar';
         bar.className = 'kq-undo-bar';
+        bar.setAttribute('role', 'status');
+        bar.setAttribute('aria-live', 'polite');
         document.body.appendChild(bar);
       }
 
@@ -7004,7 +7112,7 @@
           <div class="kq-undo-icon">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
           </div>
-          <div class="kq-undo-msg">${esc(message)}</div>
+          <div class="kq-undo-msg" title="${esc(message)}">${esc(message)}</div>
           <button type="button" class="kq-undo-btn" id="kq-undo-action-btn">Hoàn tác <span class="kq-undo-countdown">(${timeLeft}s)</span></button>
           <button type="button" class="kq-undo-close" aria-label="Đóng" onclick="kqDismissUndo()">×</button>
         </div>
@@ -7023,11 +7131,11 @@
         });
       }
 
-      const intervalId = setInterval(() => {
+      const intervalId = undoIntervalId = setInterval(() => {
         timeLeft--;
         const cd = bar.querySelector('.kq-undo-countdown');
         if (cd && timeLeft > 0) cd.textContent = `(${timeLeft}s)`;
-        if (timeLeft <= 0) clearInterval(intervalId);
+        if (timeLeft <= 0) { clearInterval(intervalId); if (undoIntervalId === intervalId) undoIntervalId = null; }
       }, 1000);
 
       const btn = document.getElementById('kq-undo-action-btn');
@@ -7059,6 +7167,7 @@
       const bar = document.getElementById('kq-undo-bar');
       if (bar) bar.classList.remove('visible');
       if (undoTimeoutId) { clearTimeout(undoTimeoutId); undoTimeoutId = null; }
+      if (undoIntervalId) { clearInterval(undoIntervalId); undoIntervalId = null; }
     };
 
     // FIX (2026-09): trước đây pushToFirestore() im lặng bỏ qua nếu lỗi mạng / bị treo tiến
@@ -7124,18 +7233,33 @@
     }
 
 
+    // Thông báo nổi: đặt ở ĐỈNH màn hình (trước đây nằm giữa đáy, đè lên nút menu tròn và thanh hoàn tác).
+    // pointer-events:none + visibility:hidden khi ẩn để lớp trong suốt không bao giờ chặn cú chạm.
+    let _toastTimer = null;
     function showToast(msg, color = "green") {
       let t = document.getElementById("rt-toast");
       if (!t) {
         t = document.createElement("div");
         t.id = "rt-toast";
-        t.style.cssText = "position:fixed;bottom:20px;left:50%;transform:translateX(-50%);padding:10px 20px;border-radius:20px;color:#fff;font-size:14px;z-index:30000;transition:0.3s;opacity:0;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,0.15);";
+        t.setAttribute("role", "status");
+        t.setAttribute("aria-live", "polite");
+        t.style.cssText = "position:fixed;top:calc(12px + env(safe-area-inset-top, 0px));left:50%;transform:translateX(-50%) translateY(-8px);max-width:min(92vw,520px);box-sizing:border-box;text-align:center;padding:10px 18px;border-radius:16px;color:#fff;font-size:14px;line-height:1.35;z-index:30000;transition:opacity .3s, transform .3s, visibility 0s linear .3s;opacity:0;visibility:hidden;pointer-events:none;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,0.15);overflow-wrap:anywhere;";
         document.body.appendChild(t);
       }
       t.style.background = color === "green" ? "var(--green)" : "var(--amber)";
       t.textContent = msg;
+      t.style.transition = "opacity .3s, transform .3s, visibility 0s";
+      t.style.visibility = "visible";
       t.style.opacity = "1";
-      setTimeout(() => { t.style.opacity = "0"; }, 3000);
+      t.style.transform = "translateX(-50%) translateY(0)";
+      if (_toastTimer) clearTimeout(_toastTimer);   // thông báo mới không bị thông báo cũ tắt sớm
+      _toastTimer = setTimeout(() => {
+        t.style.transition = "opacity .3s, transform .3s, visibility 0s linear .3s";
+        t.style.opacity = "0";
+        t.style.visibility = "hidden";
+        t.style.transform = "translateX(-50%) translateY(-8px)";
+        _toastTimer = null;
+      }, 3000);
     }
 
     const SYNC_COLLECTIONS = ['units', 'plans', 'logs', 'inspections', 'recoveries', 'docs', 'signatures', 'seals'];
