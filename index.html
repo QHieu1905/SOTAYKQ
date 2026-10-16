@@ -669,6 +669,62 @@
       color: #fff
     }
 
+    /* ================= MÀU THEO TỜ TIỀN THẬT VIỆT NAM (POLYMER & COTTON) ================= */
+    /* 500k: Xanh lơ */
+    .p-den-500k {
+      background: #e0f2fe;
+      color: #0369a1;
+      border: 1px solid #bae6fd;
+    }
+    /* 200k: Nâu đỏ */
+    .p-den-200k {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+    }
+    /* 100k: Xanh lá */
+    .p-den-100k {
+      background: #dcfce7;
+      color: #15803d;
+      border: 1px solid #bbf7d0;
+    }
+    /* 50k: Hồng */
+    .p-den-50k {
+      background: #fdf2f8;
+      color: #be185d;
+      border: 1px solid #fbcfe8;
+    }
+    /* 20k: Xanh dương */
+    .p-den-20k {
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+    }
+    /* 10k: Nâu vàng */
+    .p-den-10k {
+      background: #fef3c7;
+      color: #854d0e;
+      border: 1px solid #fde68a;
+    }
+    /* 5k: Xanh rêu cotton */
+    .p-den-5k {
+      background: #ccfbf1;
+      color: #0f766e;
+      border: 1px solid #99f6e4;
+    }
+    /* 2k: Nâu cotton */
+    .p-den-2k {
+      background: #f5ebe6;
+      color: #78350f;
+      border: 1px solid #eed6cc;
+    }
+    /* 1k: Tím cotton */
+    .p-den-1k {
+      background: #f3e8ff;
+      color: #6b21a8;
+      border: 1px solid #e9d5ff;
+    }
+
     /* ============ BẢNG ============ */
     .tbl-card {
       background: var(--card);
@@ -1822,7 +1878,74 @@
       .kq-den.rec { border-color: #fcd34d; background: #fffbeb; }
       .kq-den.fail { box-shadow: inset 4px 0 0 #e11d48; }
       .kq-den-v { grid-area: v; display: flex; align-items: center; gap: 8px; min-width: 0; }
-      .kq-den-chip { display: inline-flex; align-items: center; justify-content: center; min-width: 46px; height: 28px; padding: 0 8px; border-radius: 8px; background: #111827; color: #fff; font-weight: 800; font-size: 13px; font-variant-numeric: tabular-nums; }
+      .kq-den-chip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 66px;
+        height: 28px;
+        padding: 0 10px;
+        border-radius: 8px;
+        background: #111827;
+        color: #fff;
+        font-weight: 800;
+        font-size: 13px;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: -0.2px;
+        box-shadow: 0 1.5px 3px rgba(0, 0, 0, 0.12);
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+      }
+      .kq-den-chip:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.18);
+      }
+
+      /* Màu chip mệnh giá theo tờ tiền thật */
+      /* 500k: Xanh lơ */
+      .kq-den-chip.den-500k, .kq-den-chip[data-den="500000"], .kq-den-chip[data-den="500k"] {
+        background: linear-gradient(135deg, #0284c7 0%, #008499 100%) !important;
+        color: #ffffff !important;
+      }
+      /* 200k: Nâu đỏ */
+      .kq-den-chip.den-200k, .kq-den-chip[data-den="200000"], .kq-den-chip[data-den="200k"] {
+        background: linear-gradient(135deg, #b43426 0%, #8f241a 100%) !important;
+        color: #ffffff !important;
+      }
+      /* 100k: Xanh lá */
+      .kq-den-chip.den-100k, .kq-den-chip[data-den="100000"], .kq-den-chip[data-den="100k"] {
+        background: linear-gradient(135deg, #16a34a 0%, #15803d 100%) !important;
+        color: #ffffff !important;
+      }
+      /* 50k: Hồng */
+      .kq-den-chip.den-50k, .kq-den-chip[data-den="50000"], .kq-den-chip[data-den="50k"] {
+        background: linear-gradient(135deg, #db2777 0%, #be185d 100%) !important;
+        color: #ffffff !important;
+      }
+      /* 20k: Xanh dương */
+      .kq-den-chip.den-20k, .kq-den-chip[data-den="20000"], .kq-den-chip[data-den="20k"] {
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+        color: #ffffff !important;
+      }
+      /* 10k: Nâu vàng */
+      .kq-den-chip.den-10k, .kq-den-chip[data-den="10000"], .kq-den-chip[data-den="10k"] {
+        background: linear-gradient(135deg, #9a6217 0%, #7c4a0e 100%) !important;
+        color: #ffffff !important;
+      }
+      /* 5k: Xanh rêu cotton */
+      .kq-den-chip.den-5k, .kq-den-chip[data-den="5000"], .kq-den-chip[data-den="5k"] {
+        background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%) !important;
+        color: #ffffff !important;
+      }
+      /* 2k: Nâu sẫm cotton */
+      .kq-den-chip.den-2k, .kq-den-chip[data-den="2000"], .kq-den-chip[data-den="2k"] {
+        background: linear-gradient(135deg, #78350f 0%, #5b280b 100%) !important;
+        color: #ffffff !important;
+      }
+      /* 1k: Tím cotton */
+      .kq-den-chip.den-1k, .kq-den-chip[data-den="1000"], .kq-den-chip[data-den="1k"] {
+        background: linear-gradient(135deg, #7e22ce 0%, #581c87 100%) !important;
+        color: #ffffff !important;
+      }
       .kq-den-full { font-weight: 700; color: #374151; font-size: 13px; font-variant-numeric: tabular-nums; }
       .kq-den-act { grid-area: act; display: flex; align-items: center; gap: 6px; justify-self: end; }
       .kq-rn { width: 22px; height: 22px; border-radius: 50%; background: #d97706; color: #fff; font-size: 11.5px; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; }
@@ -3564,6 +3687,26 @@
     const sortDate = list => [...list].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
 
     const pill = (cls, txt) => `<span class="pill ${cls}">${txt}</span>`;
+    const kqDenShortKey = v => {
+      const val = typeof tqDenomVal === 'function' ? tqDenomVal(v) : (Number(String(v).replace(/\D/g, '')) || 0);
+      const m = { 500000: '500k', 200000: '200k', 100000: '100k', 50000: '50k', 20000: '20k', 10000: '10k', 5000: '5k', 2000: '2k', 1000: '1k' };
+      return m[val] || '';
+    };
+    const kqDenChip = (v, extraClass = '') => {
+      const val = typeof tqDenomVal === 'function' ? tqDenomVal(v) : (Number(String(v).replace(/\D/g, '')) || 0);
+      const k = kqDenShortKey(val);
+      const cls = ['kq-den-chip', k ? `den-${k}` : '', extraClass].filter(Boolean).join(' ');
+      const txt = typeof kqDenFull === 'function' ? kqDenFull(v || val) : (String(val).replace(/\B(?=(\d{3})+(?!\d))/g, '.') + 'đ');
+      return `<span class="${cls}" data-den="${val}">${txt}</span>`;
+    };
+    const denomPill = (d) => {
+      if (!d || d === 'none' || d === 'Không kiểm tra') return pill('p-gray', 'Không kiểm tra');
+      const val = typeof tqDenomVal === 'function' ? tqDenomVal(d) : (Number(String(d).replace(/\D/g, '')) || 0);
+      const k = kqDenShortKey(val);
+      const txt = String(d).replace(/d$/i, 'đ');
+      if (k) return `<span class="pill p-den-${k}">${txt}</span>`;
+      return pill('p-amber', txt);
+    };
     function statCard(icTone, icon, num, label, sub) {
       return `<div class="card stat">
     <div class="stat-ic ${icTone}">${ICONS[icon]}</div>
@@ -3923,9 +4066,19 @@
       const vals = T.labels.map((_, i) => s.chk[i] > 0 ? s.inv[i] / s.chk[i] * 100 : null);
       const totChk = s.chk.reduce((a, b) => a + b, 0);
       const totInv = s.inv.reduce((a, b) => a + b, 0);
+      const DENOM_BTN_THEMES = {
+        all:    { onBg: 'linear-gradient(135deg,#f59e0b,#d97706)', onBd: '#d97706', offBg: '#fffbeb', offBd: '#fde68a', offColor: '#92400e' },
+        500000: { onBg: 'linear-gradient(135deg,#0284c7,#008499)', onBd: '#008499', offBg: '#f0f9ff', offBd: '#bae6fd', offColor: '#0369a1' },
+        200000: { onBg: 'linear-gradient(135deg,#b43426,#8f241a)', onBd: '#8f241a', offBg: '#fef2f2', offBd: '#fecaca', offColor: '#991b1b' },
+        100000: { onBg: 'linear-gradient(135deg,#16a34a,#15803d)', onBd: '#15803d', offBg: '#f0fdf4', offBd: '#bbf7d0', offColor: '#166534' },
+        50000:  { onBg: 'linear-gradient(135deg,#db2777,#be185d)', onBd: '#be185d', offBg: '#fdf2f8', offBd: '#fbcfe8', offColor: '#be185d' },
+        20000:  { onBg: 'linear-gradient(135deg,#2563eb,#1d4ed8)', onBd: '#1d4ed8', offBg: '#eff6ff', offBd: '#bfdbfe', offColor: '#1d4ed8' },
+        10000:  { onBg: 'linear-gradient(135deg,#9a6217,#7c4a0e)', onBd: '#7c4a0e', offBg: '#fffbeb', offBd: '#fde68a', offColor: '#854d0e' },
+      };
       const btns = TQ_TREND_DENOMS.map(([k, label]) => {
         const on = k === key;
-        return `<button type="button" class="tq-dbtn" onclick="tqSetDenom('${k}')" aria-pressed="${on}" style="cursor:pointer; padding:9px 14px; min-height:40px; border-radius:999px; font:inherit; font-size:13px; font-weight:700; white-space:nowrap; border:1px solid ${on ? '#d97706' : '#fde68a'}; background:${on ? 'linear-gradient(135deg,#f59e0b,#d97706)' : '#fffbeb'}; color:${on ? '#fff' : '#92400e'}; box-shadow:${on ? '0 4px 12px rgba(217,119,6,0.25)' : 'none'};">${label}</button>`;
+        const th = DENOM_BTN_THEMES[k] || DENOM_BTN_THEMES.all;
+        return `<button type="button" class="tq-dbtn" onclick="tqSetDenom('${k}')" aria-pressed="${on}" style="cursor:pointer; padding:9px 14px; min-height:40px; border-radius:999px; font:inherit; font-size:13px; font-weight:700; white-space:nowrap; border:1px solid ${on ? th.onBd : th.offBd}; background:${on ? th.onBg : th.offBg}; color:${on ? '#fff' : th.offColor}; box-shadow:${on ? '0 4px 12px rgba(0,0,0,0.18)' : 'none'};">${label}</button>`;
       }).join('');
       return `<div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px;">${btns}</div>` +
         `<div style="max-width:760px; margin:0 auto;">${tqTrendSvg(vals, tqTrendW())}</div>` +
@@ -4910,7 +5063,7 @@
             : s.rec ? tqPill('#eff6ff', '#1d4ed8', '#bfdbfe', 'Luân phiên') : tqPill('#f0fdf4', '#047857', '#bbf7d0', 'Đạt');
       const diff = s.last && s.last.diff ? ' ' + tqPill('#eff6ff', '#1d4ed8', '#bfdbfe', KQ_DIFF[s.last.diff]) : '';
       return `<div class="kq-den ${s.state}${s.rec ? ' rec' : ''}">
-        <div class="kq-den-v"><span class="kq-den-chip">${kqDenFull(s.val)}</span></div>
+        <div class="kq-den-v">${kqDenChip(s.val)}</div>
         <div class="kq-den-act">${s.rec ? `<span class="kq-rn" title="Thứ tự gợi ý">${s.rank + 1}</span>` : ''}${badge}</div>
         <div class="kq-den-bar">${s.last ? `<div class="kq-barwrap"><div class="kq-bar" role="img" aria-label="Tỷ lệ ${tqPct(s.last.rate)}"><i style="width:${w.toFixed(1)}%; --bc:${bc}"></i><em title="Ngưỡng ${TQ_BAD_BUNDLE_PCT}%"></em></div><b class="kq-rate" style="color:${bc}">${tqPct(s.last.rate)}</b></div>` : `<span class="kq-none">Chưa có dữ liệu</span>`}</div>
         <div class="kq-den-last"><span class="kq-l">KT gần nhất</span><b>${s.last ? kqFmtDate(s.last.date) : '—'}</b>${diff}</div>
@@ -5122,7 +5275,7 @@
             <div class="kq-qcard-top">
               <div class="kq-qcard-den">
                 <span class="kq-rn" style="background:#b45309;">1</span>
-                <span class="kq-den-chip">${kqDenFull(d1)}</span>
+                ${kqDenChip(d1)}
                 <span style="font-size:12px; font-weight:700; color:#b45309;">${s1.state === 'fail' ? 'Kiểm tra lại' : (s1.state === 'never' ? 'Chưa kiểm tra' : 'Luân phiên')}</span>
               </div>
             </div>
@@ -5156,7 +5309,7 @@
             <div class="kq-qcard-top">
               <div class="kq-qcard-den">
                 <span class="kq-rn" style="background:#78350f;">2</span>
-                <span class="kq-den-chip" style="background:#374151;">${kqDenFull(d2)}</span>
+                ${kqDenChip(d2)}
                 <span style="font-size:12px; font-weight:700; color:#4b5563;">${s2.state === 'fail' ? 'Kiểm tra lại' : (s2.state === 'never' ? 'Chưa kiểm tra' : 'Luân phiên')}</span>
               </div>
               <label style="font-size:11.5px; font-weight:700; color:#6b7280; display:inline-flex; align-items:center; gap:4px; cursor:pointer;">
@@ -5430,9 +5583,9 @@
 
                 const denom1Text = (r.denom1 || '').replace(/d$/i, 'đ') || '500.000đ';
                 const denom2Text = (r.denom2 || '').replace(/d$/i, 'đ');
-                const denom2Badge = hasData2 ? pill('p-amber', denom2Text) : pill('p-gray', 'Không kiểm tra');
+                const denom2Badge = hasData2 ? denomPill(denom2Text) : pill('p-gray', 'Không kiểm tra');
 
-                const denomStr = hasDenom2 ? `${pill('p-amber', denom1Text)}<br><div style="height:4px"></div>${denom2Badge}` : pill('p-amber', denom1Text);
+                const denomStr = hasDenom2 ? `${denomPill(denom1Text)}<br><div style="height:4px"></div>${denom2Badge}` : denomPill(denom1Text);
                 const amountStr = hasDenom2 ? `${(Number(r.amount1) || 0).toLocaleString('vi-VN')}<br><div style="height:4px"></div>${hasData2 ? amt2Val.toLocaleString('vi-VN') : ''}` : (Number(r.amount1) || 0).toLocaleString('vi-VN');
                 const invStr = hasDenom2 ? `${(Number(r.invalidAmount1) || 0).toLocaleString('vi-VN')}<br><div style="height:4px"></div>${hasData2 ? (Number(r.invalidAmount2) || 0).toLocaleString('vi-VN') : ''}` : (Number(r.invalidAmount1) || 0).toLocaleString('vi-VN');
 
@@ -5647,7 +5800,7 @@
         });
       });
       const denomsArr = [...uniqueDenoms].sort((a, b) => getVal(b) - getVal(a));
-      const denomsHtml = denomsArr.map(d => pill('p-amber', d)).join(' ');
+      const denomsHtml = denomsArr.map(d => denomPill(d)).join(' ');
 
       const summaryHtml = `
         <div style="margin-bottom: 20px; padding: 12px 18px; background: #f4fbf7; border-radius: 12px; border: 1px solid var(--mint-2); display: flex; gap: 24px; flex-wrap: wrap; align-items: center;">
@@ -5671,7 +5824,7 @@
                   .filter(d => r.items[d].qty > 0 || r.items[d].invQty > 0)
                   .sort((a, b) => getVal(b) - getVal(a));
                 
-                const denomHtml = denoms.map(d => pill('p-amber', d)).join('<br><div style="height:4px"></div>');
+                const denomHtml = denoms.map(d => denomPill(d)).join('<br><div style="height:4px"></div>');
                 const qtyHtml = denoms.map(d => r.items[d].qty.toLocaleString('vi-VN')).join('<br><div style="height:4px"></div>');
                 const invQtyHtml = denoms.map(d => r.items[d].invQty.toLocaleString('vi-VN')).join('<br><div style="height:4px"></div>');
                 
@@ -5687,7 +5840,7 @@
                 
                 const detailsGrid = denoms.map(d => `
                   <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid #f3f4f6; padding-bottom:8px; margin-bottom:8px;">
-                    <div style="flex:1;">${pill('p-amber', d)}</div>
+                    <div style="flex:1;">${denomPill(d)}</div>
                     <div style="flex:1; text-align:right;">
                        <div style="font-size:12px; color:#4b5563;">SL: <b>${r.items[d].qty.toLocaleString('vi-VN')}</b></div>
                        <div style="font-size:11px; color:#ef4444;">KĐTCLT: <b>${r.items[d].invQty.toLocaleString('vi-VN')}</b></div>
