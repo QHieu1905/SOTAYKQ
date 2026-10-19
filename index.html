@@ -2259,6 +2259,202 @@
     .modal { border-radius: 14px !important; }
     @media (prefers-reduced-motion: reduce) { * { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
 
+
+      /* ===== Lịch kiểm tra: ghim "Đi hôm nay", hoãn, ghi chú, ma trận mệnh giá ===== */
+      .kq-row { display: flex; gap: 6px; align-items: stretch; position: relative; }
+      .kq-row .kq-item { flex: 1 1 0; min-width: 0; width: auto; }
+      .kq-acts { flex: 0 0 40px; display: flex; flex-direction: column; gap: 6px; }
+      .kq-ibtn { all: unset; box-sizing: border-box; width: 40px; height: 40px; border-radius: 10px; border: 1px solid #e5e7eb; background: #fff; color: #9ca3af; display: flex; align-items: center; justify-content: center; cursor: pointer; touch-action: manipulation; transition: background-color .15s, color .15s, border-color .15s; }
+      .kq-ibtn:hover { background: #fffbeb; color: #b45309; border-color: #fcd34d; }
+      .kq-ibtn.on { background: #fef3c7; color: #b45309; border-color: #fcd34d; }
+      .kq-ibtn.on svg { fill: currentColor; }
+      .kq-ibtn:focus-visible, .kq-txtbtn:focus-visible, .kq-chipbtn:focus-visible, .kq-link:focus-visible, .kq-mx-c:focus-visible, .kq-mx-hb:focus-visible, .kq-mx-name:focus-visible, .kq-nchip:focus-visible, .kq-seg button:focus-visible { outline: 2px solid #b45309; outline-offset: 2px; }
+      .kq-grip { cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; }
+      .kq-grip:active { cursor: grabbing; }
+      .kq-row.dragging { opacity: .5; }
+      .kq-row.drop-before::before, .kq-row.drop-after::after { content: ""; position: absolute; left: 0; right: 0; height: 3px; border-radius: 3px; background: #d97706; z-index: 4; }
+      .kq-row.drop-before::before { top: -5px; }
+      .kq-row.drop-after::after { bottom: -5px; }
+      .kq-txtbtn { all: unset; box-sizing: border-box; cursor: pointer; min-height: 40px; padding: 0 12px; display: inline-flex; align-items: center; border-radius: 10px; border: 1px solid #d1d5db; background: #fff; color: #374151; font-weight: 700; font-size: 12.5px; white-space: nowrap; touch-action: manipulation; }
+      .kq-txtbtn:hover { background: #f9fafb; }
+      .kq-grp { display: flex; flex-direction: column; gap: 8px; padding: 10px; border: 1px solid #fcd34d; background: #fffdf5; border-radius: 12px; margin-bottom: 4px; }
+      .kq-pinlist { display: flex; flex-direction: column; gap: 8px; }
+      .kq-grp-h { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+      .kq-grp-h.plain { padding: 4px 2px 0; }
+      .kq-grp-t { display: inline-flex; align-items: center; gap: 6px; font-weight: 800; font-size: 13px; color: #92400e; }
+      .kq-grp-h.plain .kq-grp-t { color: #4b5563; }
+      .kq-link { all: unset; cursor: pointer; font-size: 12px; font-weight: 700; color: #92400e; text-decoration: underline; padding: 8px 4px; }
+      .kq-pin-hint { display: flex; gap: 8px; align-items: flex-start; font-size: 12px; color: #6b7280; padding: 2px 4px 4px; line-height: 1.4; }
+      .kq-pin-hint svg { flex: 0 0 auto; margin-top: 1px; }
+      .kq-item-note { display: flex; gap: 6px; align-items: flex-start; font-size: 12px; color: #6b7280; line-height: 1.35; }
+      .kq-item-note svg { flex: 0 0 auto; margin-top: 2px; color: #b45309; }
+      .kq-item-note span { overflow-wrap: anywhere; }
+      .kq-done.snz { margin-top: 6px; }
+      .kq-done-h.snz { background: #f3f4f6; color: #4b5563; }
+      .kq-seg { display: inline-flex; padding: 3px; background: #f3f4f6; border-radius: 12px; gap: 2px; margin: 0 0 12px; }
+      .kq-seg button { all: unset; box-sizing: border-box; cursor: pointer; min-height: 38px; padding: 0 16px; border-radius: 10px; font-weight: 700; font-size: 13px; color: #6b7280; display: inline-flex; align-items: center; touch-action: manipulation; }
+      .kq-seg button.on { background: #fff; color: #92400e; box-shadow: 0 1px 2px rgba(16, 24, 40, .12); }
+      .kq-d-acts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+      .kq-chipbtn { all: unset; box-sizing: border-box; cursor: pointer; min-height: 40px; padding: 0 14px; display: inline-flex; align-items: center; gap: 6px; border-radius: 10px; border: 1px solid #d1d5db; background: #fff; color: #374151; font-weight: 700; font-size: 13px; touch-action: manipulation; }
+      .kq-chipbtn:hover { background: #fffbeb; border-color: #fcd34d; }
+      .kq-chipbtn.on { background: #fef3c7; border-color: #fcd34d; color: #92400e; }
+      .kq-chipbtn.on svg { fill: currentColor; }
+      .kq-snz-banner { margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: #f3f4f6; border: 1px solid #e5e7eb; color: #374151; font-size: 13px; display: flex; gap: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap; line-height: 1.4; }
+      .kq-snz-banner.exp { background: #fff7ed; border-color: #fed7aa; color: #9a3412; }
+      .kq-rule { display: flex; gap: 8px; align-items: flex-start; margin-top: 12px; padding: 9px 12px; border-radius: 10px; font-size: 12.5px; line-height: 1.45; border: 1px solid #e5e7eb; background: #f9fafb; color: #4b5563; }
+      .kq-rule svg { flex: 0 0 auto; margin-top: 2px; }
+      .kq-rule.must { background: #f5f3ff; border-color: #ddd6fe; color: #5b21b6; }
+      .kq-rule.retest { background: #fff1f2; border-color: #fecdd3; color: #9f1239; }
+      .kq-rule.exempt { background: #f0fdf4; border-color: #bbf7d0; color: #166534; }
+      /* Hộp thoại hoãn */
+      .kq-snz-ov { z-index: 10020; }
+      .kq-snz-panel { max-width: 460px; padding: 10px 18px calc(16px + env(safe-area-inset-bottom)); }
+      .kq-snz-t { margin: 10px 0 2px; font-size: 18px; font-weight: 800; color: #111827; }
+      .kq-snz-u { font-size: 13px; color: #6b7280; margin-bottom: 8px; overflow-wrap: anywhere; }
+      .kq-snz-l { display: block; margin: 14px 0 6px; font-size: 12.5px; font-weight: 800; color: #374151; }
+      .kq-snz-l span { color: #e11d48; }
+      .kq-snz-opts { display: flex; flex-wrap: wrap; gap: 8px; }
+      .kq-opt { position: relative; display: inline-block; }
+      .kq-opt input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+      .kq-opt span { display: inline-flex; align-items: center; min-height: 40px; padding: 0 14px; border-radius: 10px; border: 1px solid #d1d5db; background: #fff; font-size: 13px; font-weight: 700; color: #374151; }
+      .kq-opt input:checked + span { background: #d97706; border-color: #d97706; color: #fff; }
+      .kq-opt input:focus-visible + span { outline: 2px solid #92400e; outline-offset: 2px; }
+      .kq-snz-inp { width: 100%; box-sizing: border-box; margin-top: 8px; min-height: 44px; padding: 8px 12px; border-radius: 10px; border: 1px solid #d1d5db; font: inherit; font-size: 16px; background: #fff; }
+      .kq-snz-f { display: flex; gap: 10px; margin-top: 18px; }
+      .kq-snz-f .kq-btn { flex: 1; }
+      /* Ma trận TCTD × mệnh giá */
+      .kq-mx { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; }
+      .kq-mx-top { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+      .kq-mx-insight { font-size: 13px; color: #4b5563; line-height: 1.5; }
+      .kq-mx-insight b { color: #b91c1c; }
+      .kq-mx-ok { color: #047857; font-weight: 700; }
+      .kq-mx-sort { display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 700; color: #4b5563; }
+      .kq-mx-sort select { min-height: 40px; padding: 0 10px; border-radius: 8px; border: 1px solid #d1d5db; background: #fff; font: inherit; font-size: 13px; }
+      .kq-mx-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: #6b7280; margin-bottom: 8px; align-items: center; }
+      .kq-mx-legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 5px; vertical-align: -2px; border: 1px solid rgba(0, 0, 0, .08); }
+      .kq-mx-legend i.p { background: #dcfce7; } .kq-mx-legend i.w { background: #fef3c7; } .kq-mx-legend i.f { background: #fee2e2; } .kq-mx-legend i.n { background: #f3f4f6; }
+      .kq-mx-lg-t { margin-left: auto; font-style: italic; }
+      .kq-mx-scroll { overflow: auto; max-height: calc(100vh - 360px); max-height: calc(100dvh - 360px); min-height: 280px; border: 1px solid #e5e7eb; border-radius: 10px; }
+      .kq-mx-t { border-collapse: separate; border-spacing: 0; width: 100%; min-width: 700px; }
+      .kq-mx-t th, .kq-mx-t td { padding: 0; border-bottom: 1px solid #f1f2f4; border-right: 1px solid #f6f7f8; background: #fff; text-align: center; text-transform: none; letter-spacing: 0; }
+      .kq-mx-t thead th { position: sticky; top: 0; z-index: 3; background: #fff7d6; border-bottom: 1px solid #e5e7eb; padding: 6px 4px; }
+      .kq-mx-t .kq-mx-n { position: sticky; left: 0; z-index: 2; text-align: left; min-width: 220px; max-width: 280px; padding: 6px 10px; background: #fff; box-shadow: 1px 0 0 #e5e7eb; }
+      .kq-mx-t thead .kq-mx-n { z-index: 4; background: #fff7d6; }
+      .kq-mx-name { all: unset; cursor: pointer; display: block; font-size: 13px; font-weight: 700; color: #1f2937; line-height: 1.35; overflow-wrap: anywhere; }
+      .kq-mx-name:hover { color: #92400e; text-decoration: underline; }
+      .kq-mx-marks { display: inline-flex; gap: 5px; margin-top: 2px; }
+      .kq-mk { color: #9ca3af; display: inline-flex; }
+      .kq-mk.pin { color: #b45309; } .kq-mk.ok { color: #047857; font-weight: 800; font-size: 12px; }
+      .kq-mx-hb { all: unset; cursor: pointer; display: inline-flex; align-items: center; min-height: 32px; padding: 0 4px; border-radius: 8px; font-size: 12px; font-weight: 800; color: #78350f; }
+      .kq-mx-hb.on { background: #fde68a; }
+      .kq-mx-gh { font-size: 12px; font-weight: 800; color: #78350f; }
+      .kq-mx-c { all: unset; box-sizing: border-box; display: flex; align-items: center; justify-content: center; width: 100%; min-width: 64px; height: 42px; cursor: pointer; font-weight: 700; font-size: 12.5px; font-variant-numeric: tabular-nums; touch-action: manipulation; }
+      .kq-mx-c:hover { filter: brightness(.95); }
+      .kq-mx-c.p { background: #dcfce7; color: #166534; }
+      .kq-mx-c.w { background: #fef3c7; color: #92400e; }
+      .kq-mx-c.f { background: #fee2e2; color: #991b1b; }
+      .kq-mx-c.n { background: #f3f4f6; color: #9ca3af; }
+      .kq-mx-c.td { box-shadow: inset 0 0 0 2px #b45309; }
+      .kq-mx-gap { font-size: 12px; font-weight: 700; color: #9ca3af; min-width: 52px; }
+      .kq-mx-gap.has { color: #92400e; }
+      .kq-mx-t tfoot th, .kq-mx-t tfoot td { position: sticky; bottom: 0; z-index: 2; background: #fffbeb; border-top: 1px solid #e5e7eb; padding: 6px 4px; font-size: 12px; font-weight: 800; color: #78350f; }
+      .kq-mx-t tfoot .kq-mx-n { z-index: 3; }
+      .kq-mx-cov b { display: block; font-size: 13px; color: #1f2937; }
+      .kq-mx-cov small { display: block; color: #6b7280; font-size: 10.5px; font-weight: 600; }
+      .kq-mx-cov i { display: block; height: 4px; border-radius: 3px; background: #e5e7eb; margin: 3px 8px; position: relative; overflow: hidden; }
+      .kq-mx-cov i::after { content: ""; position: absolute; inset: 0 auto 0 0; width: var(--w); background: #d97706; }
+      .kq-mx-cov.low b { color: #b91c1c; }
+      .kq-mx-cov em { display: inline-block; font-style: normal; font-size: 10px; font-weight: 800; color: #fff; background: #e11d48; border-radius: 5px; padding: 0 5px; margin-top: 2px; }
+      @media (max-width: 860px) {
+        .kq-seg { display: flex; }
+        .kq-seg button { flex: 1; justify-content: center; padding: 0 8px; }
+        .kq-grp { padding: 8px; }
+        .kq-mx { padding: 8px; }
+        .kq-mx-t .kq-mx-n { min-width: 150px; max-width: 150px; padding: 6px 8px; }
+        .kq-mx-name { font-size: 12.5px; }
+        .kq-mx-scroll { max-height: calc(100dvh - 310px); }
+        .kq-mx-c { min-width: 58px; height: 44px; }
+        .kq-mx-lg-t { margin-left: 0; flex-basis: 100%; }
+      }
+      /* Ô "Bỏ qua" của MG 2: kích thước vừa tay, không xuống dòng */
+      #kq-qskip-2 { width: 20px; height: 20px; min-height: 0; padding: 0; margin: 0; flex: 0 0 auto; accent-color: #d97706; }
+      label:has(> #kq-qskip-2) { white-space: nowrap; min-height: 40px; padding: 0 6px; gap: 6px !important; }
+      body:has(#kq-snz) .kq-undo-bar { display: none; }
+      .kq-mx-sort { white-space: nowrap; }
+      @media (max-width: 860px) { .kq-hero.mx .kq-stats, .kq-hero.mx .kq-hero-sub { display: none; } .kq-hero.mx { padding: 10px 14px; } }
+
+      /* ===== Xuất báo cáo ===== */
+      .rp-bar { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+      .rp-btn { cursor: pointer; min-height: 40px; padding: 0 14px; display: inline-flex; align-items: center; gap: 8px; border-radius: 10px; border: 1px solid #fcd34d; background: #fff; color: #92400e; font: inherit; font-size: 13px; font-weight: 700; touch-action: manipulation; transition: background-color .15s; }
+      .rp-btn:hover { background: #fffbeb; }
+      .rp-btn:focus-visible { outline: 2px solid #b45309; outline-offset: 2px; }
+      .rp-ov { z-index: 10010; }
+      .rp-panel { max-width: 640px; padding: 10px 18px calc(16px + env(safe-area-inset-bottom)); }
+      .rp-panel [hidden] { display: none !important; }
+      .rp-cust { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+      .rp-f { display: block; margin-top: 10px; }
+      .rp-f > span { display: block; font-size: 12px; font-weight: 700; color: #4b5563; margin-bottom: 4px; }
+      .rp-f input, .rp-f textarea { width: 100%; box-sizing: border-box; min-height: 44px; padding: 8px 12px; border-radius: 10px; border: 1px solid #d1d5db; font: inherit; font-size: 16px; background: #fff; color: #111827; }
+      .rp-f textarea { resize: vertical; line-height: 1.45; min-height: 70px; }
+      .rp-sum { margin-top: 10px; padding: 9px 12px; border-radius: 10px; background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; font-size: 13px; font-weight: 600; line-height: 1.45; }
+      .rp-sum.warn { background: #fffbeb; border-color: #fde68a; color: #92400e; }
+      .rp-sum span { font-weight: 500; }
+      .rp-chk { display: flex; align-items: center; gap: 10px; margin-top: 14px; min-height: 40px; font-size: 13px; font-weight: 600; color: #374151; cursor: pointer; }
+      .rp-chk input { width: 20px; height: 20px; accent-color: #d97706; margin: 0; }
+      .rp-det { margin-top: 12px; border: 1px solid #e5e7eb; border-radius: 10px; padding: 0 12px 12px; }
+      .rp-det > summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; font-size: 13px; font-weight: 700; color: #92400e; }
+      .rp-sig3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+      .rp-prev { position: fixed; inset: 0; z-index: 10030; background: #e5e7eb; display: flex; flex-direction: column; }
+      .rp-prev-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding: 10px 14px; background: #fff; border-bottom: 1px solid #e5e7eb; }
+      .rp-prev-bar b { font-size: 14px; color: #111827; overflow-wrap: anywhere; }
+      .rp-prev-hint { font-size: 12px; color: #6b7280; flex: 1 1 220px; }
+      .rp-prev-act { display: flex; gap: 8px; margin-left: auto; }
+      .rp-prev-act .kq-btn { flex: none; min-width: 110px; }
+      .rp-prev-body { flex: 1; overflow: auto; padding: 12px 8px 24px; -webkit-overflow-scrolling: touch; }
+      .rp-prev-sheet { margin: 0 auto; background: #fff; box-shadow: 0 2px 12px rgba(0, 0, 0, .2); overflow: hidden; }
+      @media (max-width: 640px) { .rp-sig3 { grid-template-columns: 1fr; } .rp-cust { grid-template-columns: 1fr 1fr; } .rp-prev-act { width: 100%; } .rp-prev-act .kq-btn { flex: 1; } }
+      .rp-panel .kq-snz-f { position: sticky; bottom: 0; background: #fff; padding: 10px 0 2px; margin-top: 12px; }
+
+      /* ===== Tổng quan: cơ cấu KĐTCLT theo mệnh giá ===== */
+      .tmx { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 20px; align-items: start; }
+      .tmx-l { display: flex; flex-direction: column; align-items: center; gap: 10px; position: sticky; top: 12px; }
+      .tmx-donut { width: 170px; height: 170px; }
+      .tmx-leg { display: flex; flex-wrap: wrap; gap: 6px 12px; justify-content: center; font-size: 11.5px; color: #4b5563; }
+      .tmx-leg i, .tmx-diff-l i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+      .tmx-ins { margin-bottom: 10px; padding: 10px 12px; border-radius: 10px; background: #fffbeb; border: 1px solid #fde68a; font-size: 13px; line-height: 1.5; color: #374151; }
+      .tmx-ins p { margin: 0 0 4px; } .tmx-ins p:last-child { margin: 0; }
+      .tmx-muted { color: #6b7280; font-size: 12.5px; }
+      .tmx-row { all: unset; box-sizing: border-box; display: block; width: 100%; padding: 10px 12px; margin-bottom: 6px; border: 1px solid #f1f2f4; border-radius: 12px; cursor: pointer; background: #fff; touch-action: manipulation; transition: background-color .15s, border-color .15s; }
+      .tmx-row:hover { background: #fffbeb; border-color: #fde68a; }
+      .tmx-row:focus-visible { outline: 2px solid #b45309; outline-offset: 2px; }
+      .tmx-top { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; }
+      .tmx-chip { display: inline-flex; align-items: center; justify-content: center; min-width: 88px; height: 28px; padding: 0 10px; border-radius: 8px; color: #fff; font-weight: 800; font-size: 13px; font-variant-numeric: tabular-nums; }
+      .tmx-kv { display: flex; flex-direction: column; line-height: 1.15; min-width: 64px; }
+      .tmx-kv small { font-size: 10.5px; color: #6b7280; font-weight: 600; }
+      .tmx-kv b { font-size: 15px; font-weight: 800; color: #1f2937; font-variant-numeric: tabular-nums; }
+      .tmx-d { margin-left: auto; font-size: 12px; font-weight: 800; padding: 3px 8px; border-radius: 6px; background: #f3f4f6; color: #4b5563; font-variant-numeric: tabular-nums; white-space: nowrap; }
+      .tmx-d.up { background: #fff1f2; color: #be123c; } .tmx-d.dn { background: #ecfdf5; color: #047857; }
+      .tmx-bars { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px; }
+      .tmx-b { position: relative; display: block; height: 8px; border-radius: 4px; background: #f3f4f6; }
+      .tmx-b i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px; min-width: 2px; }
+      .tmx-b em { position: absolute; top: -3px; bottom: -3px; width: 2px; margin-left: -1px; background: #6b7280; border-radius: 2px; }
+      .tmx-sub { display: block; margin-top: 6px; font-size: 11.5px; color: #6b7280; }
+      .tmx-warn { color: #b45309; }
+      .tmx-note { margin-top: 10px; font-size: 11.5px; color: #6b7280; line-height: 1.5; }
+      .tmx-empty { padding: 18px; text-align: center; color: #6b7280; font-size: 13px; }
+      .tmx-diff { margin-top: 14px; padding-top: 12px; border-top: 1px dashed #e5e7eb; }
+      .tmx-diff-h { font-size: 13px; font-weight: 800; color: #1f2937; margin-bottom: 8px; }
+      .tmx-diff-h span { font-weight: 500; color: #6b7280; font-size: 11.5px; }
+      .tmx-diff-bar { display: flex; height: 12px; border-radius: 6px; overflow: hidden; background: #f3f4f6; gap: 2px; }
+      .tmx-diff-bar i { display: block; min-width: 4px; }
+      .tmx-diff-l { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 8px; font-size: 12.5px; color: #4b5563; }
+      @media (max-width: 700px) {
+        .tmx { grid-template-columns: 1fr; gap: 12px; }
+        .tmx-l { position: static; }
+        .tmx-donut { width: 150px; height: 150px; }
+        .tmx-d { margin-left: 0; }
+        .tmx-bars { grid-template-columns: 1fr; gap: 8px; }
+      }
   </style>
 </head>
 
@@ -3994,7 +4190,7 @@
       return `<div style="display:flex; align-items:center; gap:10px; padding:10px 0; border-top:1px dashed #fde68a;">
           <div role="button" tabindex="0" title="Xem gợi ý mệnh giá" onclick="kqOpenUnit('${id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();kqOpenUnit('${id}')}" style="flex:1 1 0; min-width:0; cursor:pointer;">
             <div style="font-weight:700; color:#1f2937; font-size:13.5px; overflow-wrap:anywhere;">${esc(x.u.name)} <span style="color:#b45309; font-size:12px; font-weight:800; white-space:nowrap;">Gợi ý mệnh giá ›</span></div>
-            <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:6px;">${tqReasonPills(nc).join('')}${x.missed && x.missed.length ? kqMissedPill(x.missed) : ''}</div>
+            <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:6px;">${x.pinned ? tqPill('#fef3c7', '#b45309', '#fcd34d', 'Đi hôm nay') : ''}${tqReasonPills(nc).join('')}${x.missed && x.missed.length ? kqMissedPill(x.missed) : ''}</div>
             <div style="margin-top:6px;">${kqRecLine(plan)}</div>
             <div style="font-size:11.5px; color:#6b7280; margin-top:4px;">Kiểm tra bổ sung → tính vào Quý ${nc.nowQ}</div>
           </div>
@@ -4037,8 +4233,97 @@
     }
     window.tqCmpSet = function (k) { window.__tqCmpSel = (window.__tqCmpSel === k) ? '' : k; tqCmpRefresh(); };
 
+
+    /* ================= TỔNG QUAN: CƠ CẤU KĐTCLT THEO MỆNH GIÁ =================
+       • Tỷ trọng = tờ KĐTCLT của mệnh giá ÷ tổng tờ KĐTCLT (mệnh giá nào đóng góp nhiều nhất).
+       • Tỷ lệ    = tờ KĐTCLT ÷ tờ kiểm tra CỦA CHÍNH mệnh giá đó (mới phản ánh mức xuống cấp vì kiểm tra theo chọn mẫu).
+       • Xu hướng = so với kỳ liền trước có độ dài bằng nhau (chỉ khi đã chọn khoảng thời gian ở bộ lọc).
+       Dùng đúng kỳ của bộ lọc "Thời gian" ở Tổng quan. */
+    const TQ_MIX_COL = { 500000: '#0b8aa8', 200000: '#b43426', 100000: '#16a34a', 50000: '#db2777', 20000: '#2563eb', 10000: '#9a6217' };
+    const TQ_MIX_SMALL = 1000;      // dưới 1.000 tờ kiểm tra = mẫu nhỏ
+    function tqMixModel(logs) {
+      const agg = L => {
+        const m = {}, diff = { thua: 0, thieu: 0, lan: 0, n: 0 }; let tc = 0, ti = 0;
+        L.forEach(l => {
+          [[l.denom1, l.amount1, l.invalidAmount1, l.diff], [l.denom2, l.amount2, l.invalidAmount2, l.diff2]].forEach(([d, a, i, df]) => {
+            const v = tqDenomVal(d), c = Number(a) || 0, n = Number(i) || 0; if (!v || c <= 0) return;
+            const x = m[v] = m[v] || { v, chk: 0, inv: 0, n: 0 }; x.chk += c; x.inv += n; x.n++; tc += c; ti += n; diff.n++;
+            if (df === 'thua' || df === 'thieu' || df === 'lan') diff[df]++;
+          });
+        });
+        return { m, tc, ti, diff };
+      };
+      const cur = agg(logs); let prev = null;
+      if (filterStartTQ && filterEndTQ && filterStartTQ <= filterEndTQ) {
+        const a = new Date(filterStartTQ + 'T00:00:00'), b = new Date(filterEndTQ + 'T00:00:00'), days = Math.round((b - a) / 864e5) + 1;
+        const z = n => String(n).padStart(2, '0'), f = d => d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate());
+        const ps = f(new Date(a.getTime() - days * 864e5)), pe = f(new Date(a.getTime() - 864e5));
+        prev = agg((data.logs || []).filter(l => l && l.date && l.date >= ps && l.date <= pe));
+      }
+      const rows = Object.values(cur.m).map(x => {
+        const rate = x.inv / x.chk * 100, p = prev && prev.m[x.v], pr = p && p.chk > 0 ? p.inv / p.chk * 100 : null;
+        return { v: x.v, chk: x.chk, inv: x.inv, n: x.n, rate, share: cur.ti ? x.inv / cur.ti * 100 : 0, shareChk: cur.tc ? x.chk / cur.tc * 100 : 0, prate: pr, delta: pr == null ? null : rate - pr };
+      }).sort((a, b) => b.share - a.share || b.v - a.v);
+      return { rows, cur, prev, hasPrev: !!(prev && prev.tc > 0) };
+    }
+    function tqMixLabel() { return (filterStartTQ && filterEndTQ) ? `${rpDmy(filterStartTQ)} – ${rpDmy(filterEndTQ)}` : `Cả năm ${new Date().getFullYear()}`; }
+    function tqMixSub(M) {
+      if (!M.rows.length) return 'Chưa có dữ liệu trong kỳ đã chọn';
+      const t = M.rows[0];
+      return M.cur.ti ? `${rpDenTxt(t.v)} đóng góp nhiều nhất (${t.share.toFixed(1)}% tờ KĐTCLT) · tỷ lệ ${tqPct(t.rate)}` : 'Chưa phát hiện tờ KĐTCLT trong kỳ';
+    }
+    function tqMixDonut(M) {
+      const R = 52, C = 2 * Math.PI * R, W = 22; let off = 0;
+      const segs = M.cur.ti ? M.rows.filter(r => r.inv > 0).map(r => {
+        const len = r.inv / M.cur.ti * C, gap = len > 3 ? 1.5 : 0, d = `<circle cx="70" cy="70" r="${R}" fill="none" stroke="${TQ_MIX_COL[r.v] || '#9ca3af'}" stroke-width="${W}" stroke-dasharray="${Math.max(0, len - gap).toFixed(2)} ${(C - len + gap).toFixed(2)}" stroke-dashoffset="${(-off).toFixed(2)}" transform="rotate(-90 70 70)"></circle>`;
+        off += len; return d;
+      }).join('') : '';
+      const label = M.rows.filter(r => r.inv > 0).map(r => `${rpDenTxt(r.v)} ${r.share.toFixed(1)}%`).join(', ') || 'chưa có tờ KĐTCLT';
+      return `<svg class="tmx-donut" viewBox="0 0 140 140" role="img" aria-label="Tỷ trọng tờ KĐTCLT theo mệnh giá: ${label}"><circle cx="70" cy="70" r="${R}" fill="none" stroke="#f3f4f6" stroke-width="${W}"></circle>${segs}
+        <text x="70" y="66" text-anchor="middle" font-size="19" font-weight="800" fill="#1f2937">${M.cur.ti.toLocaleString('vi-VN')}</text><text x="70" y="84" text-anchor="middle" font-size="10.5" fill="#6b7280">tờ KĐTCLT</text></svg>`;
+    }
+    function tqMixBody(M) {
+      if (!M.rows.length) return `<div class="tmx-empty">Chưa có dữ liệu kiểm tra theo mệnh giá ${(filterStartTQ && filterEndTQ) ? 'trong kỳ ' : ''}${esc(tqMixLabel())}.</div>`;
+      const thr = TQ_BAD_BUNDLE_PCT, maxRate = Math.max.apply(null, M.rows.map(r => r.rate)), scale = Math.max(10, Math.ceil(maxRate) + 1);
+      const rowHtml = r => {
+        const col = TQ_MIX_COL[r.v] || '#9ca3af', bc = r.rate > thr ? '#e11d48' : (r.rate >= TQ_NEAR_PCT ? '#f59e0b' : '#10b981');
+        const dl = r.delta == null ? `<span class="tmx-d" title="Chọn khoảng thời gian ở bộ lọc để so với kỳ trước">—</span>`
+          : `<span class="tmx-d ${r.delta > 0.005 ? 'up' : (r.delta < -0.005 ? 'dn' : '')}" title="So với kỳ trước: ${tqPct(r.prate)}">${r.delta > 0.005 ? '▲ +' : (r.delta < -0.005 ? '▼ ' : '● ')}${r.delta.toFixed(2)}</span>`;
+        const small = r.chk < TQ_MIX_SMALL;
+        return `<button type="button" class="tmx-row" onclick="tqMixPick('${r.v}')" aria-label="${rpDenTxt(r.v)}: chiếm ${r.share.toFixed(1)}% tờ KĐTCLT, tỷ lệ ${tqPct(r.rate)}${r.delta == null ? '' : ', thay đổi ' + r.delta.toFixed(2) + ' điểm phần trăm so với kỳ trước'}. Bấm để xem xu hướng theo tháng">
+          <span class="tmx-top"><span class="tmx-chip" style="background:${col}">${rpDenTxt(r.v)}</span>
+            <span class="tmx-kv"><small>Tỷ trọng</small><b>${r.share.toFixed(1)}%</b></span>
+            <span class="tmx-kv"><small>Tỷ lệ KĐTCLT</small><b style="color:${bc}">${tqPct(r.rate)}</b></span>${dl}</span>
+          <span class="tmx-bars"><span class="tmx-b" aria-hidden="true"><i style="width:${Math.min(100, r.share).toFixed(1)}%; background:${col}"></i></span>
+            <span class="tmx-b" aria-hidden="true"><i style="width:${Math.min(100, r.rate / scale * 100).toFixed(1)}%; background:${bc}"></i><em style="left:${(thr / scale * 100).toFixed(1)}%" title="Ngưỡng ${thr}%"></em></span></span>
+          <span class="tmx-sub">Kiểm tra mẫu ${r.chk.toLocaleString('vi-VN')} tờ (${r.shareChk.toFixed(1)}% tổng tờ kiểm tra)${small ? ' · <b class="tmx-warn">mẫu nhỏ</b>' : ''}</span></button>`;
+      };
+      // nhận định tự động
+      const top = M.rows[0], worst = M.rows.slice().sort((a, b) => b.rate - a.rate)[0], rise = M.hasPrev ? M.rows.filter(r => r.delta != null && r.delta > 0.005).sort((a, b) => b.delta - a.delta)[0] : null;
+      const ins = [];
+      if (M.cur.ti) ins.push(`<b>${rpDenTxt(top.v)}</b> đóng góp nhiều nhất: ${top.share.toFixed(1)}% tổng số tờ KĐTCLT${top.shareChk > 33 ? `, đồng thời chiếm ${top.shareChk.toFixed(1)}% số tờ kiểm tra (cần xem cùng tỷ lệ)` : ''}.`);
+      if (worst && worst.rate > 0) ins.push(`Tỷ lệ KĐTCLT cao nhất: <b>${rpDenTxt(worst.v)}</b> (${tqPct(worst.rate)})${worst.rate > thr ? ` — vượt ngưỡng ${thr}%` : ''}${worst.chk < TQ_MIX_SMALL ? ', mẫu nhỏ nên chỉ mang tính tham khảo' : ''}.`);
+      if (rise) ins.push(`Tăng nhanh nhất so với kỳ trước: <b>${rpDenTxt(rise.v)}</b> (+${rise.delta.toFixed(2)} điểm %).`);
+      else if (!M.hasPrev) ins.push(`<span class="tmx-muted">Chọn khoảng thời gian ở bộ lọc để so sánh xu hướng với kỳ trước.</span>`);
+      const d = M.cur.diff, dTot = d.thua + d.thieu + d.lan;
+      const seg = (n, c, t) => n ? `<i style="flex:${n}; background:${c}" title="${t}: ${n}"></i>` : '';
+      const diffHtml = `<div class="tmx-diff"><div class="tmx-diff-h">Chênh lệch thừa / thiếu / lẫn tiền <span>(trên ${d.n} lượt mệnh giá được kiểm tra)</span></div>
+        ${dTot ? `<div class="tmx-diff-bar" role="img" aria-label="Thừa ${d.thua}, thiếu ${d.thieu}, lẫn ${d.lan}, khớp ${d.n - dTot}">${seg(d.thua, '#3b82f6', 'Thừa')}${seg(d.thieu, '#f59e0b', 'Thiếu')}${seg(d.lan, '#8b5cf6', 'Lẫn')}${seg(d.n - dTot, '#e5e7eb', 'Khớp')}</div>
+        <div class="tmx-diff-l"><span><i style="background:#3b82f6"></i>Thừa <b>${d.thua}</b></span><span><i style="background:#f59e0b"></i>Thiếu <b>${d.thieu}</b></span><span><i style="background:#8b5cf6"></i>Lẫn <b>${d.lan}</b></span><span><i style="background:#e5e7eb"></i>Khớp <b>${d.n - dTot}</b></span></div>` : `<div class="tmx-muted">Không có chênh lệch trong kỳ.</div>`}</div>`;
+      return `<div class="tmx"><div class="tmx-l">${tqMixDonut(M)}<div class="tmx-leg">${M.rows.filter(r => r.inv > 0).map(r => `<span><i style="background:${TQ_MIX_COL[r.v] || '#9ca3af'}"></i>${rpDenTxt(r.v)}</span>`).join('')}</div></div>
+        <div class="tmx-r"><div class="tmx-ins">${ins.map(t => `<p>${t}</p>`).join('')}</div>${M.rows.map(rowHtml).join('')}</div></div>
+        <div class="tmx-note">Tỷ trọng = tờ KĐTCLT của mệnh giá ÷ tổng tờ KĐTCLT. Tỷ lệ = tờ KĐTCLT ÷ tờ kiểm tra của chính mệnh giá đó (kiểm tra theo chọn mẫu nên chỉ tỷ trọng thì chưa đủ kết luận). Bấm một mệnh giá để xem xu hướng theo tháng.</div>${diffHtml}`;
+    }
+    window.tqMixPick = function (v) {
+      window.__tqOpen.trend = true;
+      const d = document.querySelector('#pg-tongquan details[data-sec="trend"]'); if (d) d.open = true;
+      window.tqSetDenom(String(v));
+      if (window.tqFitTrend) requestAnimationFrame(window.tqFitTrend);
+      if (d) d.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+
     /* ---- Mục có thể đóng/mở trong Tổng quan (nhớ trạng thái khi vẽ lại) ---- */
-    window.__tqOpen = window.__tqOpen || { viol: false, sen: false, xoi: false, sug: false, cov: false, quart: false, trend: false, prog: false };   // mặc định thu gọn tất cả
+    window.__tqOpen = window.__tqOpen || { viol: false, sen: false, xoi: false, sug: false, cov: false, quart: false, mix: false, trend: false, prog: false };   // mặc định thu gọn tất cả
     function tqSec(id, border, bg, head, body) {
       const open = window.__tqOpen[id] !== false && !!window.__tqOpen[id];
       return `<details class="tq-sec" data-sec="${id}" ${open ? 'open' : ''} ontoggle="tqSecToggle('${id}', this.open)" style="background:${bg}; border:1px solid #fde68a; border-radius:16px; box-shadow:0 8px 24px rgba(217,119,6,0.05); box-sizing:border-box; width:100%;">
@@ -4054,7 +4339,7 @@
       if (open && id === 'trend' && window.tqFitTrend) requestAnimationFrame(window.tqFitTrend);
     };
     window.tqSecAll = function (open) {
-      ['viol', 'sen', 'xoi', 'sug', 'cov', 'quart', 'trend', 'prog'].forEach(k => { window.__tqOpen[k] = open; });
+      ['viol', 'sen', 'xoi', 'sug', 'cov', 'quart', 'mix', 'trend', 'prog'].forEach(k => { window.__tqOpen[k] = open; });
       document.querySelectorAll('#pg-tongquan details.tq-sec').forEach(d => { d.open = open; });
       window.__tqCmpSel = open ? 'all' : '';                // khối độ phủ + dải chỉ số ở cuối trang
       if (window.tqCmpRefresh) window.tqCmpRefresh();
@@ -4453,12 +4738,12 @@
              </div>
              Tổng quan
           </h2>
-          ${timeFilterDropdown({
+          <div class="rp-bar">${rpBtnHtml('bc')}${timeFilterDropdown({
             className: 'month-filter-details-tq', align: 'right',
             start: filterStartTQ, end: filterEndTQ,
             startVar: 'filterStartTQ', endVar: 'filterEndTQ',
             module: 'tq', color: '#16a34a', isOpen: window.tqFilterOpen
-          })}
+          })}</div>
         </div>
       `;
 
@@ -4533,9 +4818,9 @@
 
       // --- 1b) Gợi ý kiểm tra bổ sung: bó > 5% và đơn vị chưa đủ độ phủ các vòng 2-4 ---
       window.__tqSug = data.units.filter(u => !tqIsExempt(u))
-        .map(u => { const ul = (data.logs || []).filter(l => l.unitId === u.id), nc = tqNeedCheck(u, ul), missed = kqMissedPrev(ul); return { u, nc, missed, score: kqScore(nc, missed, false) }; })
-        .filter(x => x.score < 99)
-        .sort(kqCmp);
+        .map(u => { const ul = (data.logs || []).filter(l => l.unitId === u.id), nc = tqNeedCheck(u, ul), missed = kqMissedPrev(ul), meta = kqMeta(u.id); return { u, nc, missed, meta, pinned: !!(meta && meta.pinned), score: kqScore(nc, missed, false) }; })
+        .filter(x => !kqSnoozeActive(x.meta) && (x.score < 99 || x.pinned))
+        .sort((a, b) => (b.pinned - a.pinned) || (a.pinned && b.pinned ? ((a.meta.pinOrder || 0) - (b.meta.pinOrder || 0)) : kqCmp(a, b)));
       const sgCur = window.__tqSug.filter(x => x.nc.notChecked).length, sgViol = window.__tqSug.filter(x => x.nc.prevViol || x.nc.curViol).length, sgFew = window.__tqSug.filter(x => x.nc.few).length;
       const suggestHtml = tqSec('sug', '#e11d48', '#fff', `
           <h3 style="margin:0; font-size:16px; font-weight:800; color:#1f2937;">Gợi ý kiểm tra bổ sung</h3>
@@ -4607,6 +4892,11 @@
       window.__tqTrend = { year, labels: trendLabels, series: trendSeries };
       if (!trendSeries[window.__tqTrendKey]) window.__tqTrendKey = 'all';
       const trAll = trendSeries.all, trChk = trAll.chk.reduce((a, b) => a + b, 0), trRate = trChk > 0 ? trAll.inv.reduce((a, b) => a + b, 0) / trChk * 100 : null;
+      const mixM = tqMixModel(filteredLogs);
+      const mixHtml = tqSec('mix', '#d97706', '#fff', `          <h3 style="margin:0; font-size:16px; font-weight:800; color:#1f2937;">Cơ cấu KĐTCLT theo mệnh giá</h3>
+          <div style="margin:2px 0 0; font-size:12.5px; color:#92400e; font-weight:600;">${esc(tqMixSub(mixM))} · ${(filterStartTQ && filterEndTQ) ? 'kỳ ' : ''}${esc(tqMixLabel())}</div>
+`, `          <div id="tq-mix-box">${tqMixBody(mixM)}</div>
+`);
       const trendHtml = tqSec('trend', '#d97706', '#fff', `          <h3 style="margin:0; font-size:16px; font-weight:800; color:#1f2937;">Xu hướng tỷ lệ KĐTCLT theo tháng (T01 – T12/${year})</h3>
           <div style="margin:2px 0 0; font-size:12.5px; color:#92400e; font-weight:600;">Tờ KĐTCLT / tờ kiểm tra theo tháng${trRate == null ? '' : ' · cả kỳ ' + tqPct(trRate)}</div>
 `, `          <div id="tq-trend-box">${tqTrendInner(window.__tqTrendKey)}</div>
@@ -4819,9 +5109,9 @@
           </details>
         </div>
         ${suggestHtml}
+        ${mixHtml}
         ${trendHtml}
         ${progressHtml}
-        ${compactHtml}
         <style>
           details > summary::-webkit-details-marker { display: none; }
           details.tq-sec[open] > summary .tq-chev { transform: rotate(180deg); }
@@ -4997,14 +5287,23 @@
     const kqFmtDate = s => { if (!s) return '—'; const y = s.slice(0, 4); return s.slice(8, 10) + '/' + s.slice(5, 7) + (y !== String(new Date().getFullYear()) ? '/' + y : ''); };
     const kqIsMobile = () => window.matchMedia('(max-width: 860px)').matches;
     const KQ_DIFF = { thua: 'Thừa', thieu: 'Thiếu', lan: 'Lẫn' };
-    window.__kq = window.__kq || { sel: '', f: 'all', doneOpen: false };
+    window.__kq = window.__kq || { sel: '', f: 'all', doneOpen: false, snzOpen: false, view: 'list', msort: 'prio' };
+    const KQ_SMALL = 50000;                                    // MG nhỏ: từ 50.000đ trở xuống
+    const kqSheetMode = () => kqIsMobile() || (window.__kq && window.__kq.view === 'matrix');
+    const KQ_I = {
+      pin: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 17v5"/><path d="M9 3h6l-1 6 3 3v2H7v-2l3-3-1-6z"/></svg>',
+      snooze: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+      grip: '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>',
+      note: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v12H8l-4 4z"/></svg>',
+      info: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>'
+    };
 
     function kqDenomPlan(unitId, logsArg) {
       const todayS = kqToday();
       const logs = (logsArg || (data.logs || []).filter(l => l && l.unitId === unitId)).filter(l => l && l.date)
         .slice().sort((a, b) => String(a.date).localeCompare(String(b.date)));
       const by = {};
-      KQ_DENS.forEach(v => { by[v] = { val: v, n: 0, fails: 0, last: null, today: false, state: 'never', rank: 99, rec: false }; });
+      KQ_DENS.forEach(v => { by[v] = { val: v, n: 0, fails: 0, last: null, today: false, state: 'never', rank: 99, rec: false, mand: '' }; });
       logs.forEach(l => {
         [[l.denom1, l.amount1, l.invalidAmount1, l.diff], [l.denom2, l.amount2, l.invalidAmount2, l.diff2]].forEach(([d, a, i, df]) => {
           const v = tqDenomVal(d), chk = Number(a) || 0, inv = Number(i) || 0, s = by[v];
@@ -5021,8 +5320,40 @@
         const ka = key(a), kb = key(b);
         return ka[0] - kb[0] || ka[1] - kb[1] || KQ_DENS.indexOf(a.val) - KQ_DENS.indexOf(b.val);
       });
-      ordered.forEach((s, i) => { s.rank = i; s.rec = !s.today && i < 2; });
-      return { rows, by, rec: ordered.filter(s => s.rec).map(s => s.val), hasFail: rows.some(s => s.state === 'fail' && !s.today) };
+
+      /* QUY TẮC MỆNH GIÁ NHỎ (≤ 50.000đ) — dựa vào LẦN KIỂM TRA GẦN NHẤT của đơn vị:
+           • Lần trước có MG nhỏ mà KHÔNG ĐẠT        → đề xuất kiểm tra lại MG đó
+           • Lần trước có MG nhỏ và ĐẠT              → miễn bắt buộc lần này
+           • Lần trước chưa có MG nhỏ / chưa KT lần nào → BẮT BUỘC có 1 MG nhỏ trong 2 MG gợi ý */
+      const lastDate = logs.length ? logs[logs.length - 1].date : '';
+      const prevSmall = [];
+      logs.filter(l => l.date === lastDate).forEach(l => {
+        [[l.denom1, l.amount1, l.invalidAmount1], [l.denom2, l.amount2, l.invalidAmount2]].forEach(([d, a, i]) => {
+          const v = tqDenomVal(d), chk = Number(a) || 0;
+          if (by[v] && v <= KQ_SMALL && chk > 0) prevSmall.push({ v, rate: (Number(i) || 0) / chk * 100 });
+        });
+      });
+      const rec = ordered.filter(s => !s.today).slice(0, 2);
+      const put = w => { if (rec.length < 2) rec.push(w); else rec[1] = w; };      // thay MG xếp thấp nhất
+      const labels = arr => [...new Set(arr.map(x => kqDenFull(x.v)))].join(', ');
+      const smallFail = prevSmall.filter(x => x.rate > TQ_BAD_BUNDLE_PCT).sort((a, b) => b.rate - a.rate);
+      let rule;
+      if (smallFail.length) {
+        rule = { mode: 'retest', text: `Lần kiểm tra trước (${kqFmtDate(lastDate)}) ${labels(smallFail)} không đạt (${tqPct(smallFail[0].rate)}) → đề xuất kiểm tra lại.` };
+        const w = by[smallFail[0].v];
+        if (!w.today) { if (!rec.includes(w)) put(w); w.mand = 'retest'; }
+      } else if (prevSmall.length) {
+        rule = { mode: 'exempt', text: `Lần kiểm tra trước (${kqFmtDate(lastDate)}) đã kiểm tra ${labels(prevSmall)} và đạt → lần này miễn bắt buộc MG từ ${kqDenFull(KQ_SMALL)} trở xuống.` };
+      } else {
+        rule = { mode: 'must', text: logs.length
+          ? `Lần kiểm tra trước (${kqFmtDate(lastDate)}) chưa kiểm tra MG từ ${kqDenFull(KQ_SMALL)} trở xuống → bắt buộc có 1 MG nhỏ trong gợi ý.`
+          : `Chưa có lần kiểm tra nào → bắt buộc có 1 MG từ ${kqDenFull(KQ_SMALL)} trở xuống trong gợi ý.` };
+        let w = rec.find(x => x.val <= KQ_SMALL);
+        if (!w) { w = ordered.find(x => x.val <= KQ_SMALL && !x.today); if (w) put(w); }
+        if (w) w.mand = 'must';
+      }
+      rec.concat(ordered.filter(x => !rec.includes(x))).forEach((x, i) => { x.rank = i; x.rec = rec.includes(x); });
+      return { rows, by, rec: rec.map(x => x.val), rule, hasFail: rows.some(x => x.state === 'fail' && !x.today) };
     }
 
     // Thứ tự ưu tiên: 1) chưa KT quý hiện tại  2) chưa KT ở các quý trước (trong năm)  3) vi phạm  4) mới KT 1–2 bó gần ngưỡng  5) có chênh lệch
@@ -5046,11 +5377,32 @@
         || ((b.nc.curRate || 0) - (a.nc.curRate || 0))
         || String(a.u.name).localeCompare(String(b.u.name), 'vi');
     }
-    // Danh sách ưu tiên: dùng chung bộ tiêu chí của Tổng quan (+ nhóm "có chênh lệch" ở mức thấp nhất như trước đây)
-    function kqBuildList() {
-      const todayS = kqToday(), now = tqNow(), yp = String(now.y);
+    /* ---------- Ghim / Hoãn theo TCTD ----------
+       Lưu trong collection `plans` (không còn dùng cho bảng lịch cũ) với id = 'kqm_' + id đơn vị, đồng bộ & sao lưu như dữ liệu khác. */
+    const KQ_META_PFX = 'kqm_';
+    const kqUser = () => ((window.getCurrentUser && window.getCurrentUser()) || {}).username || '';
+    function kqMeta(unitId) { return (data.plans || []).find(p => p && p.kqMeta && p.id === KQ_META_PFX + unitId) || null; }
+    function kqSnoozeActive(m, todayS) { return !!(m && m.snoozed && (!m.snoozeUntil || (todayS || kqToday()) < m.snoozeUntil)); }
+    function kqSnoozeExpired(m, todayS) { return !!(m && m.snoozed && m.snoozeUntil && (todayS || kqToday()) >= m.snoozeUntil); }
+    function kqAddDays(ds, n) { const p = ds.split('-').map(Number), d = new Date(p[0], p[1] - 1, p[2] + n), z = x => String(x).padStart(2, '0'); return d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate()); }
+    function kqNextQuarterStart() { const n = tqNow(), d = new Date(n.y, n.q * 3, 1), z = x => String(x).padStart(2, '0'); return d.getFullYear() + '-' + z(d.getMonth() + 1) + '-01'; }
+    function kqFmtDateTime(iso) { const d = new Date(iso); if (isNaN(d)) return ''; const z = x => String(x).padStart(2, '0'); return z(d.getDate()) + '/' + z(d.getMonth() + 1) + ' ' + z(d.getHours()) + ':' + z(d.getMinutes()); }
+    function kqSaveMeta(unitId, patch) {
+      if (!window.requireEdit()) return false;
+      data.plans = data.plans || [];
+      const cur = kqMeta(unitId) || { id: KQ_META_PFX + unitId, kqMeta: true, unitId, pinned: false, pinOrder: 0, snoozed: false, snoozeUntil: '', snoozeReason: '' };
+      upsert('plans', Object.assign({}, cur, patch));
+      return true;
+    }
+    // upsert() đã vẽ lại tab; chỉ cần làm mới bảng chi tiết đang mở dạng sheet
+    function kqAfterMeta(id) {
+      const panel = document.querySelector('#kq-sheet .kq-sheet-panel');
+      if (panel && id) { const d = panel.querySelector('.kq-detail'); if (d) d.outerHTML = kqDetailHtml(id); }
+    }
+
+    function kqAllItems() {
+      const todayS = kqToday(), now = tqNow(), yp = String(now.y), out = [];
       const isD = x => x === 'thua' || x === 'thieu' || x === 'lan';
-      const todo = [], done = [];
       (data.units || []).forEach(u => {
         if (tqIsExempt(u)) return;
         if (filterUnit !== 'all' && u.id !== filterUnit) return;
@@ -5059,18 +5411,30 @@
         const nc = tqNeedCheck(u, uLogs);
         const hasDiff = uLogs.some(l => l.date && l.date.startsWith(yp) && tqRoundOf(l.date) === now.q && (isD(l.diff) || isD(l.diff2)));
         const doneToday = uLogs.some(l => l.date === todayS);
-        const missed = kqMissedPrev(uLogs), score = kqScore(nc, missed, hasDiff);
-        if (!doneToday && score >= 99) return;
-        (doneToday ? done : todo).push({ u, nc, hasDiff, missed, doneToday, score, plan: kqDenomPlan(u.id, uLogs) });
+        const missed = kqMissedPrev(uLogs), score = kqScore(nc, missed, hasDiff), meta = kqMeta(u.id);
+        out.push({ u, nc, hasDiff, missed, doneToday, score, plan: kqDenomPlan(u.id, uLogs), meta, pinned: !!(meta && meta.pinned), snoozed: kqSnoozeActive(meta, todayS), snzExpired: kqSnoozeExpired(meta, todayS) });
       });
-      const cmp = kqCmp;
-      todo.sort(cmp); done.sort(cmp);
-      return { todo, done };
+      return out;
+    }
+    // Danh sách: Đi hôm nay (ghim) → ưu tiên theo quy tắc → (gập) đã KT hôm nay / đang hoãn
+    function kqBuildList() {
+      const todo = [], done = [], pins = [], snoozed = [];
+      kqAllItems().forEach(it => {
+        if (it.doneToday) { done.push(it); return; }
+        if (it.snoozed) { snoozed.push(it); return; }
+        if (it.pinned) { pins.push(it); return; }
+        if (it.score >= 99) return;
+        todo.push(it);
+      });
+      pins.sort((a, b) => ((a.meta.pinOrder || 0) - (b.meta.pinOrder || 0)) || kqCmp(a, b));
+      todo.sort(kqCmp); done.sort(kqCmp);
+      snoozed.sort((a, b) => String(a.meta.snoozeUntil || '9999').localeCompare(String(b.meta.snoozeUntil || '9999')) || kqCmp(a, b));
+      return { todo, done, pins, snoozed };
     }
     function kqItem(unitId) {
       const u = (data.units || []).find(x => x.id === unitId); if (!u) return null;
-      const uLogs = (data.logs || []).filter(l => l && l.unitId === u.id), todayS = kqToday();
-      return { u, nc: tqNeedCheck(u, uLogs), missed: kqMissedPrev(uLogs), hasDiff: false, doneToday: uLogs.some(l => l.date === todayS), plan: kqDenomPlan(u.id, uLogs), exempt: tqIsExempt(u) };
+      const uLogs = (data.logs || []).filter(l => l && l.unitId === u.id), todayS = kqToday(), meta = kqMeta(u.id);
+      return { u, nc: tqNeedCheck(u, uLogs), missed: kqMissedPrev(uLogs), hasDiff: false, doneToday: uLogs.some(l => l.date === todayS), plan: kqDenomPlan(u.id, uLogs), exempt: tqIsExempt(u), meta, pinned: !!(meta && meta.pinned), snoozed: kqSnoozeActive(meta, todayS), snzExpired: kqSnoozeExpired(meta, todayS) };
     }
 
     /* ---------- các mảnh giao diện ---------- */
@@ -5088,34 +5452,56 @@
       const p = tqReasonPills(it.nc).slice();
       if (it.missed && it.missed.length) p.push(kqMissedPill(it.missed));
       if (it.hasDiff) p.push(tqPill('#eff6ff', '#1d4ed8', '#bfdbfe', 'Có chênh lệch Quý ' + it.nc.nowQ));
+      if (it.snzExpired) p.push(tqPill('#fff7ed', '#c2410c', '#fed7aa', 'Hết hạn hoãn' + (it.meta && it.meta.snoozeReason ? ' · ' + String(it.meta.snoozeReason).slice(0, 28) : '')));
       return p.join('');
     }
-    function kqItemHtml(it, idx, selId, isDone) {
-      const tone = isDone ? '#10b981' : ({ 1: '#f59e0b', 2: '#f97316', 3: '#e11d48', 4: '#eab308', 5: '#3b82f6' }[it.score] || '#9ca3af');
-      const on = selId === it.u.id;
+    // mode: 'todo' | 'pin' | 'done' | 'snz'  (true → 'done')
+    function kqItemHtml(it, idx, selId, modeArg) {
+      const mode = modeArg === true ? 'done' : (modeArg || 'todo');
+      const tone = mode === 'done' ? '#10b981' : mode === 'pin' ? '#b45309' : mode === 'snz' ? '#9ca3af' : ({ 1: '#f59e0b', 2: '#f97316', 3: '#e11d48', 4: '#eab308', 5: '#3b82f6' }[it.score] || '#9ca3af');
+      const on = selId === it.u.id, id = esc(it.u.id), nm = esc(it.u.name), m = it.meta || {};
       let body;
-      if (isDone) {
+      if (mode === 'done') {
         const t = it.plan.rows.filter(s => s.today).map(s => tqPill(s.last.rate > TQ_BAD_BUNDLE_PCT ? '#fff1f2' : '#f0fdf4', s.last.rate > TQ_BAD_BUNDLE_PCT ? '#be123c' : '#047857', s.last.rate > TQ_BAD_BUNDLE_PCT ? '#fecdd3' : '#bbf7d0', kqDenShort(s.val) + ' · ' + tqPct(s.last.rate))).join('');
         body = `<span class="kq-pills">${t}</span>`;
+      } else if (mode === 'snz') {
+        body = `<span class="kq-pills">${tqPill('#f3f4f6', '#374151', '#e5e7eb', m.snoozeUntil ? 'Hoãn đến ' + kqFmtDate(m.snoozeUntil) : 'Hoãn không thời hạn')}</span><span class="kq-item-note">${esc(m.snoozeReason || '')}</span>`;
       } else {
-        body = `<span class="kq-pills">${kqReasons(it)}</span>${kqRecLine(it.plan)}`;
+        const lead = '';
+        body = `<span class="kq-pills">${lead}${kqReasons(it)}</span>${kqRecLine(it.plan)}`;
       }
-      return `<button type="button" class="kq-item${on ? ' on' : ''}${isDone ? ' done' : ''}" data-id="${esc(it.u.id)}" ${on ? 'aria-current="true"' : ''} style="--tone:${tone}" onclick="kqPick('${esc(it.u.id)}')">
-        <span class="kq-rank">${isDone ? '✓' : idx + 1}</span>
-        <span class="kq-item-main"><span class="kq-item-name">${esc(it.u.name)}</span>${body}</span>
-        <svg class="kq-go" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
-      </button>`;
+      const noteLine = '';
+      const rankInner = mode === 'done' ? '✓' : mode === 'snz' ? KQ_I.snooze.replace('width="18" height="18"', 'width="15" height="15"') : idx + 1;
+      const pinBtn = `<button type="button" class="kq-ibtn${it.pinned ? ' on' : ''}" aria-pressed="${it.pinned}" title="${it.pinned ? 'Bỏ ghim' : 'Ghim vào “Đi hôm nay”'}" aria-label="${it.pinned ? 'Bỏ ghim' : 'Ghim đi hôm nay'}: ${nm}" onclick="kqTogglePin('${id}')">${KQ_I.pin}</button>`;
+      let acts = '';
+      if (mode === 'todo') acts = pinBtn + `<button type="button" class="kq-ibtn" title="Hoãn kiểm tra…" aria-label="Hoãn: ${nm}" onclick="kqOpenSnooze('${id}')">${KQ_I.snooze}</button>`;
+      else if (mode === 'pin') acts = pinBtn + `<button type="button" class="kq-ibtn kq-grip" data-grip="${id}" title="Kéo để sắp thứ tự (hoặc phím ↑ ↓)" aria-label="Sắp thứ tự ${nm}: dùng phím mũi tên lên xuống">${KQ_I.grip}</button>`;
+      else if (mode === 'done') acts = it.pinned ? pinBtn : '';
+      else if (mode === 'snz') acts = `<button type="button" class="kq-txtbtn" aria-label="Bỏ hoãn: ${nm}" onclick="kqUnsnooze('${id}')">Bỏ hoãn</button>`;
+      return `<div class="kq-row${mode === 'pin' ? ' pinrow' : ''}" data-row="${id}">
+        <button type="button" class="kq-item${on ? ' on' : ''}${mode === 'done' ? ' done' : ''}" data-id="${id}" ${on ? 'aria-current="true"' : ''} style="--tone:${tone}" onclick="kqPick('${id}')">
+          <span class="kq-rank">${rankInner}</span>
+          <span class="kq-item-main"><span class="kq-item-name">${nm}</span>${body}${noteLine}</span>
+        </button>${acts ? `<div class="kq-acts">${acts}</div>` : ''}
+      </div>`;
+    }
+    function kqRecLabel(s) {
+      if (s.mand === 'must') return 'Bắt buộc MG ≤ ' + kqDenFull(KQ_SMALL);
+      if (s.state === 'fail') return 'Kiểm tra lại';
+      return s.state === 'never' ? 'Chưa kiểm tra' : 'Luân phiên';
     }
     function kqNoteFor(s) {
+      const pre = s.mand === 'must' ? `Bắt buộc 1 MG ≤ ${kqDenFull(KQ_SMALL)} · ` : '';
       if (s.today) return `Đã kiểm tra hôm nay (${tqPct(s.last.rate)})`;
-      if (s.state === 'fail') return `Lần trước ${tqPct(s.last.rate)} > ${TQ_BAD_BUNDLE_PCT}% → kiểm tra lại`;
-      if (s.state === 'never') return 'Chưa có kết quả nào → nên kiểm tra';
-      return s.rec ? `Lần trước ${tqPct(s.last.rate)} đạt → luân phiên (kiểm tra cũ nhất ${kqFmtDate(s.last.date)})` : `Đạt ${tqPct(s.last.rate)} → chưa cần kiểm tra lại`;
+      if (s.state === 'fail') return pre + `Lần trước ${tqPct(s.last.rate)} > ${TQ_BAD_BUNDLE_PCT}% → kiểm tra lại`;
+      if (s.state === 'never') return pre + 'Chưa có kết quả nào → nên kiểm tra';
+      return pre + (s.rec ? `Lần trước ${tqPct(s.last.rate)} đạt → luân phiên (kiểm tra cũ nhất ${kqFmtDate(s.last.date)})` : `Đạt ${tqPct(s.last.rate)} → chưa cần kiểm tra lại`);
     }
     function kqDenRow(s) {
       const bc = s.state === 'fail' ? '#e11d48' : (s.state === 'pass' && s.last.rate >= TQ_NEAR_PCT) ? '#f59e0b' : '#10b981';
       const w = s.last ? Math.min(100, s.last.rate / 10 * 100) : 0;
       const badge = s.today ? tqPill('#f0fdf4', '#047857', '#bbf7d0', 'Đã KT hôm nay')
+        : s.mand === 'must' ? tqPill('#f5f3ff', '#6d28d9', '#ddd6fe', 'Bắt buộc ≤ ' + kqDenFull(KQ_SMALL))
         : s.state === 'fail' ? tqPill('#fff1f2', '#be123c', '#fecdd3', 'Kiểm tra lại')
           : s.state === 'never' ? tqPill('#fffbeb', '#b45309', '#fde68a', 'Chưa kiểm tra')
             : s.rec ? tqPill('#eff6ff', '#1d4ed8', '#bfdbfe', 'Luân phiên') : tqPill('#f0fdf4', '#047857', '#bbf7d0', 'Đạt');
@@ -5203,13 +5589,13 @@
     };
 
     window.kqNextTodoUnit = function (currentId) {
-      const L = kqBuildList();
-      if (L.todo.length > 0) {
-        const nextItem = L.todo.find(x => x.u.id !== currentId) || L.todo[0];
+      const L = kqBuildList(), Q = L.pins.concat(L.todo);
+      if (Q.length > 0) {
+        const nextItem = Q.find(x => x.u.id !== currentId) || Q[0];
         if (nextItem) {
           window.__kq.sel = nextItem.u.id;
           kqRefresh();
-          if (kqIsMobile()) kqOpenSheet(nextItem.u.id);
+          if (kqSheetMode()) kqOpenSheet(nextItem.u.id);
         }
       } else {
         if (typeof showToast === 'function') showToast('Tất cả TCTD ưu tiên đã hoàn thành hôm nay!', 'green');
@@ -5311,20 +5697,20 @@
       };
 
       // Ghi nhớ vị trí hiện tại TRƯỚC khi lưu để chuyển đúng sang đơn vị đứng sau nó
-      const preList = kqBuildList().todo, preIdx = preList.findIndex(x => x.u.id === unitId);
+      const preB = kqBuildList(), preList = preB.pins.concat(preB.todo), preIdx = preList.findIndex(x => x.u.id === unitId);
       const afterIds = preIdx >= 0 ? preList.slice(preIdx + 1).map(x => x.u.id) : [];
 
       upsert('logs', rec);
 
       if (goToNext) {
         // Tìm TCTD kế tiếp trong danh sách todo
-        const curL = kqBuildList();
-        if (curL.todo.length > 0) {
-          const nextItem = curL.todo.find(x => afterIds.includes(x.u.id)) || curL.todo.find(x => x.u.id !== unitId) || curL.todo[0];
+        const curL = kqBuildList(), curQ = curL.pins.concat(curL.todo);
+        if (curQ.length > 0) {
+          const nextItem = curQ.find(x => afterIds.includes(x.u.id)) || curQ.find(x => x.u.id !== unitId) || curQ[0];
           if (nextItem) {
             window.__kq.sel = nextItem.u.id;
             kqRefresh();
-            if (kqIsMobile()) kqOpenSheet(nextItem.u.id);
+            if (kqSheetMode()) kqOpenSheet(nextItem.u.id);
             if (typeof showToast === 'function') showToast(`✓ Đã lưu! Đã chuyển sang ${nextItem.u.name}`, 'green');
             setTimeout(() => {
               const nextInp = kqQ('kq-qinv-1');
@@ -5334,11 +5720,11 @@
           }
         }
         kqRefresh();
-        if (kqIsMobile()) kqCloseSheet();
+        if (kqSheetMode()) kqCloseSheet();
         if (typeof showToast === 'function') showToast('🎉 Tuyệt vời! Bạn đã hoàn thành toàn bộ danh sách ưu tiên hôm nay!', 'green');
       } else {
         kqRefresh();
-        if (kqIsMobile()) kqOpenSheet(unitId);
+        if (kqSheetMode()) kqOpenSheet(unitId);
         if (typeof showToast === 'function') showToast('✓ Đã lưu kết quả kiểm tra thành công!', 'green');
       }
     };
@@ -5363,7 +5749,7 @@
               <div class="kq-qcard-den">
                 <span class="kq-rn" style="background:#b45309;">1</span>
                 ${kqDenChip(d1)}
-                <span style="font-size:12px; font-weight:700; color:#b45309;">${s1.state === 'fail' ? 'Kiểm tra lại' : (s1.state === 'never' ? 'Chưa kiểm tra' : 'Luân phiên')}</span>
+                <span style="font-size:12px; font-weight:700; color:#b45309;">${kqRecLabel(s1)}</span>
               </div>
             </div>
             <div class="kq-qfields">
@@ -5397,7 +5783,7 @@
               <div class="kq-qcard-den">
                 <span class="kq-rn" style="background:#78350f;">2</span>
                 ${kqDenChip(d2)}
-                <span style="font-size:12px; font-weight:700; color:#4b5563;">${s2.state === 'fail' ? 'Kiểm tra lại' : (s2.state === 'never' ? 'Chưa kiểm tra' : 'Luân phiên')}</span>
+                <span style="font-size:12px; font-weight:700; color:#4b5563;">${kqRecLabel(s2)}</span>
               </div>
               <label style="font-size:11.5px; font-weight:700; color:#6b7280; display:inline-flex; align-items:center; gap:4px; cursor:pointer;">
                 <input type="checkbox" id="kq-qskip-2" onchange="kqQuickToggleSkip2(this)"> Bỏ qua
@@ -5477,7 +5863,10 @@
           <div class="kq-d-sub">Quý ${now.q} (${tqRoundMonths(now.q)}) · còn ${tqDaysLeft(now)} ngày</div>
           <h3>${esc(it.u.name)}</h3>
           <div class="kq-pills" style="margin-top:8px">${reasons || tqPill('#f0fdf4', '#047857', '#bbf7d0', 'Không có cảnh báo trong Quý ' + now.q)}</div>
+          ${kqHeadActs(it)}
         </div>
+        ${kqSnoozeBanner(it)}
+        ${kqRuleHtml(p)}
         ${quickFormHtml}
         <div class="kq-sec-t">Tổng hợp theo mệnh giá <span class="kq-sec-s">· kết quả lần kiểm tra gần nhất, vạch xám = ngưỡng ${TQ_BAD_BUNDLE_PCT}%</span></div>
         <div class="kq-den-head" aria-hidden="true"><span>Mệnh giá</span><span>KT gần nhất</span><span>Tỷ lệ KĐTCLT</span><span>Số lần</span><span>Gợi ý</span></div>
@@ -5486,33 +5875,193 @@
       </div>`;
     }
 
+    /* ---------- khối giao diện: nút ghim/hoãn, banner, ghi chú, quy tắc ---------- */
+    function kqHeadActs(it) {
+      const id = esc(it.u.id), m = it.meta || {}, snz = it.snoozed;
+      return `<div class="kq-d-acts">
+        <button type="button" class="kq-chipbtn${it.pinned ? ' on' : ''}" aria-pressed="${it.pinned}" onclick="kqTogglePin('${id}')">${KQ_I.pin}<span>${it.pinned ? 'Đã ghim · Đi hôm nay' : 'Ghim đi hôm nay'}</span></button>
+        ${snz ? `<button type="button" class="kq-chipbtn" onclick="kqUnsnooze('${id}')">${KQ_I.snooze}<span>Bỏ hoãn</span></button>` : `<button type="button" class="kq-chipbtn" onclick="kqOpenSnooze('${id}')">${KQ_I.snooze}<span>Hoãn…</span></button>`}
+      </div>`;
+    }
+    function kqSnoozeBanner(it) {
+      const m = it.meta; if (!m || !m.snoozed) return '';
+      const id = esc(it.u.id), why = esc(m.snoozeReason || '(không ghi lý do)');
+      if (it.snzExpired) return `<div class="kq-snz-banner exp" role="status"><b>Đã hết hạn hoãn (${kqFmtDate(m.snoozeUntil)})</b> · Lý do trước đó: ${why}</div>`;
+      return `<div class="kq-snz-banner" role="status"><span><b>Đang hoãn${m.snoozeUntil ? ' đến ' + kqFmtDate(m.snoozeUntil) : ' · không thời hạn'}</b> · Lý do: ${why}</span><button type="button" class="kq-txtbtn" onclick="kqUnsnooze('${id}')">Bỏ hoãn</button></div>`;
+    }
+    function kqRuleHtml(p) {
+      if (!p || !p.rule) return '';
+      return `<div class="kq-rule ${p.rule.mode}">${KQ_I.info}<span>${esc(p.rule.text)}</span></div>`;
+    }
+    /* ---------- Ghim "Đi hôm nay" ---------- */
+    window.kqTogglePin = function (id) {
+      const m = kqMeta(id), on = !(m && m.pinned);
+      const maxOrder = (data.plans || []).filter(p => p && p.kqMeta && p.pinned).reduce((a, p) => Math.max(a, p.pinOrder || 0), 0);
+      if (kqSaveMeta(id, on ? { pinned: true, pinOrder: maxOrder + 1, snoozed: false, snoozeUntil: '', snoozeReason: '' } : { pinned: false })) kqAfterMeta(id);
+    };
+    window.kqUnpinAll = function () {
+      const ids = kqBuildList().pins.map(x => x.u.id); if (!ids.length) return;
+      if (!window.requireEdit()) return;
+      if (!confirm(`Bỏ ghim ${ids.length} TCTD khỏi “Đi hôm nay”?`)) return;
+      ids.forEach(id => kqSaveMeta(id, { pinned: false }));
+    };
+    function kqSetPinOrder(ids) {
+      if (!window.requireEdit()) return;
+      ids.forEach((id, i) => { const m = kqMeta(id); if (m && (m.pinOrder || 0) !== i + 1) kqSaveMeta(id, { pinOrder: i + 1 }); });
+    }
+    window.kqMovePin = function (id, dir) {
+      const ids = kqBuildList().pins.map(x => x.u.id), i = ids.indexOf(id), j = i + dir;
+      if (i < 0 || j < 0 || j >= ids.length) return;
+      ids.splice(j, 0, ids.splice(i, 1)[0]); kqSetPinOrder(ids);
+      setTimeout(() => { const g = document.querySelector('.kq-grip[data-grip="' + id + '"]'); if (g) g.focus(); }, 60);
+    };
+    (function () {          // kéo-thả bằng chuột/cảm ứng (không di chuyển DOM khi kéo, chỉ hiện vạch chèn) + phím ↑ ↓
+      let drag = null;
+      const clear = () => document.querySelectorAll('.kq-row.drop-before,.kq-row.drop-after').forEach(r => r.classList.remove('drop-before', 'drop-after'));
+      document.addEventListener('pointerdown', e => {
+        const g = e.target.closest && e.target.closest('.kq-grip'); if (!g) return;
+        const row = g.closest('.kq-row'); if (!row) return; e.preventDefault();
+        drag = { row, list: row.parentElement, target: null, after: false }; row.classList.add('dragging');
+      });
+      document.addEventListener('pointermove', e => {
+        if (!drag) return; clear(); drag.target = null;
+        const rows = Array.from(drag.list.children).filter(r => r.classList.contains('kq-row') && r !== drag.row);
+        for (const r of rows) { const b = r.getBoundingClientRect(); if (e.clientY >= b.top && e.clientY <= b.bottom) { drag.target = r; drag.after = e.clientY > b.top + b.height / 2; r.classList.add(drag.after ? 'drop-after' : 'drop-before'); break; } }
+      });
+      document.addEventListener('pointerup', () => {
+        if (!drag) return; const d = drag; drag = null; clear(); d.row.classList.remove('dragging'); if (!d.target) return;
+        const me = d.row.dataset.row, ids = Array.from(d.list.children).filter(r => r.classList.contains('kq-row')).map(r => r.dataset.row).filter(x => x !== me);
+        const ti = ids.indexOf(d.target.dataset.row); ids.splice(d.after ? ti + 1 : ti, 0, me); kqSetPinOrder(ids);
+      });
+      document.addEventListener('pointercancel', () => { if (drag) { clear(); drag.row.classList.remove('dragging'); drag = null; } });
+      document.addEventListener('keydown', e => {
+        const g = e.target.closest && e.target.closest('.kq-grip'); if (!g || (e.key !== 'ArrowUp' && e.key !== 'ArrowDown')) return;
+        e.preventDefault(); kqMovePin(g.dataset.grip, e.key === 'ArrowUp' ? -1 : 1);
+      });
+    })();
+
+    /* ---------- Hoãn kèm lý do ---------- */
+    window.kqCloseSnooze = function () { const o = document.getElementById('kq-snz'); if (o) o.remove(); if (!document.getElementById('kq-sheet')) document.body.style.overflow = ''; };
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.getElementById('kq-snz')) { e.stopImmediatePropagation(); kqCloseSnooze(); } }, true);
+    window.kqOpenSnooze = function (id) {
+      if (!window.requireEdit()) return;
+      const it = kqItem(id); if (!it) return; kqCloseSnooze();
+      const reasons = ['Đóng cửa / nghỉ', 'Chưa có hàng', 'Hẹn ngày khác', 'Khác'];
+      const durs = [['1', 'Hết hôm nay'], ['3', '3 ngày'], ['7', '1 tuần'], ['q', 'Hết quý'], ['none', 'Không thời hạn']];
+      const ov = document.createElement('div');
+      ov.id = 'kq-snz'; ov.className = 'kq-sheet kq-snz-ov'; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-labelledby', 'kq-snz-t');
+      ov.onclick = e => { if (e.target === ov) kqCloseSnooze(); };
+      ov.innerHTML = `<div class="kq-sheet-panel kq-snz-panel"><div class="kq-grab"></div>
+        <h3 class="kq-snz-t" id="kq-snz-t">Hoãn kiểm tra</h3><div class="kq-snz-u">${esc(it.u.name)}</div>
+        <div class="kq-snz-l">Lý do hoãn <span aria-hidden="true">*</span></div>
+        <div class="kq-snz-opts" role="radiogroup" aria-label="Lý do hoãn">${reasons.map(r => `<label class="kq-opt"><input type="radio" name="kq-snz-r" value="${esc(r)}"><span>${r}</span></label>`).join('')}</div>
+        <input type="text" id="kq-snz-d" class="kq-snz-inp" maxlength="80" placeholder="Ghi chú thêm / lý do khác" aria-label="Ghi chú thêm về lý do hoãn">
+        <div class="kq-snz-l">Hoãn trong</div>
+        <div class="kq-snz-opts" role="radiogroup" aria-label="Thời gian hoãn">${durs.map((d, i) => `<label class="kq-opt"><input type="radio" name="kq-snz-t" value="${d[0]}"${d[0] === '3' ? ' checked' : ''}><span>${d[1]}</span></label>`).join('')}</div>
+        <label class="kq-snz-l" for="kq-snz-date">Hoặc hiện lại vào ngày</label>
+        <input type="date" id="kq-snz-date" class="kq-snz-inp" min="${kqAddDays(kqToday(), 1)}">
+        <div class="kq-snz-f"><button type="button" class="kq-btn" onclick="kqCloseSnooze()">Hủy</button><button type="button" class="kq-btn pri" onclick="kqConfirmSnooze('${esc(id)}')">Hoãn kiểm tra</button></div></div>`;
+      document.body.appendChild(ov); document.body.style.overflow = 'hidden';
+      const first = ov.querySelector('input[name=kq-snz-r]'); if (first) first.focus();
+    };
+    window.kqConfirmSnooze = function (id) {
+      const ov = document.getElementById('kq-snz'); if (!ov) return;
+      const warn = m => { if (typeof showToast === 'function') showToast(m, 'amber'); else alert(m); };
+      const r = ov.querySelector('input[name=kq-snz-r]:checked'); if (!r) return warn('Chọn lý do hoãn (đóng cửa, chưa có hàng…)');
+      const extra = ov.querySelector('#kq-snz-d').value.trim();
+      if (r.value === 'Khác' && !extra) { ov.querySelector('#kq-snz-d').focus(); return warn('Nhập lý do khi chọn “Khác”'); }
+      const reason = r.value === 'Khác' ? extra : (r.value + (extra ? ' — ' + extra : ''));
+      const todayS = kqToday(), custom = ov.querySelector('#kq-snz-date').value;
+      let until = '';
+      if (custom) { if (custom <= todayS) return warn('Ngày hiện lại phải sau hôm nay'); until = custom; }
+      else { const t = ov.querySelector('input[name=kq-snz-t]:checked'), v = t ? t.value : '3'; until = v === 'none' ? '' : v === 'q' ? kqNextQuarterStart() : kqAddDays(todayS, +v); }
+      kqCloseSnooze();
+      if (kqSaveMeta(id, { snoozed: true, snoozeUntil: until, snoozeReason: reason, pinned: false })) {
+        kqAfterMeta(id);
+        if (typeof showToast === 'function') showToast('Đã hoãn · ' + reason + (until ? ' · hiện lại ' + kqFmtDate(until) : ''), 'green');
+      }
+    };
+    window.kqUnsnooze = function (id) { if (kqSaveMeta(id, { snoozed: false, snoozeUntil: '', snoozeReason: '' })) kqAfterMeta(id); };
+
+    /* ---------- Ma trận TCTD × mệnh giá ---------- */
+    function kqMatrixHtml() {
+      const K = window.__kq, items = kqAllItems(), N = items.length, SORT = K.msort || 'prio';
+      const cols = KQ_DENS.map(v => items.reduce((a, it) => { const s = it.plan.by[v]; if (s.last) { a.chk++; if (s.last.rate > TQ_BAD_BUNDLE_PCT) a.fail++; else a.pass++; } return a; }, { v, chk: 0, pass: 0, fail: 0 }));
+      const minChk = Math.min.apply(null, cols.map(c => c.chk));
+      const gap = it => KQ_DENS.filter(v => !it.plan.by[v].last).length;
+      const rk = s => !s.last ? 0 : s.last.rate > TQ_BAD_BUNDLE_PCT ? 1 : 2;
+      const rows = items.slice();
+      if (SORT === 'name') rows.sort((a, b) => String(a.u.name).localeCompare(String(b.u.name), 'vi'));
+      else if (SORT === 'gap') rows.sort((a, b) => gap(b) - gap(a) || kqCmp(a, b));
+      else if (/^\d+$/.test(SORT)) { const v = +SORT; rows.sort((a, b) => rk(a.plan.by[v]) - rk(b.plan.by[v]) || kqCmp(a, b)); }
+      else rows.sort((a, b) => (b.pinned - a.pinned) || kqCmp(a, b));
+      const lowest = cols.filter(c => c.chk === minChk);
+      const insight = !N ? '' : (minChk >= N
+        ? `<span class="kq-mx-ok">Mọi mệnh giá đã được kiểm tra ở tất cả ${N} TCTD.</span>`
+        : `<span>Ít được kiểm tra nhất:</span> ${lowest.map(c => `<b>${kqDenFull(c.v)}</b> (${c.chk}/${N} TCTD)`).join(' · ')}`);
+      const cell = (it, v) => {
+        const s = it.plan.by[v], id = esc(it.u.id); let cls = 'n', txt = '–', lab = 'chưa kiểm tra';
+        if (s.last) { const r = s.last.rate; cls = r > TQ_BAD_BUNDLE_PCT ? 'f' : (r >= TQ_NEAR_PCT ? 'w' : 'p'); txt = (cls === 'f' ? '✕ ' : '✓ ') + r.toFixed(1); lab = (cls === 'f' ? 'không đạt ' : 'đạt ') + tqPct(r) + ' · ' + kqFmtDate(s.last.date); }
+        return `<td><button type="button" class="kq-mx-c ${cls}${s.today ? ' td' : ''}" onclick="kqPick('${id}')" title="${esc(it.u.name)} · ${kqDenFull(v)}: ${lab}" aria-label="${esc(it.u.name)}, ${kqDenFull(v)}: ${lab}${s.rec ? ', đang được gợi ý' : ''}">${txt}</button></td>`;
+      };
+      const head = cols.map(c => `<th scope="col" class="kq-mx-h"><button type="button" class="kq-mx-hb${SORT === String(c.v) ? ' on' : ''}" aria-label="Sắp xếp theo ${kqDenFull(c.v)} (chưa kiểm tra lên đầu)" onclick="kqMxSort('${c.v}')">${kqDenChip(c.v)}</button></th>`).join('');
+      const body = rows.map(it => {
+        const id = esc(it.u.id), g = gap(it);
+        const marks = (it.pinned ? `<span class="kq-mk pin" title="Đi hôm nay">${KQ_I.pin.replace('width="18" height="18"', 'width="12" height="12"')}</span>` : '') + (it.snoozed ? `<span class="kq-mk snz" title="Đang hoãn">${KQ_I.snooze.replace('width="18" height="18"', 'width="12" height="12"')}</span>` : '') + (it.doneToday ? `<span class="kq-mk ok" title="Đã kiểm tra hôm nay">✓</span>` : '');
+        return `<tr><th scope="row" class="kq-mx-n"><button type="button" class="kq-mx-name" onclick="kqPick('${id}')">${esc(it.u.name)}</button><span class="kq-mx-marks">${marks}</span></th>${KQ_DENS.map(v => cell(it, v)).join('')}<td class="kq-mx-gap${g ? ' has' : ''}">${g}/6</td></tr>`;
+      }).join('');
+      const foot = `<tr><th scope="row" class="kq-mx-n">Đã kiểm tra</th>${cols.map(c => `<td class="kq-mx-cov${N && c.chk === minChk && minChk < N ? ' low' : ''}"><b>${c.chk}/${N}</b><i style="--w:${N ? Math.round(c.chk / N * 100) : 0}%"></i><small>${c.fail ? c.fail + ' không đạt' : 'không có vi phạm'}</small>${N && c.chk === minChk && minChk < N ? '<em>Ít nhất</em>' : ''}</td>`).join('')}<td></td></tr>`;
+      const opt = (v, t) => `<option value="${v}"${SORT === v ? ' selected' : ''}>${t}</option>`;
+      return `<div class="kq-mx">
+        <div class="kq-mx-top"><div class="kq-mx-insight" role="status">${insight}</div>
+          <label class="kq-mx-sort">Sắp xếp <select onchange="kqMxSort(this.value)">${opt('prio', 'Theo ưu tiên')}${opt('gap', 'Nhiều MG chưa KT nhất')}${opt('name', 'Tên A–Z')}${/^\d+$/.test(SORT) ? opt(SORT, 'Theo ' + kqDenFull(+SORT)) : ''}</select></label></div>
+        <div class="kq-mx-legend" aria-hidden="true"><span><i class="p"></i>Đạt</span><span><i class="w"></i>Gần ngưỡng (≥ ${TQ_NEAR_PCT}%)</span><span><i class="f"></i>Không đạt (&gt; ${TQ_BAD_BUNDLE_PCT}%)</span><span><i class="n"></i>Chưa kiểm tra</span><span class="kq-mx-lg-t">Số trong ô = tỷ lệ KĐTCLT lần kiểm tra gần nhất (%)</span></div>
+        <div class="kq-mx-scroll" tabindex="0" role="region" aria-label="Ma trận TCTD theo mệnh giá"><table class="kq-mx-t"><thead><tr><th scope="col" class="kq-mx-n kq-mx-corner"><button type="button" class="kq-mx-hb${SORT === 'name' ? ' on' : ''}" onclick="kqMxSort('name')">TCTD (${N})</button></th>${head}<th scope="col" class="kq-mx-h kq-mx-gh">Thiếu</th></tr></thead><tbody>${body || `<tr><td colspan="8" class="kq-empty">Không có TCTD nào.</td></tr>`}</tbody><tfoot>${foot}</tfoot></table></div></div>`;
+    }
+    window.kqMxSort = function (v) { const K = window.__kq; K.msort = (K.msort === v && v !== 'prio') ? 'prio' : v; kqRefresh(); };
+    window.kqSetView = function (v) { window.__kq.view = v; kqCloseSheet(); kqRefresh(); };
+    window.kqToggleSnz = function () { window.__kq.snzOpen = !window.__kq.snzOpen; kqRefresh(); };
+
     /* ---------- trang chính ---------- */
     function kqRootHtml() {
       const K = window.__kq, L = kqBuildList(), now = tqNow(), d = new Date();
+      K.view = K.view || 'list';
       const WD = ['Chủ nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
       const dateTxt = WD[d.getDay()] + ', ' + String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear();
+      const act = L.pins.concat(L.todo);
       const cnt = { all: L.todo.length, cur: 0, miss: 0, viol: 0, few: 0, den: 0, diff: 0 };
       L.todo.forEach(x => { if (x.nc.notChecked) cnt.cur++; if (x.missed.length) cnt.miss++; if (x.nc.prevViol || x.nc.curViol) cnt.viol++; if (x.nc.few) cnt.few++; if (x.plan.hasFail) cnt.den++; if (x.hasDiff) cnt.diff++; });
+      const denAll = act.filter(x => x.plan.hasFail).length;
       const F = K.f;
       const vis = L.todo.filter(x => F === 'all' || (F === 'cur' && x.nc.notChecked) || (F === 'miss' && x.missed.length) || (F === 'viol' && (x.nc.prevViol || x.nc.curViol)) || (F === 'few' && x.nc.few) || (F === 'den' && x.plan.hasFail) || (F === 'diff' && x.hasDiff));
-      if (!vis.some(x => x.u.id === K.sel)) K.sel = vis.length ? vis[0].u.id : (L.done[0] ? L.done[0].u.id : '');
+      const known = [].concat(vis, L.pins, L.done, L.snoozed).map(x => x.u.id);
+      if (!known.includes(K.sel)) K.sel = (L.pins[0] || vis[0] || L.done[0] || L.snoozed[0] || { u: { id: '' } }).u.id;
       const chip = (k, label, n, c) => { const on = F === k; return `<button type="button" class="kq-chip-f${on ? ' on' : ''}" style="--c:${c}" aria-pressed="${on}" onclick="kqSetF('${k}')">${label}: ${n}</button>`; };
       const chips = chip('all', 'Tất cả', cnt.all, '#92400e') + chip('cur', 'Chưa KT Quý ' + now.q, cnt.cur, '#b45309') + chip('miss', 'Chưa KT quý trước', cnt.miss, '#c2410c') + chip('viol', 'Đã vi phạm', cnt.viol, '#be123c') + chip('den', 'Có MG cần KT lại', cnt.den, '#e11d48') + chip('few', '1–2 bó ≥ ' + TQ_NEAR_PCT + '%', cnt.few, '#b45309') + chip('diff', 'Chênh lệch', cnt.diff, '#1d4ed8');
+      const pinsHtml = L.pins.length
+        ? `<div class="kq-grp"><div class="kq-grp-h"><span class="kq-grp-t">${KQ_I.pin} Đi hôm nay · ${L.pins.length}</span><button type="button" class="kq-link" onclick="kqUnpinAll()">Bỏ ghim tất cả</button></div><div class="kq-pinlist">${L.pins.map((x, i) => kqItemHtml(x, i, K.sel, 'pin')).join('')}</div></div>`
+        : (L.todo.length ? `<div class="kq-pin-hint">${KQ_I.pin.replace('width="18" height="18"', 'width="14" height="14"')}<span>Bấm biểu tượng ghim ở mỗi TCTD để lập danh sách “Đi hôm nay”, rồi kéo để sắp thứ tự.</span></div>` : '');
+      const listHead = L.pins.length && vis.length ? `<div class="kq-grp-h plain"><span class="kq-grp-t">Ưu tiên theo quy tắc · ${vis.length}</span></div>` : '';
       const listHtml = vis.length
-        ? vis.map((x, i) => kqItemHtml(x, i, K.sel, false)).join('')
-        : `<div class="kq-empty">${L.todo.length ? 'Không có đơn vị nào khớp bộ lọc này.' : `Không còn TCTD nào cần ưu tiên trong Quý ${now.q}.`}</div>`;
+        ? vis.map((x, i) => kqItemHtml(x, i, K.sel, 'todo')).join('')
+        : (L.pins.length && !L.todo.length ? '' : `<div class="kq-empty">${L.todo.length ? 'Không có đơn vị nào khớp bộ lọc này.' : `Không còn TCTD nào cần ưu tiên trong Quý ${now.q}.`}</div>`);
       const doneHtml = L.done.length ? `<div class="kq-done">
           <button type="button" class="kq-done-h" aria-expanded="${!!K.doneOpen}" onclick="kqToggleDone()">Đã kiểm tra hôm nay (${L.done.length}) <span>${K.doneOpen ? '▲' : '▼'}</span></button>
-          ${K.doneOpen ? L.done.map((x, i) => kqItemHtml(x, i, K.sel, true)).join('') : ''}</div>` : '';
+          ${K.doneOpen ? L.done.map((x, i) => kqItemHtml(x, i, K.sel, 'done')).join('') : ''}</div>` : '';
+      const snzHtml = L.snoozed.length ? `<div class="kq-done snz">
+          <button type="button" class="kq-done-h snz" aria-expanded="${!!K.snzOpen}" onclick="kqToggleSnz()">Đang hoãn (${L.snoozed.length}) <span>${K.snzOpen ? '▲' : '▼'}</span></button>
+          ${K.snzOpen ? L.snoozed.map((x, i) => kqItemHtml(x, i, K.sel, 'snz')).join('') : ''}</div>` : '';
       const stat = (n, label, c) => `<div class="kq-stat"><b style="color:${c}">${n}</b><span>${label}</span></div>`;
-      return `<section class="kq-hero">
+      const seg = `<div class="kq-seg" role="tablist" aria-label="Chế độ xem"><button type="button" role="tab" aria-selected="${K.view === 'list'}" class="${K.view === 'list' ? 'on' : ''}" onclick="kqSetView('list')">Danh sách ưu tiên</button><button type="button" role="tab" aria-selected="${K.view === 'matrix'}" class="${K.view === 'matrix' ? 'on' : ''}" onclick="kqSetView('matrix')">Ma trận mệnh giá</button></div>`;
+      const hero = `<section class="kq-hero${K.view === 'matrix' ? ' mx' : ''}">
           <div><div class="kq-hero-date">${dateTxt}</div><h2>Ưu tiên kiểm tra hôm nay</h2>
           <div class="kq-hero-sub">Quý ${now.q} (${tqRoundMonths(now.q)}) · còn ${tqDaysLeft(now)} ngày · bấm vào TCTD để xem gợi ý mệnh giá</div></div>
-          <div class="kq-stats">${stat(L.todo.length, 'Cần ưu tiên', '#b45309')}${stat(L.done.length, 'Đã KT hôm nay', '#059669')}${stat(cnt.den, 'Có MG KT lại', '#e11d48')}</div>
-        </section>
-        <div class="kq-chips" role="group" aria-label="Lọc danh sách">${chips}</div>
+          <div class="kq-stats">${stat(act.length, 'Cần ưu tiên', '#b45309')}${stat(L.done.length, 'Đã KT hôm nay', '#059669')}${stat(denAll, 'Có MG KT lại', '#e11d48')}${L.snoozed.length ? stat(L.snoozed.length, 'Đang hoãn', '#6b7280') : ''}</div>
+        </section>${seg}`;
+      if (K.view === 'matrix') return hero + kqMatrixHtml();
+      return hero + `<div class="kq-chips" role="group" aria-label="Lọc danh sách">${chips}</div>
         <div class="kq-wrap">
-          <div class="kq-left" id="kq-left">${listHtml}${doneHtml}</div>
+          <div class="kq-left" id="kq-left">${pinsHtml}${listHead}${listHtml}${doneHtml}${snzHtml}</div>
           <div class="kq-detail-col"><div id="kq-detail">${kqIsMobile() ? '' : (K.sel ? kqDetailHtml(K.sel) : '<div class="kq-empty">Chọn một TCTD để xem gợi ý mệnh giá.</div>')}</div></div>
         </div>`;
     }
@@ -5521,7 +6070,7 @@
     window.kqToggleDone = function () { window.__kq.doneOpen = !window.__kq.doneOpen; kqRefresh(); };
     window.kqPick = function (id) {
       try { haptic(); } catch (e) { }
-      if (kqIsMobile()) { kqOpenSheet(id); return; }
+      if (kqSheetMode()) { kqOpenSheet(id); return; }
       window.__kq.sel = id;
       document.querySelectorAll('#kq-root .kq-item').forEach(b => { const on = b.dataset.id === id; b.classList.toggle('on', on); if (on) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current'); });
       const d = document.getElementById('kq-detail'); if (d) d.innerHTML = kqDetailHtml(id);
@@ -5564,7 +6113,7 @@
     window.kqCloseSheet = function () { const s = document.getElementById('kq-sheet'); if (s) s.remove(); document.body.style.overflow = ''; };
     document.addEventListener('keydown', e => { if (e.key === 'Escape') window.kqCloseSheet(); });
     window.kqOpenUnit = function (id) {
-      if (tab === 'kehoach' && !kqIsMobile()) { window.kqPick(id); return; }
+      if (tab === 'kehoach' && !kqSheetMode()) { window.kqPick(id); return; }
       kqOpenSheet(id);
     };
     window.kqGo = function (id) {
@@ -5576,6 +6125,416 @@
     function renderKehoach() {
       return `<div id="kq-root">${kqRootHtml()}</div>`;
     }
+
+    /* ================= XUẤT BÁO CÁO (Excel / PDF) + BẢN IN NHẬT KÝ ĐỂ KÝ =================
+       • Báo cáo kết quả kiểm tra: bố cục Đánh giá chung → Kết quả (so sánh kỳ trước) → Tồn tại/hạn chế → Nguyên nhân → Kiến nghị.
+       • Nhật ký kiểm tra (bản in ký): bảng từng lượt kiểm tra + khối chữ ký.
+       • Excel (.xlsx): tạo bằng ExcelJS, tải thư viện khi cần (có mạng); PDF: xem trước rồi In → "Lưu dưới dạng PDF" (giữ đúng dấu tiếng Việt).
+       Dữ liệu lấy từ bộ nhớ của tab hiện tại (data.logs) nên kỳ chọn cần nằm trong dữ liệu đã tải. */
+    const RP_KEY = 'rp_settings_v2';
+    const RP_DEF = { parent: 'NGÂN HÀNG NHÀ NƯỚC VIỆT NAM', org: 'CHI NHÁNH KHU VỰC 9', dept: 'PHÒNG TIỀN TỆ - KHO QUỸ', place: 'Đà Nẵng',
+      t1: 'NGƯỜI LẬP BIỂU', t2: 'TRƯỞNG PHÒNG', t3: '', n1: '', n2: '', n3: '', sigCol: true };
+    const rpZ = n => String(n).padStart(2, '0');
+    const rpYmd = d => d.getFullYear() + '-' + rpZ(d.getMonth() + 1) + '-' + rpZ(d.getDate());
+    const rpPct = x => (Math.round(x * 100) / 100).toFixed(2).replace('.', ',');
+    const rpNum = n => Number(n || 0).toLocaleString('vi-VN');
+    const rpDmy = s => s ? s.slice(8, 10) + '/' + s.slice(5, 7) + '/' + s.slice(0, 4) : '';
+    const rpDenTxt = v => String(v).replace(/\B(?=(\d{3})+(?!\d))/g, '.') + 'đ';
+    const rpThr = () => (typeof TQ_BAD_BUNDLE_PCT === 'number' ? TQ_BAD_BUNDLE_PCT : 5);
+    window.__rp = window.__rp || { type: 'bc', kind: 'q', fmt: 'xlsx', cf: '', ct: '', edited: false, cause: '', rec: '' };
+
+    function rpSettings() { try { return Object.assign({}, RP_DEF, JSON.parse(localStorage.getItem(RP_KEY) || '{}')); } catch (e) { return Object.assign({}, RP_DEF); } }
+    function rpSaveSettings(s) { try { localStorage.setItem(RP_KEY, JSON.stringify(s)); } catch (e) { } }
+
+    /* ---------- Kỳ báo cáo + kỳ so sánh ---------- */
+    function rpQRange(y, q) { return [rpYmd(new Date(y, (q - 1) * 3, 1)), rpYmd(new Date(y, q * 3, 0))]; }
+    function rpPeriod(kind, cf, ct) {
+      const t = new Date(), y = t.getFullYear(), m = t.getMonth(), q = Math.floor(m / 3) + 1;
+      const pqOf = (yy, qq) => qq === 1 ? [yy - 1, 4] : [yy, qq - 1];
+      let from, to, label, prev;
+      if (kind === 'q') { [from, to] = rpQRange(y, q); label = `Quý ${q}/${y}`; const p = pqOf(y, q); prev = rpQRange(p[0], p[1]); }
+      else if (kind === 'pq') { const p = pqOf(y, q); [from, to] = rpQRange(p[0], p[1]); label = `Quý ${p[1]}/${p[0]}`; const pp = pqOf(p[0], p[1]); prev = rpQRange(pp[0], pp[1]); }
+      else if (kind === 'm') { from = rpYmd(new Date(y, m, 1)); to = rpYmd(new Date(y, m + 1, 0)); label = `Tháng ${m + 1}/${y}`; prev = [rpYmd(new Date(y, m - 1, 1)), rpYmd(new Date(y, m, 0))]; }
+      else if (kind === 'pm') { from = rpYmd(new Date(y, m - 1, 1)); to = rpYmd(new Date(y, m, 0)); const d0 = new Date(y, m - 1, 1); label = `Tháng ${d0.getMonth() + 1}/${d0.getFullYear()}`; prev = [rpYmd(new Date(y, m - 2, 1)), rpYmd(new Date(y, m - 1, 0))]; }
+      else if (kind === 'y') { from = y + '-01-01'; to = y + '-12-31'; label = `Năm ${y}`; prev = [(y - 1) + '-01-01', (y - 1) + '-12-31']; }
+      else {
+        from = cf || ''; to = ct || ''; label = (from && to) ? `${rpDmy(from)} – ${rpDmy(to)}` : '';
+        if (from && to && from <= to) {
+          const a = new Date(from + 'T00:00:00'), b = new Date(to + 'T00:00:00'), days = Math.round((b - a) / 864e5) + 1;
+          prev = [rpYmd(new Date(a.getTime() - days * 864e5)), rpYmd(new Date(a.getTime() - 864e5))];
+        } else prev = ['', ''];
+      }
+      return { kind, from, to, label, prev };
+    }
+
+    /* ---------- Tổng hợp số liệu ---------- */
+    function rpAgg(logs) {
+      const den = {}, unit = {}, entries = [];
+      let tc = 0, ti = 0, failLogs = 0;
+      const isD = x => x === 'thua' || x === 'thieu' || x === 'lan';
+      logs.forEach(l => {
+        const es = [];
+        [[l.denom1, l.amount1, l.invalidAmount1, l.diff], [l.denom2, l.amount2, l.invalidAmount2, l.diff2]].forEach(([d, a, i, df]) => {
+          const v = tqDenomVal(d), c = Number(a) || 0, n = Number(i) || 0;
+          if (v && c > 0) es.push({ v, c, i: n, diff: df || 'khop' });
+        });
+        if (!es.length) return;
+        const lc = es.reduce((a, e) => a + e.c, 0), li = es.reduce((a, e) => a + e.i, 0), lrate = lc ? li / lc * 100 : 0, lfail = lrate > rpThr();
+        if (lfail) failLogs++;
+        tc += lc; ti += li;
+        const u = unit[l.unitId] = unit[l.unitId] || { id: l.unitId, n: 0, c: 0, i: 0, failLogs: 0, lan: 0, thieu: 0, thua: 0, dates: [] };
+        u.n++; u.c += lc; u.i += li; if (lfail) u.failLogs++; u.dates.push(l.date);
+        es.forEach(e => {
+          const d = den[e.v] = den[e.v] || { v: e.v, n: 0, c: 0, i: 0, fails: 0 };
+          d.n++; d.c += e.c; d.i += e.i; if (e.c && e.i / e.c * 100 > rpThr()) d.fails++;
+          if (e.diff === 'lan') u.lan++; else if (e.diff === 'thieu') u.thieu++; else if (e.diff === 'thua') u.thua++;
+          entries.push({ log: l, v: e.v, c: e.c, i: e.i, rate: e.c ? e.i / e.c * 100 : 0, diff: e.diff, lrate, lfail, lan: l.diff === 'lan' || l.diff2 === 'lan' });
+        });
+      });
+      return { den, unit, entries, tc, ti, rate: tc ? ti / tc * 100 : 0, n: logs.filter(l => (Number(l.amount1) || 0) > 0).length, failLogs, units: Object.keys(unit).length };
+    }
+    function rpUnitName(id) { return (data.units || []).find(u => u.id === id)?.name || '—'; }
+    function rpLogsIn(from, to) { return (data.logs || []).filter(l => l && l.date && l.date >= from && l.date <= to).slice().sort((a, b) => String(a.date).localeCompare(String(b.date)) || String(a.id).localeCompare(String(b.id))); }
+    function rpConclusion(e) {      // giống cột "Kết luận" ở Nhật ký
+      if (e.lan) return 'Lẫn tiền đủ TCLT';
+      if (e.lfail) return 'Không đạt (>' + rpThr() + '%)';
+      if (e.diff === 'thieu') return 'Thiếu';
+      if (e.diff === 'thua') return 'Thừa';
+      return 'Đạt (≤' + rpThr() + '%)';
+    }
+    function rpModel(per) {
+      const logs = rpLogsIn(per.from, per.to), A = rpAgg(logs);
+      const pl = per.prev[0] ? rpLogsIn(per.prev[0], per.prev[1]) : [], P = rpAgg(pl);
+      const exempt = typeof tqIsExempt === 'function' ? tqIsExempt : () => false;
+      const allUnits = (data.units || []).filter(u => !exempt(u));
+      const units = allUnits.filter(u => A.unit[u.id]).map(u => { const x = A.unit[u.id], p = P.unit[u.id]; const rate = x.c ? x.i / x.c * 100 : 0, prate = p && p.c ? p.i / p.c * 100 : null; return Object.assign({ name: u.name, rate, prate, delta: prate == null ? null : rate - prate }, x); })
+        .sort((a, b) => String(a.name).localeCompare(String(b.name), 'vi'));
+      const notChecked = allUnits.filter(u => !A.unit[u.id]).map(u => u.name).sort((a, b) => String(a).localeCompare(String(b), 'vi'));
+      const dens = Object.values(A.den).sort((a, b) => b.v - a.v).map(d => { const p = P.den[d.v]; const rate = d.c ? d.i / d.c * 100 : 0, prate = p && p.c ? p.i / p.c * 100 : null; return Object.assign({ rate, prate, delta: prate == null ? null : rate - prate }, d); });
+      const fails = A.entries.filter(e => e.rate > rpThr()).map(e => ({ date: e.log.date, name: rpUnitName(e.log.unitId), v: e.v, c: e.c, i: e.i, rate: e.rate }));
+      const diffs = A.entries.filter(e => e.diff && e.diff !== 'khop').map(e => ({ date: e.log.date, name: rpUnitName(e.log.unitId), v: e.v, kind: e.diff === 'lan' ? 'Lẫn tiền đủ TCLT' : e.diff === 'thieu' ? 'Thiếu' : 'Thừa' }));
+      const rows = logs.map(l => {
+        const es = []; [[l.denom1, l.amount1, l.invalidAmount1, l.diff], [l.denom2, l.amount2, l.invalidAmount2, l.diff2]].forEach(([d, a, i, df]) => { const v = tqDenomVal(d), c = Number(a) || 0, n = Number(i) || 0; if (v && c > 0) es.push({ v, c, i: n, rate: n / c * 100, diff: df || 'khop' }); });
+        if (!es.length) return null;
+        const lc = es.reduce((a, e) => a + e.c, 0), li = es.reduce((a, e) => a + e.i, 0), lrate = lc ? li / lc * 100 : 0;
+        const lan = l.diff === 'lan' || l.diff2 === 'lan';
+        const dff = (l.diff && l.diff !== 'khop') ? l.diff : (es.length > 1 ? l.diff2 : 'khop');
+        return { date: l.date, name: rpUnitName(l.unitId), es, lrate, concl: rpConclusion({ lan, lfail: lrate > rpThr(), diff: dff }), fail: lrate > rpThr() || lan };
+      }).filter(Boolean);
+      const dates = (data.logs || []).map(l => l && l.date).filter(Boolean).sort();
+      return { per, logs, A, P, units, dens, fails, diffs, notChecked, rows, totalUnits: allUnits.length, loadedMin: dates[0] || '', count: rows.length };
+    }
+    function rpAutoText(M) {
+      const { per, A, P } = M;
+      if (!M.count) return `Trong kỳ báo cáo (${rpDmy(per.from)} – ${rpDmy(per.to)}) chưa có lượt kiểm tra nào được ghi nhận.`;
+      const cover = M.totalUnits ? Math.round(A.units / M.totalUnits * 100) : 0;
+      let t = `Trong kỳ báo cáo (từ ngày ${rpDmy(per.from)} đến ngày ${rpDmy(per.to)}), đã thực hiện ${rpNum(A.n)} lượt kiểm tra tại ${A.units}/${M.totalUnits} TCTD trên địa bàn (đạt ${cover}%). Tổng số tờ kiểm tra là ${rpNum(A.tc)} tờ, trong đó số tờ không đủ tiêu chuẩn lưu thông là ${rpNum(A.ti)} tờ, tỷ lệ bình quân ${rpPct(A.rate)}%`;
+      if (P.tc) { const d = A.rate - P.rate; t += ` (kỳ trước ${rpPct(P.rate)}%, ${d > 0 ? 'tăng' : d < 0 ? 'giảm' : 'không đổi'}${d ? ' ' + rpPct(Math.abs(d)) + ' điểm %' : ''})`; }
+      t += '.';
+      t += A.failLogs ? ` Có ${A.failLogs} lượt kiểm tra không đạt (tỷ lệ > ${rpThr()}%) tại ${M.units.filter(u => u.failLogs).length} TCTD.` : ` Không có lượt kiểm tra nào vượt ngưỡng ${rpThr()}%.`;
+      return t;
+    }
+    function rpAutoRec(M) {
+      const out = [];
+      if (M.units.some(u => u.failLogs)) out.push(`Đề nghị các TCTD có kết quả không đạt (nêu tại mục III) rà soát quy trình tuyển chọn tiền, khắc phục và báo cáo kết quả về Chi nhánh.`);
+      if (M.fails.length) out.push(`Tổ chức kiểm tra lại các mệnh giá không đạt trong kỳ báo cáo tiếp theo.`);
+      if (M.notChecked.length) out.push(`Bố trí kiểm tra đối với ${M.notChecked.length} TCTD chưa được kiểm tra trong kỳ.`);
+      if (M.diffs.length) out.push(`Yêu cầu các TCTD có chênh lệch thừa/thiếu/lẫn tiền xác minh nguyên nhân và xử lý theo quy định.`);
+      if (!out.length) out.push(`Tiếp tục duy trì công tác kiểm tra định kỳ theo kế hoạch.`);
+      return out.map((x, i) => `${i + 1}. ${x}`).join('\n');
+    }
+
+    /* ---------- Excel (ExcelJS) ---------- */
+    function rpLoadExcelJS() {
+      return new Promise((res, rej) => {
+        if (window.ExcelJS) return res(window.ExcelJS);
+        const s = document.createElement('script'); let done = false;
+        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js';
+        s.onload = () => { done = true; window.ExcelJS ? res(window.ExcelJS) : rej(new Error('no ExcelJS')); };
+        s.onerror = () => { if (!done) rej(new Error('load fail')); };
+        document.head.appendChild(s);
+        setTimeout(() => { if (!done && !window.ExcelJS) rej(new Error('timeout')); }, 20000);
+      });
+    }
+    function rpFileBase(M, type) { return (type === 'nk' ? 'NhatKy_KDTCLT_' : 'BaoCao_KDTCLT_') + (M.per.label || '').replace(/[^0-9A-Za-zÀ-ỹ]+/g, '-').replace(/^-|-$/g, ''); }
+    function rpDownload(blob, name) {
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click();
+      setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+    }
+    async function rpBuildXlsx(M, st, o) {
+      const EJ = await rpLoadExcelJS(), wb = new EJ.Workbook();
+      wb.creator = 'Sổ tay điện tử Kiểm tra tuyển chọn tiền KĐTCLT'; wb.created = new Date();
+      const F = (sz, b, i) => ({ name: 'Times New Roman', size: sz || 12, bold: !!b, italic: !!i });
+      const thin = { style: 'thin', color: { argb: 'FF000000' } }, BR = { top: thin, left: thin, bottom: thin, right: thin };
+      const todayD = new Date(), dateLine = `${st.place ? st.place + ', ' : ''}ngày ${todayD.getDate()} tháng ${todayD.getMonth() + 1} năm ${todayD.getFullYear()}`;
+      const head = (ws, ncol) => {
+        const half = Math.floor(ncol / 2);
+        [[1, st.parent, 'CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM', true], [2, st.org, 'Độc lập – Tự do – Hạnh phúc', true], [3, st.dept, '', false]].forEach(([r, a, b, bold]) => {
+          ws.mergeCells(r, 1, r, half); ws.mergeCells(r, half + 1, r, ncol);
+          const c1 = ws.getCell(r, 1), c2 = ws.getCell(r, half + 1);
+          c1.value = a; c1.font = F(12, r !== 1); c1.alignment = { horizontal: 'center' };
+          c2.value = b; c2.font = F(12, true); c2.alignment = { horizontal: 'center' };
+        });
+        ws.getCell(3, 1).font = F(12, true); ws.getCell(1, 1).font = F(12, false);
+      };
+      const table = (ws, r0, cols, rows, o2) => {
+        const hr = ws.getRow(r0); cols.forEach((c, i) => { const cell = hr.getCell(i + 1); cell.value = c; cell.font = F(11, true); cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true }; cell.border = BR; cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFEDEDED' } }; });
+        hr.height = 30;
+        rows.forEach((row, ri) => { const r = ws.getRow(r0 + 1 + ri); if (o2 && o2.wrapCol != null && row[o2.wrapCol] != null) { const wd = ws.getColumn(o2.wrapCol + 1).width || 30, ln = Math.ceil(String(row[o2.wrapCol]).length / (wd * 0.95)); if (ln > 1) r.height = ln * 15 + 4; } row.forEach((v, i) => { const cell = r.getCell(i + 1); cell.value = v; cell.font = F(11, o2 && o2.boldLast && ri === rows.length - 1); cell.border = BR; const al = (o2 && o2.align && o2.align[i]) || 'left'; cell.alignment = { horizontal: al, vertical: 'middle', wrapText: true }; if (o2 && o2.fmt && o2.fmt[i] && typeof v === 'number') cell.numFmt = o2.fmt[i]; }); });
+        return r0 + 1 + rows.length;
+      };
+      const merged = (ws, r, ncol, text, font, align, h) => { ws.mergeCells(r, 1, r, ncol); const c = ws.getCell(r, 1); c.value = text; c.font = font || F(12); c.alignment = { wrapText: true, vertical: 'top', horizontal: align || 'left' }; if (h) ws.getRow(r).height = h; };
+      const sigBlock = (ws, r, ncol) => {
+        const t = [[st.t1, st.n1], [st.t2, st.n2], [st.t3, st.n3]].filter(x => x[0]); const w = Math.floor(ncol / t.length);
+        ws.mergeCells(r, 1, r, ncol); const d = ws.getCell(r, 1); d.value = dateLine; d.font = F(12, false, true); d.alignment = { horizontal: 'right' };
+        t.forEach((x, i) => {
+          const c0 = i * w + 1, c1 = i === t.length - 1 ? ncol : (i + 1) * w;
+          ws.mergeCells(r + 1, c0, r + 1, c1); ws.mergeCells(r + 2, c0, r + 2, c1); ws.mergeCells(r + 6, c0, r + 6, c1);
+          const a = ws.getCell(r + 1, c0); a.value = x[0]; a.font = F(12, true); a.alignment = { horizontal: 'center' };
+          const b = ws.getCell(r + 2, c0); b.value = '(Ký, ghi rõ họ tên)'; b.font = F(11, false, true); b.alignment = { horizontal: 'center' };
+          const n = ws.getCell(r + 6, c0); n.value = x[1] || ''; n.font = F(12, true); n.alignment = { horizontal: 'center' };
+        });
+        return r + 7;
+      };
+      const setup = (ws, landscape, titleRow) => { ws.pageSetup = { paperSize: 9, orientation: landscape ? 'landscape' : 'portrait', fitToPage: true, fitToWidth: 1, fitToHeight: 0, margins: { left: 0.6, right: 0.4, top: 0.6, bottom: 0.6, header: 0.3, footer: 0.3 }, horizontalCentered: true }; ws.headerFooter = { oddFooter: '&C&"Times New Roman,Italic"&9Trang &P / &N' }; if (titleRow) ws.pageSetup.printTitlesRow = titleRow; ws.views = [{ showGridLines: false }]; };
+
+      if (o.type === 'bc') {
+        const ws = wb.addWorksheet('Báo cáo'), NC = 9;
+        [6, 34, 11, 14, 14, 11, 11, 13, 17].forEach((w, i) => ws.getColumn(i + 1).width = w);
+        head(ws, NC); setup(ws, false);
+        merged(ws, 5, NC, 'BÁO CÁO KẾT QUẢ KIỂM TRA TIỀN KHÔNG ĐỦ TIÊU CHUẨN LƯU THÔNG', F(14, true), 'center', 24);
+        merged(ws, 6, NC, `Kỳ báo cáo: ${M.per.label} (từ ngày ${rpDmy(M.per.from)} đến ngày ${rpDmy(M.per.to)})`, F(12, false, true), 'center');
+        let r = 8;
+        merged(ws, r++, NC, 'I. ĐÁNH GIÁ TÌNH HÌNH CHUNG', F(12, true));
+        const txt = o.summary || rpAutoText(M); merged(ws, r, NC, txt, F(12), 'left', Math.max(34, Math.ceil(txt.length / 95) * 17)); r += 2;
+        const dd = (a, b) => b == null ? '—' : (a - b);
+        r = table(ws, r, ['STT', 'Chỉ tiêu', 'Đơn vị', 'Kỳ này', 'Kỳ trước', 'Tăng/giảm'], [
+          [1, 'Số TCTD được kiểm tra', 'TCTD', M.A.units, M.P.units || 0, M.A.units - (M.P.units || 0)],
+          [2, 'Số lượt kiểm tra', 'lượt', M.A.n, M.P.n || 0, M.A.n - (M.P.n || 0)],
+          [3, 'Tổng số tờ kiểm tra', 'tờ', M.A.tc, M.P.tc || 0, M.A.tc - (M.P.tc || 0)],
+          [4, 'Số tờ KĐTCLT', 'tờ', M.A.ti, M.P.ti || 0, M.A.ti - (M.P.ti || 0)],
+          [5, 'Tỷ lệ KĐTCLT bình quân', '%', +M.A.rate.toFixed(2), M.P.tc ? +M.P.rate.toFixed(2) : '—', M.P.tc ? +(M.A.rate - M.P.rate).toFixed(2) : '—'],
+          [6, `Số lượt kiểm tra không đạt (tính chung cả lượt, > ${rpThr()}%)`, 'lượt', M.A.failLogs, M.P.failLogs || 0, M.A.failLogs - (M.P.failLogs || 0)]
+        ], { align: ['center', 'left', 'center', 'right', 'right', 'right'], fmt: [null, null, null, '#,##0.##', '#,##0.##', '+#,##0.##;-#,##0.##;0'] }) + 1;
+        merged(ws, r++, NC, 'II. KẾT QUẢ THỰC HIỆN', F(12, true));
+        merged(ws, r++, NC, '1. Theo mệnh giá', F(12, true, true));
+        r = table(ws, r, ['STT', 'Mệnh giá', 'Số lượt', 'Số tờ kiểm tra', 'Số tờ KĐTCLT', 'Tỷ lệ (%)', 'Kỳ trước (%)', 'Tăng/giảm (điểm %)', 'Số lượt không đạt'],
+          M.dens.map((d, i) => [i + 1, rpDenTxt(d.v), d.n, d.c, d.i, +d.rate.toFixed(2), d.prate == null ? '—' : +d.prate.toFixed(2), d.delta == null ? '—' : +d.delta.toFixed(2), d.fails]).concat(M.dens.length ? [['', 'Cộng', M.dens.reduce((a, d) => a + d.n, 0), M.A.tc, M.A.ti, +M.A.rate.toFixed(2), M.P.tc ? +M.P.rate.toFixed(2) : '—', M.P.tc ? +(M.A.rate - M.P.rate).toFixed(2) : '—', M.dens.reduce((a, d) => a + d.fails, 0)]] : []),
+          { align: ['center', 'center', 'right', 'right', 'right', 'right', 'right', 'right', 'right'], fmt: [null, null, '#,##0', '#,##0', '#,##0', '0.00', '0.00', '+0.00;-0.00;0.00', '#,##0'], boldLast: M.dens.length > 0 }) + 1;
+        merged(ws, r++, NC, '2. Theo tổ chức tín dụng', F(12, true, true));
+        r = table(ws, r, ['STT', 'Tổ chức tín dụng', 'Số lượt KT', 'Số tờ kiểm tra', 'Số tờ KĐTCLT', 'Tỷ lệ (%)', 'Kỳ trước (%)', 'Tăng/giảm (điểm %)', 'Kết luận'],
+          M.units.map((u, i) => [i + 1, u.name, u.n, u.c, u.i, +u.rate.toFixed(2), u.prate == null ? '—' : +u.prate.toFixed(2), u.delta == null ? '—' : +u.delta.toFixed(2), u.failLogs ? 'Không đạt' : (u.lan ? 'Lẫn tiền đủ TCLT' : 'Đạt')]),
+          { wrapCol: 1, align: ['center', 'left', 'right', 'right', 'right', 'right', 'right', 'right', 'center'], fmt: [null, null, '#,##0', '#,##0', '#,##0', '0.00', '0.00', '+0.00;-0.00;0.00', null] });
+        merged(ws, r++, NC, 'Ghi chú: Kết luận theo TCTD xác định theo tỷ lệ chung của từng lượt kiểm tra (cùng quy ước với Nhật ký); số lượt không đạt theo mệnh giá được tính riêng từng mệnh giá.', F(10.5, false, true)); r++;
+        merged(ws, r++, NC, 'III. TỒN TẠI, HẠN CHẾ', F(12, true));
+        merged(ws, r++, NC, `1. Các trường hợp không đạt (tỷ lệ > ${rpThr()}%): ${M.fails.length ? M.fails.length + ' trường hợp' : 'không có'}`, F(12, true, true));
+        if (M.fails.length) r = table(ws, r, ['STT', 'Tổ chức tín dụng', 'Ngày KT', 'Mệnh giá', 'Số tờ KT', 'Số tờ KĐTCLT', 'Tỷ lệ (%)'], M.fails.map((f, i) => [i + 1, f.name, rpDmy(f.date), rpDenTxt(f.v), f.c, f.i, +f.rate.toFixed(2)]), { wrapCol: 1, align: ['center', 'left', 'center', 'center', 'right', 'right', 'right'], fmt: [null, null, null, null, '#,##0', '#,##0', '0.00'] }) + 1;
+        merged(ws, r++, NC, `2. TCTD chưa được kiểm tra trong kỳ: ${M.notChecked.length ? M.notChecked.length + ' đơn vị' : 'không có'}`, F(12, true, true));
+        if (M.notChecked.length) { merged(ws, r, NC, M.notChecked.join('; ') + '.', F(12), 'left', Math.max(20, Math.ceil(M.notChecked.join('; ').length / 95) * 17)); r += 2; }
+        merged(ws, r++, NC, `3. Chênh lệch thừa/thiếu/lẫn tiền: ${M.diffs.length ? M.diffs.length + ' trường hợp' : 'không có'}`, F(12, true, true));
+        if (M.diffs.length) r = table(ws, r, ['STT', 'Tổ chức tín dụng', 'Ngày KT', 'Mệnh giá', 'Nội dung'], M.diffs.map((f, i) => [i + 1, f.name, rpDmy(f.date), rpDenTxt(f.v), f.kind]), { wrapCol: 1, align: ['center', 'left', 'center', 'center', 'left'] }) + 1;
+        merged(ws, r++, NC, 'IV. NGUYÊN NHÂN', F(12, true));
+        merged(ws, r, NC, o.cause || '', F(12), 'left', Math.max(34, Math.ceil((o.cause || '').length / 95) * 17 + 17)); r += 2;
+        merged(ws, r++, NC, 'V. KIẾN NGHỊ, ĐỀ XUẤT', F(12, true));
+        const rec = o.rec || rpAutoRec(M); merged(ws, r, NC, rec, F(12), 'left', Math.max(34, rec.split('\n').reduce((a, ln) => a + Math.ceil(ln.length / 95), 0) * 17 + 6)); r += 2;
+        sigBlock(ws, r, NC);
+        // Trang 2: bảng chi tiết (lọc/tổng hợp được)
+        const w2 = wb.addWorksheet('Chi tiết'); setup(w2, true, '1:1');
+        [6, 12, 44, 14, 13, 14, 11, 20, 14].forEach((w, i) => w2.getColumn(i + 1).width = w);
+        const det = []; M.A.entries.forEach((e, i) => det.push([i + 1, new Date(e.log.date + 'T00:00:00'), rpUnitName(e.log.unitId), rpDenTxt(e.v), e.c, e.i, +e.rate.toFixed(2), rpConclusion(e), e.diff === 'thieu' ? 'Thiếu' : e.diff === 'thua' ? 'Thừa' : e.diff === 'lan' ? 'Lẫn' : 'Khớp']));
+        table(w2, 1, ['STT', 'Ngày KT', 'Tổ chức tín dụng', 'Mệnh giá', 'Số tờ kiểm tra', 'Số tờ KĐTCLT', 'Tỷ lệ (%)', 'Kết luận (theo lượt KT)', 'Chênh lệch'], det, { align: ['center', 'center', 'left', 'center', 'right', 'right', 'right', 'left', 'center'], fmt: [null, 'dd/mm/yyyy', null, null, '#,##0', '#,##0', '0.00', null, null] });
+        w2.views = [{ state: 'frozen', ySplit: 1, showGridLines: true }]; if (det.length) w2.autoFilter = { from: { row: 1, column: 1 }, to: { row: 1 + det.length, column: 9 } };
+      } else {
+        const ws = wb.addWorksheet('Nhật ký kiểm tra'), withSig = !!o.sigCol, NC = withSig ? 10 : 9;
+        const widths = withSig ? [6, 12, 40, 14, 13, 14, 11, 20, 16, 18] : [6, 12, 44, 14, 13, 14, 11, 22, 18];
+        widths.forEach((w, i) => ws.getColumn(i + 1).width = w);
+        head(ws, NC); setup(ws, true, '8:8');
+        merged(ws, 5, NC, 'NHẬT KÝ KIỂM TRA TIỀN KHÔNG ĐỦ TIÊU CHUẨN LƯU THÔNG', F(14, true), 'center', 24);
+        merged(ws, 6, NC, `Kỳ: ${M.per.label} (từ ngày ${rpDmy(M.per.from)} đến ngày ${rpDmy(M.per.to)}) – ${M.count} lượt kiểm tra`, F(12, false, true), 'center');
+        const cols = ['STT', 'Ngày kiểm tra', 'Tổ chức tín dụng', 'Mệnh giá', 'Số tờ kiểm tra', 'Số tờ KĐTCLT', 'Tỷ lệ (%)', 'Kết luận', 'Chênh lệch'].concat(withSig ? ['Người kiểm tra ký'] : []);
+        const body = []; M.rows.forEach((x, i) => x.es.forEach((e, k) => body.push([k ? '' : i + 1, k ? '' : new Date(x.date + 'T00:00:00'), k ? '' : x.name, rpDenTxt(e.v), e.c, e.i, +e.rate.toFixed(2), k ? '' : x.concl, e.diff === 'thieu' ? 'Thiếu' : e.diff === 'thua' ? 'Thừa' : e.diff === 'lan' ? 'Lẫn' : 'Khớp'].concat(withSig ? [''] : []))));
+        body.push(['', '', 'Cộng', '', M.A.tc, M.A.ti, +M.A.rate.toFixed(2), '', ''].concat(withSig ? [''] : []));
+        const al = ['center', 'center', 'left', 'center', 'right', 'right', 'right', 'center', 'center'].concat(withSig ? ['center'] : []);
+        const endRow = table(ws, 8, cols, body, { wrapCol: 2, align: al, fmt: [null, 'dd/mm/yyyy', null, null, '#,##0', '#,##0', '0.00', null, null, null], boldLast: true });
+        let rr = 9; M.rows.forEach(x => { if (x.es.length > 1) { [1, 2, 3, 8].concat(withSig ? [10] : []).forEach(c => ws.mergeCells(rr, c, rr + 1, c)); ws.getRow(rr).height = 22; ws.getRow(rr + 1).height = 22; } rr += x.es.length; });
+        sigBlock(ws, endRow + 1, NC);
+      }
+      return wb.xlsx.writeBuffer();
+    }
+    function rpCsv(M) {
+      const q = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+      const rows = [['STT', 'Ngày KT', 'Tổ chức tín dụng', 'Mệnh giá', 'Số tờ kiểm tra', 'Số tờ KĐTCLT', 'Tỷ lệ (%)', 'Kết luận']];
+      M.A.entries.forEach((e, i) => rows.push([i + 1, rpDmy(e.log.date), rpUnitName(e.log.unitId), rpDenTxt(e.v), e.c, e.i, rpPct(e.rate), rpConclusion(e)]));
+      return '\ufeff' + rows.map(r => r.map(q).join(';')).join('\r\n');
+    }
+
+    /* ---------- PDF: tài liệu in (A4) ---------- */
+    function rpDocHtml(M, st, o) {
+      const e = esc, land = o.type === 'nk', thr = rpThr(), todayD = new Date();
+      const dateLine = `${st.place ? e(st.place) + ', ' : ''}ngày ${todayD.getDate()} tháng ${todayD.getMonth() + 1} năm ${todayD.getFullYear()}`;
+      const hd = `<div class="hd"><div class="l"><div>${e(st.parent)}</div><div><b>${e(st.org)}</b></div><div class="u">${e(st.dept)}</div></div><div class="r"><div><b>CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</b></div><div><b class="ul">Độc lập – Tự do – Hạnh phúc</b></div></div></div>`;
+      const signers = [[st.t1, st.n1], [st.t2, st.n2], [st.t3, st.n3]].filter(x => x[0]);
+      const sig = `<div class="date">${dateLine}</div><div class="sig">${signers.map(x => `<div><b>${e(x[0])}</b><div class="it">(Ký, ghi rõ họ tên)</div><div class="nm">${e(x[1] || '')}</div></div>`).join('')}</div>`;
+      const th = a => `<thead><tr>${a.map(x => `<th>${x}</th>`).join('')}</tr></thead>`;
+      const tr = (a, cls) => `<tr${cls ? ` class="${cls}"` : ''}>${a.map(([v, c]) => `<td${c ? ` class="${c}"` : ''}>${v}</td>`).join('')}</tr>`;
+      const dlt = d => d == null ? '—' : (d > 0 ? '+' : '') + rpPct(d);
+      let body = '';
+      if (o.type === 'bc') {
+        const txt = o.summary || rpAutoText(M), rec = o.rec || rpAutoRec(M);
+        const dots = n => Array.from({ length: n }, () => '<div class="dot"></div>').join('');
+        body = `<h1>BÁO CÁO KẾT QUẢ KIỂM TRA TIỀN KHÔNG ĐỦ TIÊU CHUẨN LƯU THÔNG</h1><div class="sub">Kỳ báo cáo: ${e(M.per.label)} (từ ngày ${rpDmy(M.per.from)} đến ngày ${rpDmy(M.per.to)})</div>
+        <h2>I. ĐÁNH GIÁ TÌNH HÌNH CHUNG</h2><p>${e(txt)}</p>
+        <table>${th(['STT', 'Chỉ tiêu', 'Đơn vị', 'Kỳ này', 'Kỳ trước', 'Tăng/giảm'])}<tbody>
+          ${tr([[1, 'c'], ['Số TCTD được kiểm tra'], ['TCTD', 'c'], [M.A.units, 'n'], [M.P.units || 0, 'n'], [dlt(M.A.units - (M.P.units || 0)).replace(',00', ''), 'n']])}
+          ${tr([[2, 'c'], ['Số lượt kiểm tra'], ['lượt', 'c'], [M.A.n, 'n'], [M.P.n || 0, 'n'], [dlt(M.A.n - (M.P.n || 0)).replace(',00', ''), 'n']])}
+          ${tr([[3, 'c'], ['Tổng số tờ kiểm tra'], ['tờ', 'c'], [rpNum(M.A.tc), 'n'], [rpNum(M.P.tc || 0), 'n'], [((M.A.tc - (M.P.tc || 0)) > 0 ? '+' : '') + rpNum(M.A.tc - (M.P.tc || 0)), 'n']])}
+          ${tr([[4, 'c'], ['Số tờ KĐTCLT'], ['tờ', 'c'], [rpNum(M.A.ti), 'n'], [rpNum(M.P.ti || 0), 'n'], [((M.A.ti - (M.P.ti || 0)) > 0 ? '+' : '') + rpNum(M.A.ti - (M.P.ti || 0)), 'n']])}
+          ${tr([[5, 'c'], ['Tỷ lệ KĐTCLT bình quân'], ['%', 'c'], [rpPct(M.A.rate), 'n'], [M.P.tc ? rpPct(M.P.rate) : '—', 'n'], [M.P.tc ? dlt(M.A.rate - M.P.rate) : '—', 'n']])}
+          ${tr([[6, 'c'], [`Số lượt kiểm tra không đạt (tính chung cả lượt, &gt; ${thr}%)`], ['lượt', 'c'], [M.A.failLogs, 'n'], [M.P.failLogs || 0, 'n'], [dlt(M.A.failLogs - (M.P.failLogs || 0)).replace(',00', ''), 'n']])}
+        </tbody></table>
+        <h2>II. KẾT QUẢ THỰC HIỆN</h2><h3>1. Theo mệnh giá</h3>
+        <table>${th(['STT', 'Mệnh giá', 'Số lượt', 'Số tờ kiểm tra', 'Số tờ KĐTCLT', 'Tỷ lệ (%)', 'Kỳ trước (%)', 'Tăng/giảm (điểm %)', 'Lượt không đạt'])}<tbody>
+          ${M.dens.length ? M.dens.map((d, i) => tr([[i + 1, 'c'], [rpDenTxt(d.v), 'c'], [d.n, 'n'], [rpNum(d.c), 'n'], [rpNum(d.i), 'n'], [rpPct(d.rate), 'n' + (d.rate > thr ? ' bad' : '')], [d.prate == null ? '—' : rpPct(d.prate), 'n'], [dlt(d.delta), 'n'], [d.fails, 'n']])).join('') + tr([['', 'c'], ['<b>Cộng</b>', 'c'], [M.dens.reduce((a, d) => a + d.n, 0), 'n'], [rpNum(M.A.tc), 'n'], [rpNum(M.A.ti), 'n'], [rpPct(M.A.rate), 'n'], [M.P.tc ? rpPct(M.P.rate) : '—', 'n'], [M.P.tc ? dlt(M.A.rate - M.P.rate) : '—', 'n'], [M.dens.reduce((a, d) => a + d.fails, 0), 'n']], 'tot') : `<tr><td colspan="9" class="c">Không có số liệu</td></tr>`}
+        </tbody></table>
+        <h3>2. Theo tổ chức tín dụng</h3>
+        <table>${th(['STT', 'Tổ chức tín dụng', 'Số lượt KT', 'Số tờ kiểm tra', 'Số tờ KĐTCLT', 'Tỷ lệ (%)', 'Kỳ trước (%)', 'Tăng/giảm (điểm %)', 'Kết luận'])}<tbody>
+          ${M.units.length ? M.units.map((u, i) => tr([[i + 1, 'c'], [e(u.name)], [u.n, 'n'], [rpNum(u.c), 'n'], [rpNum(u.i), 'n'], [rpPct(u.rate), 'n' + (u.failLogs ? ' bad' : '')], [u.prate == null ? '—' : rpPct(u.prate), 'n'], [dlt(u.delta), 'n'], [u.failLogs ? 'Không đạt' : (u.lan ? 'Lẫn tiền đủ TCLT' : 'Đạt'), 'c' + (u.failLogs ? ' bad' : '')]])).join('') : `<tr><td colspan="9" class="c">Không có số liệu</td></tr>`}
+        </tbody></table>
+        <p class="note">Ghi chú: Kết luận theo TCTD xác định theo tỷ lệ chung của từng lượt kiểm tra (cùng quy ước với Nhật ký); số lượt không đạt theo mệnh giá được tính riêng từng mệnh giá.</p>
+        <h2>III. TỒN TẠI, HẠN CHẾ</h2>
+        <h3>1. Các trường hợp không đạt (tỷ lệ &gt; ${thr}%): ${M.fails.length ? M.fails.length + ' trường hợp' : 'không có'}</h3>
+        ${M.fails.length ? `<table>${th(['STT', 'Tổ chức tín dụng', 'Ngày KT', 'Mệnh giá', 'Số tờ KT', 'Số tờ KĐTCLT', 'Tỷ lệ (%)'])}<tbody>${M.fails.map((f, i) => tr([[i + 1, 'c'], [e(f.name)], [rpDmy(f.date), 'c'], [rpDenTxt(f.v), 'c'], [rpNum(f.c), 'n'], [rpNum(f.i), 'n'], [rpPct(f.rate), 'n bad']])).join('')}</tbody></table>` : ''}
+        <h3>2. TCTD chưa được kiểm tra trong kỳ: ${M.notChecked.length ? M.notChecked.length + ' đơn vị' : 'không có'}</h3>
+        ${M.notChecked.length ? `<p>${e(M.notChecked.join('; '))}.</p>` : ''}
+        <h3>3. Chênh lệch thừa/thiếu/lẫn tiền: ${M.diffs.length ? M.diffs.length + ' trường hợp' : 'không có'}</h3>
+        ${M.diffs.length ? `<table>${th(['STT', 'Tổ chức tín dụng', 'Ngày KT', 'Mệnh giá', 'Nội dung'])}<tbody>${M.diffs.map((f, i) => tr([[i + 1, 'c'], [e(f.name)], [rpDmy(f.date), 'c'], [rpDenTxt(f.v), 'c'], [f.kind]])).join('')}</tbody></table>` : ''}
+        <h2>IV. NGUYÊN NHÂN</h2>${o.cause ? `<p class="pre">${e(o.cause)}</p>` : dots(3)}
+        <h2>V. KIẾN NGHỊ, ĐỀ XUẤT</h2><p class="pre">${e(rec)}</p>${sig}`;
+      } else {
+        const withSig = !!o.sigCol, rowsH = M.rows.map((x, i) => `<tr><td class="c">${i + 1}</td><td class="c">${rpDmy(x.date)}</td><td>${e(x.name)}</td><td class="c">${x.es.map(z => rpDenTxt(z.v)).join('<br>')}</td><td class="n">${x.es.map(z => rpNum(z.c)).join('<br>')}</td><td class="n">${x.es.map(z => rpNum(z.i)).join('<br>')}</td><td class="n">${x.es.map(z => `<span class="${z.rate > thr ? 'bad' : ''}">${rpPct(z.rate)}</span>`).join('<br>')}</td><td class="c${x.fail ? ' bad' : ''}">${e(x.concl)}</td><td class="c">${x.es.map(z => z.diff === 'thieu' ? 'Thiếu' : z.diff === 'thua' ? 'Thừa' : z.diff === 'lan' ? 'Lẫn' : 'Khớp').join('<br>')}</td>${withSig ? '<td class="sg"></td>' : ''}</tr>`).join('');
+        body = `<h1>NHẬT KÝ KIỂM TRA TIỀN KHÔNG ĐỦ TIÊU CHUẨN LƯU THÔNG</h1><div class="sub">Kỳ: ${e(M.per.label)} (từ ngày ${rpDmy(M.per.from)} đến ngày ${rpDmy(M.per.to)}) – ${M.count} lượt kiểm tra tại ${M.A.units} TCTD</div>
+        <table class="log">${th(['STT', 'Ngày kiểm tra', 'Tổ chức tín dụng', 'Mệnh giá', 'Số tờ kiểm tra', 'Số tờ KĐTCLT', 'Tỷ lệ (%)', 'Kết luận', 'Chênh lệch'].concat(withSig ? ['Người kiểm tra ký'] : []))}<tbody>${rowsH || `<tr><td colspan="${withSig ? 10 : 9}" class="c">Không có lượt kiểm tra nào trong kỳ</td></tr>`}
+          <tr class="tot"><td></td><td></td><td><b>Cộng</b></td><td></td><td class="n">${rpNum(M.A.tc)}</td><td class="n">${rpNum(M.A.ti)}</td><td class="n">${rpPct(M.A.rate)}</td><td></td><td></td>${withSig ? '<td></td>' : ''}</tr></tbody></table>${sig}`;
+      }
+      const css = `@page{size:A4 ${land ? 'landscape' : 'portrait'};margin:${land ? '12mm 12mm 14mm' : '16mm 14mm 18mm 20mm'}}
+        *{box-sizing:border-box}html,body{margin:0;padding:0;background:#fff}
+        body{font-family:"Times New Roman",Times,"Liberation Serif",serif;font-size:${land ? '11pt' : '12.5pt'};color:#000;line-height:1.35;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+        .wrap{width:${land ? '273mm' : '176mm'};margin:0 auto}
+        .hd{display:flex;justify-content:space-between;align-items:flex-start;gap:6mm;text-align:center;margin-bottom:8mm;font-size:${land ? '11pt' : '11pt'}}.hd .l,.hd .r{white-space:nowrap}.hd .u{font-weight:700}.ul{display:inline-block;border-bottom:1px solid #000;padding-bottom:1px}
+        h1{font-size:${land ? '14pt' : '14.5pt'};text-align:center;margin:4mm 0 1mm;line-height:1.3}.sub{text-align:center;font-style:italic;margin-bottom:5mm}
+        h2{font-size:12.5pt;margin:5mm 0 1.5mm;break-after:avoid}h3{font-size:12pt;font-style:italic;margin:3mm 0 1.5mm;break-after:avoid}
+        p{margin:0 0 2mm;text-align:justify}.note{font-style:italic;font-size:10.5pt}.pre{white-space:pre-wrap}
+        table{width:100%;border-collapse:collapse;margin:1mm 0 3mm;font-size:${land ? '10.5pt' : '11pt'}}th,td{border:1px solid #000;padding:2px 5px;vertical-align:middle}
+        th{background:#ededed;font-weight:700;text-align:center}thead{display:table-header-group}tr{break-inside:avoid}.c{text-align:center}.n{text-align:right;font-variant-numeric:tabular-nums}.bad{color:#b00020;font-weight:700}tr.tot td{font-weight:700;background:#f7f7f7}.sg{min-width:34mm}table.log td{height:10mm}
+        .dot{border-bottom:1px dotted #000;height:7mm}
+        .date{text-align:right;font-style:italic;margin-top:6mm;break-after:avoid}.sig{display:flex;justify-content:space-around;text-align:center;margin-top:2mm;break-inside:avoid}.sig>div{flex:1 1 0;max-width:60mm}.sig .it{font-style:italic;font-size:10.5pt}.sig .nm{margin-top:22mm;font-weight:700}`;
+      return `<!doctype html><html lang="vi"><head><meta charset="utf-8"><title>${e(rpFileBase(M, o.type))}</title><style>${css}</style></head><body><div class="wrap">${hd}${body}</div></body></html>`;
+    }
+    function rpPreview(html, land, title) {
+      rpClosePreview();
+      const ov = document.createElement('div'); ov.id = 'rp-prev'; ov.className = 'rp-prev'; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-label', 'Xem trước bản in');
+      ov.innerHTML = `<div class="rp-prev-bar"><b>${esc(title)}</b><span class="rp-prev-hint">Bấm In → chọn “Lưu dưới dạng PDF” để xuất file PDF</span><div class="rp-prev-act"><button type="button" class="kq-btn" onclick="rpClosePreview()">Đóng</button><button type="button" class="kq-btn pri" onclick="rpPrint()">In / Lưu PDF</button></div></div>
+        <div class="rp-prev-body" id="rp-prev-body"><div class="rp-prev-sheet" id="rp-prev-sheet"><iframe id="rp-frame" title="Bản in" style="border:0;background:#fff"></iframe></div></div>`;
+      document.body.appendChild(ov); document.body.style.overflow = 'hidden';
+      const fr = ov.querySelector('#rp-frame'), W = land ? 1123 : 794;
+      const fit = () => {
+        const body = document.getElementById('rp-prev-body'), sheet = document.getElementById('rp-prev-sheet'); if (!body || !sheet || !fr.contentDocument) return;
+        const k = Math.min(1, (body.clientWidth - 16) / W), h = Math.max(fr.contentDocument.documentElement.scrollHeight, 400);
+        fr.style.width = W + 'px'; fr.style.height = h + 'px'; sheet.style.width = (W * k) + 'px'; sheet.style.height = (h * k) + 'px'; fr.style.transform = `scale(${k})`; fr.style.transformOrigin = '0 0';
+      };
+      window.__rpFit = fit; window.addEventListener('resize', fit);
+      fr.onload = () => { fit(); setTimeout(fit, 250); };
+      fr.srcdoc = html;
+    }
+    window.rpPrint = function () { const f = document.getElementById('rp-frame'); if (f && f.contentWindow) { f.contentWindow.focus(); f.contentWindow.print(); } };
+    window.rpClosePreview = function () { const o = document.getElementById('rp-prev'); if (o) o.remove(); if (window.__rpFit) { window.removeEventListener('resize', window.__rpFit); window.__rpFit = null; } if (!document.getElementById('kq-sheet') && !document.getElementById('rp-dlg')) document.body.style.overflow = ''; };
+
+    /* ---------- Hộp thoại ---------- */
+    window.rpBtnHtml = function (type) { return `<button type="button" class="rp-btn" onclick="rpOpen('${type}')" aria-haspopup="dialog"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg><span>Xuất báo cáo</span></button>`; };
+    const rpPresets = [['q', 'Quý này'], ['pq', 'Quý trước'], ['m', 'Tháng này'], ['pm', 'Tháng trước'], ['y', 'Năm nay'], ['c', 'Tùy chọn']];
+    window.rpOpen = function (type) {
+      const R = window.__rp; R.type = type || R.type || 'bc'; R.edited = false; rpCloseDlg();
+      const st = rpSettings();
+      const ov = document.createElement('div'); ov.id = 'rp-dlg'; ov.className = 'kq-sheet rp-ov'; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-labelledby', 'rp-t');
+      ov.onclick = e => { if (e.target === ov) rpCloseDlg(); };
+      const f = (id, label, val, ph) => `<label class="rp-f"><span>${label}</span><input type="text" id="${id}" value="${esc(val || '')}" placeholder="${esc(ph || '')}" maxlength="80" autocomplete="off"></label>`;
+      ov.innerHTML = `<div class="kq-sheet-panel rp-panel"><div class="kq-grab"></div><button type="button" class="kq-x" aria-label="Đóng" onclick="rpCloseDlg()">×</button>
+        <h3 class="kq-snz-t" id="rp-t">Xuất báo cáo</h3><div class="kq-snz-u">Chọn mẫu, kỳ báo cáo và định dạng</div>
+        <div class="kq-snz-l">Mẫu xuất</div>
+        <div class="kq-snz-opts" role="radiogroup" aria-label="Mẫu xuất">
+          <label class="kq-opt"><input type="radio" name="rp-type" value="bc" ${R.type === 'bc' ? 'checked' : ''} onchange="rpChange()"><span>Báo cáo kết quả kiểm tra</span></label>
+          <label class="kq-opt"><input type="radio" name="rp-type" value="nk" ${R.type === 'nk' ? 'checked' : ''} onchange="rpChange()"><span>Nhật ký kiểm tra (bản in để ký)</span></label></div>
+        <div class="kq-snz-l">Kỳ báo cáo</div>
+        <div class="kq-snz-opts" role="radiogroup" aria-label="Kỳ báo cáo">${rpPresets.map(p => `<label class="kq-opt"><input type="radio" name="rp-kind" value="${p[0]}" ${R.kind === p[0] ? 'checked' : ''} onchange="rpChange()"><span>${p[1]}</span></label>`).join('')}</div>
+        <div class="rp-cust" id="rp-cust" ${R.kind === 'c' ? '' : 'hidden'}><label class="rp-f"><span>Từ ngày</span><input type="date" id="rp-cf" value="${esc(R.cf)}" onchange="rpChange()"></label><label class="rp-f"><span>Đến ngày</span><input type="date" id="rp-ct" value="${esc(R.ct)}" onchange="rpChange()"></label></div>
+        <div class="rp-sum" id="rp-sum" role="status" aria-live="polite"></div>
+        <div class="kq-snz-l">Định dạng</div>
+        <div class="kq-snz-opts" role="radiogroup" aria-label="Định dạng">
+          <label class="kq-opt"><input type="radio" name="rp-fmt" value="xlsx" ${R.fmt === 'xlsx' ? 'checked' : ''}><span>Excel (.xlsx)</span></label>
+          <label class="kq-opt"><input type="radio" name="rp-fmt" value="pdf" ${R.fmt === 'pdf' ? 'checked' : ''}><span>PDF (xem trước &amp; in)</span></label></div>
+        <label class="rp-chk" id="rp-sigcol-w"><input type="checkbox" id="rp-sigcol" ${st.sigCol ? 'checked' : ''}> Thêm cột “Người kiểm tra ký” cho từng dòng</label>
+        <details class="rp-det" id="rp-txt-d"><summary>Nội dung nhận xét (tự điền theo số liệu, có thể sửa)</summary>
+          <label class="rp-f"><span>Đánh giá tình hình chung</span><textarea id="rp-sum-t" rows="4" maxlength="900" oninput="window.__rp.edited=true"></textarea></label>
+          <label class="rp-f"><span>Nguyên nhân (để trống sẽ có dòng chấm để điền tay khi in)</span><textarea id="rp-cause" rows="3" maxlength="600" placeholder="VD: Chủ quan: …; Khách quan: …"></textarea></label>
+          <label class="rp-f"><span>Kiến nghị, đề xuất</span><textarea id="rp-rec" rows="4" maxlength="900" oninput="window.__rp.edited=true"></textarea></label></details>
+        <details class="rp-det"><summary>Tiêu đề &amp; chữ ký (lưu cho lần sau)</summary>
+          ${f('rp-parent', 'Cơ quan chủ quản', st.parent)}${f('rp-org', 'Đơn vị', st.org)}${f('rp-dept', 'Phòng/Bộ phận', st.dept)}${f('rp-place', 'Địa danh', st.place)}
+          <div class="rp-sig3">${[1, 2, 3].map(i => `<div>${f('rp-t' + i, i === 3 ? 'Chức danh ký 3 (trống = bỏ)' : 'Chức danh ký ' + i, st['t' + i], i === 3 ? 'VD: GIÁM ĐỐC' : '')}${f('rp-n' + i, 'Họ tên (không bắt buộc)', st['n' + i], 'để trống nếu ký tay')}</div>`).join('')}</div></details>
+        <div class="kq-snz-f"><button type="button" class="kq-btn" onclick="rpCloseDlg()">Hủy</button><button type="button" class="kq-btn pri" id="rp-go" onclick="rpGo()">Xuất báo cáo</button></div></div>`;
+      document.body.appendChild(ov); document.body.style.overflow = 'hidden'; rpChange(true);
+      const first = ov.querySelector('input[name=rp-type]:checked'); if (first) first.focus();
+    };
+    window.rpCloseDlg = function () { const o = document.getElementById('rp-dlg'); if (o) o.remove(); if (!document.getElementById('kq-sheet') && !document.getElementById('rp-prev')) document.body.style.overflow = ''; };
+    document.addEventListener('keydown', e => {
+      if (e.key !== 'Escape') return;
+      if (document.getElementById('rp-prev')) { e.stopImmediatePropagation(); rpClosePreview(); }
+      else if (document.getElementById('rp-dlg')) { e.stopImmediatePropagation(); rpCloseDlg(); }
+    }, true);
+    function rpRead() {
+      const g = id => (document.getElementById(id) || {}).value || '';
+      const R = window.__rp, type = (document.querySelector('input[name=rp-type]:checked') || {}).value || 'bc', kind = (document.querySelector('input[name=rp-kind]:checked') || {}).value || 'q';
+      const fmt = (document.querySelector('input[name=rp-fmt]:checked') || {}).value || 'xlsx';
+      R.type = type; R.kind = kind; R.fmt = fmt; R.cf = g('rp-cf'); R.ct = g('rp-ct');
+      const st = { parent: g('rp-parent').trim(), org: g('rp-org').trim(), dept: g('rp-dept').trim(), place: g('rp-place').trim(), t1: g('rp-t1').trim() || RP_DEF.t1, t2: g('rp-t2').trim() || RP_DEF.t2, t3: g('rp-t3').trim(), n1: g('rp-n1').trim(), n2: g('rp-n2').trim(), n3: g('rp-n3').trim(), sigCol: !!(document.getElementById('rp-sigcol') || {}).checked };
+      return { R, st, per: rpPeriod(kind, R.cf, R.ct) };
+    }
+    window.rpChange = function (init) {
+      const { R, per } = rpRead(), sum = document.getElementById('rp-sum'), go = document.getElementById('rp-go');
+      document.getElementById('rp-cust').hidden = R.kind !== 'c';
+      document.getElementById('rp-sigcol-w').hidden = R.type !== 'nk';
+      document.getElementById('rp-txt-d').hidden = R.type !== 'bc';
+      const ok = per.from && per.to && per.from <= per.to;
+      if (!ok) { sum.className = 'rp-sum warn'; sum.textContent = R.kind === 'c' ? 'Chọn đủ “Từ ngày” và “Đến ngày” (từ ngày không sau đến ngày).' : ''; if (go) go.disabled = true; return; }
+      if (go) go.disabled = false;
+      const M = rpModel(per); let msg = `${rpDmy(per.from)} – ${rpDmy(per.to)} · ${M.count} lượt kiểm tra · ${M.A.units}/${M.totalUnits} TCTD`, warn = '';
+      if (!M.count) warn = 'Không có lượt kiểm tra nào trong kỳ này.';
+      else if (M.loadedMin && per.from < M.loadedMin) warn = `Dữ liệu đang tải trong máy chỉ từ ${rpDmy(M.loadedMin)}; có thể thiếu số liệu đầu kỳ. Mở tab Tổng quan (tải cả năm) rồi xuất lại nếu cần đủ.`;
+      sum.className = 'rp-sum' + (warn ? ' warn' : ''); sum.innerHTML = esc(msg) + (warn ? `<br><span>${esc(warn)}</span>` : '');
+      if (R.type === 'bc') {
+        const t = document.getElementById('rp-sum-t'), rc = document.getElementById('rp-rec');
+        if (t && (!R.edited || init)) t.value = rpAutoText(M);
+        if (rc && (!R.edited || init)) rc.value = rpAutoRec(M);
+      }
+    };
+    window.rpGo = async function () {
+      const { R, st, per } = rpRead(); if (!(per.from && per.to && per.from <= per.to)) return;
+      const M = rpModel(per), g = id => (document.getElementById(id) || {}).value || '';
+      const o = { type: R.type, sigCol: st.sigCol, summary: g('rp-sum-t').trim(), cause: g('rp-cause').trim(), rec: g('rp-rec').trim() };
+      rpSaveSettings(Object.assign({}, st)); const base = rpFileBase(M, R.type);
+      if (R.fmt === 'pdf') { rpCloseDlg(); rpPreview(rpDocHtml(M, st, o), R.type === 'nk', base); return; }
+      const btn = document.getElementById('rp-go'); if (btn) { btn.disabled = true; btn.textContent = 'Đang tạo file…'; }
+      try {
+        const buf = await rpBuildXlsx(M, st, o);
+        rpDownload(new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), base + '.xlsx');
+        rpCloseDlg(); if (typeof showToast === 'function') showToast('✓ Đã tạo file Excel: ' + base + '.xlsx', 'green');
+      } catch (err) {
+        console.error('[Xuất Excel]', err);
+        if (btn) { btn.disabled = false; btn.textContent = 'Xuất báo cáo'; }
+        if (confirm('Không tải được thư viện tạo Excel (cần kết nối mạng).\n\nBấm OK để tải bảng chi tiết dạng CSV (mở được bằng Excel), hoặc Hủy rồi chọn PDF.')) {
+          rpDownload(new Blob([rpCsv(M)], { type: 'text/csv;charset=utf-8' }), base + '.csv'); rpCloseDlg();
+        }
+      }
+    };
 
     /* ================= 4. NHẬT KÝ KIỂM TRA BÓ TIỀN ================= */
     function renderNhatky() {
@@ -5634,12 +6593,12 @@
       const totalUnits = new Set(list.map(l => l.unitId)).size;
       const totalSheets = list.reduce((sum, r) => sum + (Number(r.amount1) || 0) + (Number(r.amount2) || 0), 0);
 
-      const monthFilterHtml = timeFilterDropdown({
+      const monthFilterHtml = `<span class="rp-bar">${timeFilterDropdown({
         className: 'month-filter-details-nk', align: 'left',
         start: filterStartNK, end: filterEndNK,
         startVar: 'filterStartNK', endVar: 'filterEndNK',
         module: 'nk', color: 'var(--main)', isOpen: window.nkFilterOpen
-      });
+      })}${rpBtnHtml('nk')}</span>`;
 
       const filterHtml = `
         <div style="display:flex; align-items:center; gap:12px; margin-left: 6px; flex-wrap: wrap;">
@@ -6596,8 +7555,8 @@
         // Tải trực tiếp từ server (không qua onSnapshot) các collection của tab đang xem,
         // để số liệu hiển thị đúng ngay lập tức.
         const tabToColMap = {
-          tongquan: ['units', 'logs', 'recoveries'], donvi: ['units', 'seals', 'signatures'],
-          kehoach: ['units', 'logs'], nhatky: ['logs'], sanluong: ['inspections', 'recoveries'], thuvien: ['docs']
+          tongquan: ['units', 'logs', 'recoveries', 'plans'], donvi: ['units', 'seals', 'signatures'],
+          kehoach: ['units', 'logs', 'plans'], nhatky: ['logs'], sanluong: ['inspections', 'recoveries'], thuvien: ['docs']
         };
         const colsToRefresh = tabToColMap[typeof tab !== 'undefined' ? tab : 'tongquan'] || [];
         for (const col of colsToRefresh) {
@@ -7536,9 +8495,9 @@
       }
       
       const tabToCol = {
-        'tongquan': ['units', 'logs', 'recoveries'],
+        'tongquan': ['units', 'logs', 'recoveries', 'plans'],
         'donvi': ['units', 'logs', 'seals', 'signatures'], 
-        'kehoach': ['units', 'logs'], 
+        'kehoach': ['units', 'logs', 'plans'], 
         'nhatky': ['units', 'logs'],
         'sanluong': ['units', 'logs', 'inspections', 'recoveries'], 
         'thuvien': ['docs']
@@ -8792,7 +9751,7 @@
 
         if (typeof window.showUndoToast === 'function') {
           window.showUndoToast({
-            message: `Đã sửa ${uName ? 'TCTD ' + uName : 'bản ghi'}`,
+            message: rec.kqMeta ? `Đã cập nhật ghim/hoãn: ${uName}` : `Đã sửa ${uName ? 'TCTD ' + uName : 'bản ghi'}`,
             timeout: 8000,
             onUndo: () => {
               const curIdx = (data[key] || []).findIndex(x => x.id === rec.id);
@@ -8816,7 +9775,7 @@
 
         if (typeof window.showUndoToast === 'function') {
           window.showUndoToast({
-            message: `Đã lưu ${uName ? 'TCTD ' + uName : 'bản ghi mới'}`,
+            message: rec.kqMeta ? `Đã cập nhật ghim/hoãn: ${uName}` : `Đã lưu ${uName ? 'TCTD ' + uName : 'bản ghi mới'}`,
             timeout: 8000,
             onUndo: () => {
               data[key] = data[key].filter(x => x.id !== rec.id);
