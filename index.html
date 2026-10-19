@@ -2455,6 +2455,62 @@
         .tmx-d { margin-left: 0; }
         .tmx-bars { grid-template-columns: 1fr; gap: 8px; }
       }
+
+      /* ===== Hồ sơ TCTD 360° ===== */
+      .u360-ov { z-index: 10005; }
+      .u360-panel { max-width: 900px; width: 100%; min-height: 56vh; padding: 10px 18px calc(18px + env(safe-area-inset-bottom)); }
+      .u360-eyebrow { margin-top: 8px; font-size: 11.5px; font-weight: 800; color: #92400e; text-transform: uppercase; letter-spacing: .5px; }
+      .u360-title { margin: 2px 0 8px; font-size: 20px; font-weight: 800; color: #111827; line-height: 1.3; padding-right: 46px; overflow-wrap: anywhere; }
+      .u360-tabs { display: flex; gap: 4px; overflow-x: auto; border-bottom: 1px solid #e5e7eb; margin-bottom: 14px; scrollbar-width: none; }
+      .u360-tabs::-webkit-scrollbar { display: none; }
+      .u360-tab { all: unset; box-sizing: border-box; cursor: pointer; min-height: 46px; padding: 0 14px; display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 13.5px; color: #6b7280; border-bottom: 3px solid transparent; white-space: nowrap; touch-action: manipulation; }
+      .u360-tab:hover { color: #92400e; }
+      .u360-tab[aria-selected="true"] { color: #92400e; border-bottom-color: #d97706; }
+      .u360-tab:focus-visible { outline: 2px solid #b45309; outline-offset: -2px; border-radius: 6px; }
+      .u360-tab .cnt { min-width: 22px; height: 20px; padding: 0 6px; border-radius: 10px; background: #f3f4f6; color: #4b5563; font-size: 11.5px; display: inline-flex; align-items: center; justify-content: center; }
+      .u360-tab[aria-selected="true"] .cnt { background: #fef3c7; color: #92400e; }
+      #u360-body:focus-visible { outline: none; }
+      .u360-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)); gap: 8px; margin-bottom: 14px; }
+      .u360-k { border: 1px solid #e5e7eb; border-radius: 10px; padding: 8px 12px; background: #fff; }
+      .u360-k b { display: block; font-size: 20px; font-weight: 800; line-height: 1.2; font-variant-numeric: tabular-nums; }
+      .u360-k span { font-size: 11.5px; color: #6b7280; font-weight: 600; }
+      .u360-sec { margin: 18px 0 8px; font-size: 13.5px; font-weight: 800; color: #1f2937; }
+      .u360-sec span { font-weight: 500; color: #6b7280; font-size: 11.5px; }
+      .u360-chart { border: 1px solid #e5e7eb; border-radius: 10px; padding: 8px; background: #fff; }
+      .u360-chart svg { width: 100%; height: auto; display: block; }
+      .u360-note { margin-bottom: 10px; padding: 8px 12px; border-radius: 10px; background: #fffbeb; border: 1px solid #fde68a; color: #92400e; font-size: 12.5px; }
+      .u360-den { border: none; box-shadow: none; padding: 0; }
+      .u360-tw { overflow-x: auto; border: 1px solid #e5e7eb; border-radius: 10px; }
+      .u360-t { width: 100%; border-collapse: collapse; font-size: 13px; }
+      .u360-t th { background: #fff7d6; color: #78350f; font-size: 12px; font-weight: 700; text-align: left; padding: 8px 10px; text-transform: none; white-space: nowrap; }
+      .u360-t td { padding: 7px 10px; border-top: 1px solid #f1f2f4; vertical-align: middle; }
+      .u360-t .c { text-align: center; } .u360-t .n { text-align: right; font-variant-numeric: tabular-nums; font-weight: 700; }
+      .u360-t .bad { color: #be123c; font-weight: 800; }
+      .u360-de { display: flex; align-items: center; gap: 8px; margin: 2px 0; }
+      .u360-dr { font-variant-numeric: tabular-nums; font-weight: 700; color: #374151; }
+      .u360-dr.bad { color: #be123c; }
+      .u360-more { all: unset; box-sizing: border-box; cursor: pointer; margin-top: 10px; min-height: 44px; padding: 0 16px; display: inline-flex; align-items: center; border-radius: 10px; border: 1px solid #d1d5db; font-weight: 700; font-size: 13px; color: #374151; background: #fff; }
+      .u360-empty { padding: 28px 16px; text-align: center; color: #6b7280; font-size: 14px; background: #f9fafb; border-radius: 12px; }
+      .u360-hint { margin-bottom: 10px; font-size: 12.5px; color: #6b7280; }
+      .u360-file { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid #e5e7eb; border-radius: 12px; margin-bottom: 8px; background: #fff; }
+      .u360-fic { flex: 0 0 40px; height: 40px; border-radius: 10px; background: #fef3c7; color: #b45309; display: flex; align-items: center; justify-content: center; }
+      .u360-fi { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+      .u360-fi b { font-size: 14px; color: #1f2937; } .u360-fi span { font-size: 12.5px; color: #6b7280; overflow-wrap: anywhere; }
+      .u360-view { flex: 0 0 auto; min-width: 84px; }
+      .u360-fa { margin-top: 12px; display: flex; }
+      .u360-fa .kq-btn { flex: none; padding: 0 18px; }
+      .u360-link { all: unset; box-sizing: border-box; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; min-height: 36px; font-weight: 800; color: #1f2937; text-align: left; touch-action: manipulation; }
+      .u360-link:hover b { color: #92400e; text-decoration: underline; }
+      .u360-link svg { color: #b45309; flex: 0 0 auto; }
+      .u360-link:focus-visible { outline: 2px solid #b45309; outline-offset: 2px; border-radius: 6px; }
+      .u360-mini { cursor: pointer; min-height: 36px; padding: 0 12px; border-radius: 999px; border: 1px solid #fcd34d; background: #fff; color: #92400e; font: inherit; font-weight: 700; font-size: 12.5px; touch-action: manipulation; }
+      .u360-mini:hover { background: #fffbeb; }
+      .u360-stack { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; align-items: stretch; }
+      @media (max-width: 860px) {
+        .u360-panel { padding: 8px 14px calc(16px + env(safe-area-inset-bottom)); }
+        .u360-title { font-size: 18px; }
+        .u360-stt { display: none; }
+      }
   </style>
 </head>
 
@@ -4194,7 +4250,7 @@
             <div style="margin-top:6px;">${kqRecLine(plan)}</div>
             <div style="font-size:11.5px; color:#6b7280; margin-top:4px;">Kiểm tra bổ sung → tính vào Quý ${nc.nowQ}</div>
           </div>
-          <button type="button" onclick="kqGo('${id}')" style="cursor:pointer; flex-shrink:0; min-height:38px; padding:6px 14px; border-radius:999px; border:none; background:linear-gradient(135deg,#f59e0b,#d97706); color:#fff; font:inherit; font-size:12.5px; font-weight:800; box-shadow:0 4px 10px rgba(217,119,6,.25);">Kiểm tra</button>
+          <div class="u360-stack"><button type="button" class="u360-mini" onclick="u360Open('${id}')">Hồ sơ</button><button type="button" onclick="kqGo('${id}')" style="cursor:pointer; flex-shrink:0; min-height:38px; padding:6px 14px; border-radius:999px; border:none; background:linear-gradient(135deg,#f59e0b,#d97706); color:#fff; font:inherit; font-size:12.5px; font-weight:800; box-shadow:0 4px 10px rgba(217,119,6,.25);">Kiểm tra</button></div>
         </div>`;
     }
     function tqSugBodyHtml() {
@@ -5210,7 +5266,7 @@
                 const acts = rowActs(`openForm('unit','${u.id}')`, `removeUnit('${u.id}')`);
                 const deskRow = [
                   `<div style="text-align:center">${idx + 1}</div>`,
-                  unitCell(u.id),
+                  u360Link(u.id),
                   uLogs.length,
                   ktResult,
                   acts
@@ -5236,7 +5292,8 @@
                            <span style="font-size:13px; font-weight:700; color:var(--ink);">${uLogs.length} lần</span>
                         </div>
                         <div style="display:flex; gap:12px; margin-top:16px;">
-                           <button class="nk-action-btn edit" onclick="haptic(); openForm('unit','${u.id}')">
+                           <button class="nk-action-btn" style="background:#fffbeb; color:#92400e; border:1px solid #fcd34d;" onclick="u360Open('${u.id}')">Hồ sơ 360°</button>
+                            <button class="nk-action-btn edit" onclick="haptic(); openForm('unit','${u.id}')">
                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg> Sửa
                            </button>
                            <button class="nk-action-btn del" onclick="haptic(); removeUnit('${u.id}')">
@@ -5880,6 +5937,7 @@
       const id = esc(it.u.id), m = it.meta || {}, snz = it.snoozed;
       return `<div class="kq-d-acts">
         <button type="button" class="kq-chipbtn${it.pinned ? ' on' : ''}" aria-pressed="${it.pinned}" onclick="kqTogglePin('${id}')">${KQ_I.pin}<span>${it.pinned ? 'Đã ghim · Đi hôm nay' : 'Ghim đi hôm nay'}</span></button>
+        <button type="button" class="kq-chipbtn" onclick="u360Open('${id}')">Hồ sơ 360°</button>
         ${snz ? `<button type="button" class="kq-chipbtn" onclick="kqUnsnooze('${id}')">${KQ_I.snooze}<span>Bỏ hoãn</span></button>` : `<button type="button" class="kq-chipbtn" onclick="kqOpenSnooze('${id}')">${KQ_I.snooze}<span>Hoãn…</span></button>`}
       </div>`;
     }
@@ -6125,6 +6183,128 @@
     function renderKehoach() {
       return `<div id="kq-root">${kqRootHtml()}</div>`;
     }
+
+
+    /* ================= HỒ SƠ TCTD 360° =================
+       Bấm tên TCTD → hộp thoại 3 tab: (1) Lịch sử kiểm tra + biểu đồ tỷ lệ của riêng đơn vị, (2) Mẫu niêm phong, (3) Chữ ký mẫu.
+       Lịch sử được truy vấn riêng theo đơn vị (đủ cả năm, chỉ đọc đúng bản ghi của đơn vị đó) rồi nhớ tạm 2 phút;
+       mất mạng/bảo trì thì dùng dữ liệu đang có trong máy và có ghi chú. Tab 2–3 mở file bằng trình xem PDF sẵn có. */
+    const U360_CACHE = {};
+    const u360Dmy = d => d ? d.slice(8, 10) + '/' + d.slice(5, 7) + '/' + d.slice(0, 4) : '—';
+    function u360Model(logs) {
+      const thr = TQ_BAD_BUNDLE_PCT, rows = [];
+      (logs || []).filter(l => l && l.date).slice().sort((a, b) => String(a.date).localeCompare(String(b.date)) || String(a.id).localeCompare(String(b.id))).forEach(l => {
+        const es = [];
+        [[l.denom1, l.amount1, l.invalidAmount1, l.diff], [l.denom2, l.amount2, l.invalidAmount2, l.diff2]].forEach(([d, a, i, df]) => {
+          const v = tqDenomVal(d), c = Number(a) || 0, n = Number(i) || 0; if (v && c > 0) es.push({ v, c, i: n, rate: n / c * 100, diff: df || 'khop' });
+        });
+        if (!es.length) return;
+        const lc = es.reduce((a, e) => a + e.c, 0), li = es.reduce((a, e) => a + e.i, 0), lrate = lc ? li / lc * 100 : 0;
+        const lan = l.diff === 'lan' || l.diff2 === 'lan', dff = (l.diff && l.diff !== 'khop') ? l.diff : (es.length > 1 ? l.diff2 : 'khop');
+        rows.push({ date: l.date, es, lc, li, lrate, fail: lrate > thr, lan, concl: rpConclusion({ lan, lfail: lrate > thr, diff: dff || 'khop' }) });
+      });
+      const tc = rows.reduce((a, r) => a + r.lc, 0), ti = rows.reduce((a, r) => a + r.li, 0);
+      return { rows, n: rows.length, fail: rows.filter(r => r.fail).length, pass: rows.filter(r => !r.fail).length, rate: tc ? ti / tc * 100 : 0, tc, ti, last: rows.length ? rows[rows.length - 1].date : '' };
+    }
+    function u360Chart(rows) {
+      if (!rows.length) return '';
+      const W = 640, H = 230, L = 44, R = 16, T = 18, B = 40, thr = TQ_BAD_BUNDLE_PCT, n = rows.length;
+      const max = Math.max.apply(null, rows.map(r => r.lrate)), yMax = Math.max(10, Math.ceil(max) + 1), step = yMax <= 12 ? 2 : 5;
+      const X = i => n === 1 ? (L + (W - L - R) / 2) : L + i * (W - L - R) / (n - 1), Y = v => T + (H - T - B) * (1 - v / yMax);
+      let g = ''; for (let v = 0; v <= yMax; v += step) g += `<line x1="${L}" y1="${Y(v).toFixed(1)}" x2="${W - R}" y2="${Y(v).toFixed(1)}" stroke="#eceff3"/><text x="${L - 6}" y="${(Y(v) + 3.5).toFixed(1)}" text-anchor="end" font-size="10.5" fill="#6b7280">${v}%</text>`;
+      const pts = rows.map((r, i) => `${X(i).toFixed(1)},${Y(r.lrate).toFixed(1)}`).join(' ');
+      const every = n <= 8 ? 1 : Math.ceil(n / 8);
+      const xl = rows.map((r, i) => (i % every === 0 || i === n - 1) ? `<text x="${X(i).toFixed(1)}" y="${H - 18}" text-anchor="middle" font-size="10.5" fill="#6b7280">${r.date.slice(8, 10)}/${r.date.slice(5, 7)}</text>` : '').join('');
+      const dots = rows.map((r, i) => `<circle cx="${X(i).toFixed(1)}" cy="${Y(r.lrate).toFixed(1)}" r="4.5" fill="${r.fail ? '#e11d48' : '#10b981'}" stroke="#fff" stroke-width="1.5"><title>${u360Dmy(r.date)}: ${r.lrate.toFixed(2)}%</title></circle>` + ((n <= 12 || r.fail) ? `<text x="${X(i).toFixed(1)}" y="${(Y(r.lrate) - 9).toFixed(1)}" text-anchor="middle" font-size="10.5" font-weight="700" fill="${r.fail ? '#be123c' : '#374151'}">${r.lrate.toFixed(2)}</text>` : '')).join('');
+      const label = rows.map(r => `${u360Dmy(r.date)} ${r.lrate.toFixed(2)}%`).slice(-6).join('; ');
+      return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Tỷ lệ KĐTCLT theo từng lần kiểm tra: ${label}">${g}<line x1="${L}" y1="${Y(thr).toFixed(1)}" x2="${W - R}" y2="${Y(thr).toFixed(1)}" stroke="#e11d48" stroke-width="1.4" stroke-dasharray="5 4"/><text x="${W - R}" y="${(Y(thr) - 5).toFixed(1)}" text-anchor="end" font-size="10.5" font-weight="700" fill="#e11d48">Ngưỡng ${thr}%</text><polyline points="${pts}" fill="none" stroke="#374151" stroke-width="2.2" stroke-linejoin="round"/>${dots}${xl}</svg>`;
+    }
+    function u360HistHtml(S) {
+      if (S.loading) return `<div class="u360-empty" role="status">Đang tải lịch sử kiểm tra…</div>`;
+      const M = S.model, thr = TQ_BAD_BUNDLE_PCT;
+      if (!M.n) return `<div class="u360-empty">Đơn vị này chưa có lần kiểm tra nào.</div>`;
+      const k = (v, l, c) => `<div class="u360-k"><b style="color:${c}">${v}</b><span>${l}</span></div>`;
+      const plan = kqDenomPlan(S.id, S.logs);
+      const rowsDesc = M.rows.slice().reverse(), shown = S.showAll ? rowsDesc : rowsDesc.slice(0, 15);
+      const hist = shown.map((r, i) => `<tr><td class="c u360-stt">${rowsDesc.length - i}</td><td class="c">${u360Dmy(r.date)}</td>
+          <td>${r.es.map(e => `<div class="u360-de">${kqDenChip(e.v)}<span class="u360-dr${e.rate > thr ? ' bad' : ''}">${e.rate.toFixed(2)}%</span></div>`).join('')}</td>
+          <td class="n${r.fail ? ' bad' : ''}">${r.lrate.toFixed(2)}%</td><td class="c">${pill(r.fail ? 'p-red' : (r.lan ? 'p-purple' : (/Thiếu|Thừa/.test(r.concl) ? 'p-amber' : 'p-green')), esc(r.concl))}</td></tr>`).join('');
+      return `<div class="u360-kpis">${k(M.n, 'Lần kiểm tra', '#1f2937')}${k(M.pass, 'Đạt', '#059669')}${k(M.fail, 'Không đạt', M.fail ? '#e11d48' : '#6b7280')}${k(M.rate.toFixed(2) + '%', 'Tỷ lệ bình quân', M.rate > thr ? '#e11d48' : '#1f2937')}${k(u360Dmy(M.last), 'Lần gần nhất', '#1f2937')}</div>
+        ${S.partial ? `<div class="u360-note">Đang hiển thị dữ liệu có trong máy (không kết nối được máy chủ), có thể chưa đủ toàn bộ lịch sử.</div>` : ''}
+        <div class="u360-sec">Tỷ lệ KĐTCLT theo từng lần kiểm tra <span>(chấm đỏ = không đạt, tính chung cả lượt)</span></div><div class="u360-chart">${u360Chart(M.rows)}</div>
+        <div class="u360-sec">Kết quả lần gần nhất theo mệnh giá</div>
+        <div class="kq-detail u360-den"><div class="kq-den-head" aria-hidden="true"><span>Mệnh giá</span><span>KT gần nhất</span><span>Tỷ lệ KĐTCLT</span><span>Số lần</span><span>Gợi ý lần tới</span></div>${plan.rows.map(kqDenRow).join('')}</div>
+        <div class="u360-sec">Lịch sử các lần kiểm tra <span>(mới nhất trước)</span></div>
+        <div class="u360-tw"><table class="u360-t"><thead><tr><th class="u360-stt">Lần</th><th>Ngày</th><th>Mệnh giá · tỷ lệ</th><th>Cả lượt</th><th>Kết luận</th></tr></thead><tbody>${hist}</tbody></table></div>
+        ${rowsDesc.length > 15 ? `<button type="button" class="u360-more" onclick="u360ToggleAll()">${S.showAll ? 'Chỉ hiện 15 lần gần nhất' : 'Hiện tất cả ' + rowsDesc.length + ' lần'}</button>` : ''}`;
+    }
+    function u360Recs(kind, id) { return ((kind === 'seal' ? data.seals : data.signatures) || []).filter(r => r.unitId === id && (r.fileName || r.fileId)); }
+    function u360FilesHtml(kind, S) {
+      const recs = u360Recs(kind, S.id), seal = kind === 'seal';
+      const pdf = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M13 2v7h7"/></svg>';
+      const lib = `<button type="button" class="kq-btn" onclick="u360ToLib()">Quản lý trong Thư viện</button>`;
+      if (!recs.length) return `<div class="u360-empty">${seal ? 'Chưa có mẫu niêm phong' : 'Chưa có bảng chữ ký mẫu'} của đơn vị này.</div><div class="u360-fa">${lib}</div>`;
+      return `<div class="u360-hint">${recs.length} file đã tải lên của đơn vị. Bấm “Xem” để mở trình xem PDF.</div>` + recs.map(r => `<div class="u360-file"><span class="u360-fic">${pdf}</span><div class="u360-fi"><b>${esc(r.name || (seal ? 'Mẫu niêm phong bó tiền' : 'Bảng đăng ký chữ ký mẫu'))}</b><span>${esc(r.fileName || 'Tài liệu đính kèm')}</span></div><button type="button" class="kq-btn pri u360-view" onclick="u360OpenFile('${kind}','${esc(r.id)}')">Xem</button></div>`).join('') + `<div class="u360-fa">${lib}</div>`;
+    }
+    function u360Render() {
+      const S = window.__u360, host = document.getElementById('u360-body'); if (!S || !host) return;
+      const cnt = { hist: S.loading ? '…' : S.model.n, seal: u360Recs('seal', S.id).length, sig: u360Recs('sig', S.id).length };
+      const T = [['hist', 'Lịch sử kiểm tra'], ['seal', 'Mẫu niêm phong'], ['sig', 'Chữ ký mẫu']];
+      document.getElementById('u360-tabs').innerHTML = T.map(t => `<button type="button" class="u360-tab" role="tab" id="u360-tab-${t[0]}" aria-selected="${S.tab === t[0]}" aria-controls="u360-body" tabindex="${S.tab === t[0] ? 0 : -1}" onclick="u360Tab('${t[0]}')" onkeydown="u360TabKey(event)">${t[1]}<span class="cnt">${cnt[t[0]]}</span></button>`).join('');
+      host.setAttribute('aria-labelledby', 'u360-tab-' + S.tab);
+      host.innerHTML = S.tab === 'hist' ? u360HistHtml(S) : u360FilesHtml(S.tab, S);
+    }
+    window.u360Tab = function (t) { if (window.__u360) { window.__u360.tab = t; u360Render(); const b = document.getElementById('u360-tab-' + t); if (b && document.activeElement && document.activeElement.classList.contains('u360-tab')) b.focus(); } };
+    window.u360TabKey = function (e) {
+      const ids = ['hist', 'seal', 'sig'], i = ids.indexOf(window.__u360.tab);
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); const j = (i + (e.key === 'ArrowRight' ? 1 : 2)) % 3; u360Tab(ids[j]); const b = document.getElementById('u360-tab-' + ids[j]); if (b) b.focus(); }
+    };
+    window.u360ToggleAll = function () { if (window.__u360) { window.__u360.showAll = !window.__u360.showAll; u360Render(); } };
+    window.u360OpenFile = function (kind, rid) {
+      const r = ((kind === 'seal' ? data.seals : data.signatures) || []).find(x => x.id === rid); if (!r) return;
+      if (r.fileId) showPdfModal(r.fileId, true, r.fileName || r.title || r.name || 'Tài liệu đính kèm', r.fileUrl || '', r.storagePath || '');
+      else showPdfModal((kind === 'seal' ? 'MAU NIEM PHONG BO TIEN TCTD/' : 'BANG DANG KY CHU KY MAU TCTD/') + r.fileName, false, r.fileName || 'Tài liệu');
+    };
+    window.u360ToLib = function () { const id = window.__u360 && window.__u360.id; u360Close(); if (id) { filterUnit = id; switchTab('thuvien'); } };
+    async function u360Load(id) {
+      const S = window.__u360, cached = U360_CACHE[id], local = (data.logs || []).filter(l => l && l.unitId === id);
+      const finish = (logs, partial) => {
+        const byId = {}; (logs || []).forEach(l => { byId[l.id || (l.date + '|' + Math.random())] = l; }); local.forEach(l => { byId[l.id] = l; });   // bản ghi vừa lưu trong máy luôn được tính
+        const all = Object.values(byId); U360_CACHE[id] = { logs: logs || [], partial, at: Date.now() };
+        if (!window.__u360 || window.__u360.id !== id) return;
+        Object.assign(window.__u360, { logs: all, partial, loading: false, model: u360Model(all) }); u360Render();
+      };
+      if (cached && Date.now() - cached.at < 120000) { finish(cached.logs, cached.partial); return; }
+      let logs = null;
+      try {
+        const maint = window.isMaintenanceOn && window.isMaintenanceOn() && !(window.isAdmin && window.isAdmin());
+        if (!maint && typeof fbFirestore !== 'undefined' && fbFirestore) {
+          const snap = await fbFirestore.collection('app_data').doc('main').collection('logs').where('unitId', '==', id).get();
+          logs = snap.docs.map(d => d.data());
+        }
+      } catch (e) { console.warn('[Hồ sơ 360°] không tải được lịch sử từ máy chủ', e); logs = null; }
+      finish(logs || local, !logs);
+    }
+    window.u360Open = function (id, tab) {
+      const u = (data.units || []).find(x => x.id === id); if (!u) return;
+      u360Close(); try { haptic(); } catch (e) { }
+      window.__u360 = { id, tab: tab || 'hist', logs: null, loading: true, partial: false, showAll: false, model: null };
+      const ov = document.createElement('div');
+      ov.id = 'u360'; ov.className = 'kq-sheet u360-ov'; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-labelledby', 'u360-t');
+      ov.onclick = e => { if (e.target === ov) u360Close(); };
+      ov.innerHTML = `<div class="kq-sheet-panel u360-panel"><div class="kq-grab"></div><button type="button" class="kq-x" aria-label="Đóng hồ sơ" onclick="u360Close()">×</button>
+        <div class="u360-eyebrow">Hồ sơ TCTD 360°</div><h3 class="u360-title" id="u360-t">${esc(u.name)}</h3>
+        <div class="u360-tabs" role="tablist" aria-label="Nội dung hồ sơ" id="u360-tabs"></div><div id="u360-body" role="tabpanel" tabindex="0"></div></div>`;
+      document.body.appendChild(ov); document.body.style.overflow = 'hidden';
+      u360Render(); u360Load(id);
+    };
+    window.u360Close = function () { const o = document.getElementById('u360'); if (o) o.remove(); window.__u360 = null; if (!document.getElementById('kq-sheet') && !document.getElementById('rp-dlg') && !document.getElementById('rp-prev')) document.body.style.overflow = ''; };
+    document.addEventListener('keydown', e => {
+      if (e.key !== 'Escape' || !document.getElementById('u360')) return;
+      const pdf = document.getElementById('pdf-modal-overlay'); if (pdf && pdf.classList.contains('open')) return;
+      e.stopImmediatePropagation(); u360Close();
+    }, true);
+    const u360Link = id => `<button type="button" class="u360-link" onclick="u360Open('${esc(id)}')" title="Mở hồ sơ 360°"><b>${esc(unitName(id))}</b><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></button>`;
 
     /* ================= XUẤT BÁO CÁO (Excel / PDF) + BẢN IN NHẬT KÝ ĐỂ KÝ =================
        • Báo cáo kết quả kiểm tra: bố cục Đánh giá chung → Kết quả (so sánh kỳ trước) → Tồn tại/hạn chế → Nguyên nhân → Kiến nghị.
