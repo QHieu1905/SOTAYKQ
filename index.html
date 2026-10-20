@@ -2520,6 +2520,23 @@
       .nk-note-btn:disabled { opacity: .6; cursor: default; }
       .bk-locked { cursor: not-allowed; opacity: .6; border: 1px dashed #d1d5db; background: #f9fafb; }
       .bk-lock-note { margin: 0 0 14px; padding: 10px 14px; border-radius: 10px; background: #f3f4f6; border: 1px solid #e5e7eb; color: #4b5563; font-size: 13px; line-height: 1.55; }
+
+      /* ===== Đồng bộ thủ công ===== */
+      .bk-sync-state { margin: 0 0 12px; padding: 10px 14px; border-radius: 10px; font-size: 13px; font-weight: 600; line-height: 1.5; }
+      .bk-hint { margin: -10px 0 24px; font-size: 12.5px; color: #6b7280; line-height: 1.6; }
+      .msj-ov { z-index: 10015; }
+      .msj-panel { max-width: 640px; padding: 10px 18px calc(16px + env(safe-area-inset-bottom)); }
+      .msj-safe { margin: 10px 0; padding: 9px 12px; border-radius: 10px; background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; font-size: 12.5px; line-height: 1.55; }
+      .msj-warn { margin: 8px 0; padding: 9px 12px; border-radius: 10px; background: #fffbeb; border: 1px solid #fde68a; color: #92400e; font-size: 12.5px; line-height: 1.5; }
+      .msj-tw { overflow-x: auto; border: 1px solid #e5e7eb; border-radius: 10px; margin-top: 10px; }
+      .msj-t { width: 100%; border-collapse: collapse; font-size: 13px; }
+      .msj-t th { background: #fff7d6; color: #78350f; font-size: 12px; font-weight: 700; text-align: right; padding: 8px 10px; text-transform: none; white-space: nowrap; }
+      .msj-t th:first-child { text-align: left; }
+      .msj-t td { padding: 7px 10px; border-top: 1px solid #f1f2f4; }
+      .msj-t td.n { text-align: right; font-variant-numeric: tabular-nums; color: #6b7280; }
+      .msj-t td.g { color: #047857; font-weight: 800; } .msj-t td.a { color: #b45309; font-weight: 800; }
+      @media (max-width: 480px) { .msj-t th, .msj-t td { padding: 7px 6px; } .msj-t { font-size: 12.5px; } }
+      .msj-t tfoot td { font-weight: 800; background: #f9fafb; color: #1f2937; }
   </style>
 </head>
 
@@ -6317,6 +6334,135 @@
     }, true);
     const u360Link = id => `<button type="button" class="u360-link" onclick="u360Open('${esc(id)}')" title="Mở hồ sơ 360°"><b>${esc(unitName(id))}</b><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></button>`;
 
+    /* ================= ĐỒNG BỘ THỦ CÔNG TỪ TỆP .JSON (mọi tài khoản) =================
+       Dùng khi đồng bộ tự động bị lỗi (tường lửa, mất mạng…): admin "Tải .json" rồi gửi cho đồng nghiệp, họ nhập vào máy mình.
+       Khác "Nhập .json" của admin (ghi đè TOÀN BỘ), cách này là GỘP AN TOÀN:
+         • chỉ thêm/cập nhật bản ghi theo id vào 8 nhóm dữ liệu nghiệp vụ; KHÔNG xoá bản ghi nào trên máy;
+         • KHÔNG đụng tới tài khoản, phân quyền, nhật nnhật hệ thống, cài đặt (tránh nâng quyền / ghi đè dùng chung);
+         • KHÔNG ghi lên Cloud — chỉ cập nhật dữ liệu trên máy này; khi đồng bộ tự động chạy lại thì dữ liệu máy chủ là chuẩn;
+         • bản ghi đang chờ đồng bộ lên Cloud và bản trên máy mới hơn (updatedAt) được giữ nguyên;
+         • xem trước số liệu trước khi nhập, và có "Hoàn tác lần nhập gần nhất". */
+    const MSJ_COLS = [['units', 'Danh mục TCTD'], ['logs', 'Nhật ký kiểm tra'], ['plans', 'Kế hoạch / ghim'], ['inspections', 'Kiểm tra (sản lượng)'], ['recoveries', 'Thu hồi'], ['docs', 'Tài liệu'], ['seals', 'Mẫu niêm phong'], ['signatures', 'Chữ ký mẫu']];
+    const MSJ_MAX_BYTES = 200 * 1024 * 1024;
+    function msjStable(o) {
+      if (Array.isArray(o)) return '[' + o.map(msjStable).join(',') + ']';
+      if (o && typeof o === 'object') return '{' + Object.keys(o).sort().map(k => JSON.stringify(k) + ':' + msjStable(o[k])).join(',') + '}';
+      return JSON.stringify(o);
+    }
+    function msjTs(x) { const v = x && (x.updatedAt || x.modifiedAt || x.ts); if (!v) return 0; const n = Number(v); return isNaN(n) ? (Date.parse(v) || 0) : n; }
+    function msjValid(col, it) {
+      if (!it || typeof it !== 'object' || Array.isArray(it) || it.id == null || String(it.id).length > 200) return false;
+      if (col === 'logs') return typeof it.unitId === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(String(it.date || ''));
+      return true;
+    }
+    function msjPlan(obj) {
+      const pend = new Set((typeof getPendingSyncQueue === 'function' ? getPendingSyncQueue() : []).map(x => x.col + '::' + x.id));
+      const out = {}; let invalid = 0;
+      MSJ_COLS.forEach(([col]) => {
+        const inc = Array.isArray(obj.data[col]) ? obj.data[col] : [], cur = new Map((data[col] || []).map(x => [x.id, x]));
+        const r = { col, incoming: inc.length, add: [], upd: [], same: 0, keep: 0 };
+        inc.forEach(it => {
+          if (!msjValid(col, it)) { invalid++; return; }
+          if (pend.has(col + '::' + it.id)) { r.keep++; return; }
+          const loc = cur.get(it.id);
+          if (!loc) r.add.push(it);
+          else if (msjStable(loc) === msjStable(it)) r.same++;
+          else if (msjTs(loc) && msjTs(it) && msjTs(loc) > msjTs(it)) r.keep++;
+          else r.upd.push(it);
+        });
+        out[col] = r;
+      });
+      out.__invalid = invalid; return out;
+    }
+    function msjMaxLogDate(arr) { return (arr || []).reduce((m, l) => (l && l.date && l.date > m ? l.date : m), ''); }
+    window.manualSyncFromJson = function () {
+      const input = document.createElement('input'); input.type = 'file'; input.accept = '.json,application/json';
+      input.onchange = e => {
+        const file = e.target.files && e.target.files[0]; if (!file) return;
+        if (file.size > MSJ_MAX_BYTES) { alert('Tệp quá lớn (' + Math.round(file.size / 1048576) + ' MB). Chỉ nhập tệp sao lưu của ứng dụng (.json).'); return; }
+        const reader = new FileReader();
+        reader.onerror = () => alert('Không đọc được tệp.');
+        reader.onload = ev => {
+          let obj; try { obj = JSON.parse(ev.target.result); } catch (err) { alert('Tệp không phải JSON hợp lệ: ' + err.message); return; }
+          msjStart(obj, { name: file.name, size: file.size, modified: file.lastModified });
+        };
+        reader.readAsText(file);
+      };
+      input.click();
+    };
+    function msjStart(obj, meta) {
+      if (!obj || typeof obj !== 'object' || !obj.data || typeof obj.data !== 'object' || Array.isArray(obj.data)) { alert('Đây không phải tệp sao lưu của ứng dụng (thiếu phần "data").'); return; }
+      const plan = msjPlan(obj); window.__msj = { obj, meta, plan };
+      msjClose(); const z = n => String(n).padStart(2, '0'), d = meta.modified ? new Date(meta.modified) : null;
+      const when = d ? `${z(d.getDate())}/${z(d.getMonth() + 1)}/${d.getFullYear()} ${z(d.getHours())}:${z(d.getMinutes())}` : '—';
+      let tAdd = 0, tUpd = 0; MSJ_COLS.forEach(([c]) => { tAdd += plan[c].add.length; tUpd += plan[c].upd.length; });
+      const fMax = msjMaxLogDate(obj.data.logs), lMax = msjMaxLogDate(data.logs);
+      const warns = [];
+      if (fMax && lMax && fMax < lMax) warns.push(`Tệp có vẻ <b>cũ hơn</b> dữ liệu trên máy (nhật ký mới nhất trong tệp: ${rpDmy(fMax)}, trên máy: ${rpDmy(lMax)}). Chỉ nhập nếu chắc chắn đúng tệp.`);
+      if (plan.__invalid) warns.push(`${plan.__invalid} bản ghi không hợp lệ trong tệp sẽ bị bỏ qua.`);
+      if (!tAdd && !tUpd) warns.push('Dữ liệu trên máy đã khớp với tệp — không có gì cần nhập.');
+      const rows = MSJ_COLS.filter(([c]) => plan[c].incoming > 0).map(([c, l]) => { const r = plan[c]; return `<tr><td>${l}</td><td class="n">${r.incoming}</td><td class="n${r.add.length ? ' g' : ''}">${r.add.length}</td><td class="n${r.upd.length ? ' a' : ''}">${r.upd.length}</td><td class="n">${r.same + r.keep}</td></tr>`; }).join('');
+      const ov = document.createElement('div'); ov.id = 'msj-dlg'; ov.className = 'kq-sheet msj-ov'; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-labelledby', 'msj-t');
+      ov.onclick = e => { if (e.target === ov) msjClose(); };
+      ov.innerHTML = `<div class="kq-sheet-panel msj-panel"><div class="kq-grab"></div><button type="button" class="kq-x" aria-label="Đóng" onclick="msjClose()">×</button>
+        <h3 class="kq-snz-t" id="msj-t">Đồng bộ thủ công từ tệp</h3>
+        <div class="kq-snz-u">${esc(meta.name || '')} · lưu lúc ${when} · ${(meta.size / 1048576).toFixed(1)} MB</div>
+        <div class="msj-safe" role="note">✅ Chỉ <b>cập nhật dữ liệu trên máy này</b> · không ghi lên Cloud · không đổi tài khoản/phân quyền · không xoá bản ghi nào trên máy. Có thể hoàn tác.</div>
+        ${warns.map(w => `<div class="msj-warn" role="alert">⚠️ ${w}</div>`).join('')}
+        <div class="msj-tw"><table class="msj-t"><thead><tr><th>Nhóm dữ liệu</th><th>Trong tệp</th><th>Mới</th><th>Sửa</th><th>Giữ</th></tr></thead><tbody>${rows || '<tr><td colspan="5">Tệp không có dữ liệu nghiệp vụ.</td></tr>'}</tbody><tfoot><tr><td>Tổng</td><td></td><td class="n g">${tAdd}</td><td class="n a">${tUpd}</td><td></td></tr></tfoot></table></div>
+        <div class="kq-snz-f"><button type="button" class="kq-btn" onclick="msjClose()">Hủy</button><button type="button" class="kq-btn pri" id="msj-go" ${(tAdd + tUpd) ? '' : 'disabled'} onclick="msjApply()">Nhập vào máy này</button></div></div>`;
+      document.body.appendChild(ov); document.body.style.overflow = 'hidden';
+    }
+    window.msjClose = function () { const o = document.getElementById('msj-dlg'); if (o) o.remove(); if (!document.getElementById('kq-sheet') && !document.getElementById('rp-dlg') && !document.getElementById('rp-prev') && !document.getElementById('u360')) document.body.style.overflow = ''; };
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.getElementById('msj-dlg')) { e.stopImmediatePropagation(); msjClose(); } }, true);
+    window.msjApply = async function () {
+      const M = window.__msj; if (!M) return;
+      const btn = document.getElementById('msj-go'); if (btn) { btn.disabled = true; btn.textContent = 'Đang nhập…'; }
+      try {
+        // bản chụp để hoàn tác (chỉ 8 nhóm nghiệp vụ)
+        const snap = {}; MSJ_COLS.forEach(([c]) => { snap[c] = structuredClone(data[c] || []); });
+        await dbPut('store_data', 'before_manual_import', { at: Date.now(), cols: snap });
+        try { localStorage.setItem('msj_undo_at', String(Date.now())); } catch (e) { }
+        let nAdd = 0, nUpd = 0;
+        MSJ_COLS.forEach(([col]) => {
+          const p = M.plan[col]; data[col] = data[col] || [];
+          p.add.concat(p.upd).forEach(it => rtUpsertLocal(col, structuredClone(it)));
+          nAdd += p.add.length; nUpd += p.upd.length;
+          if (p.add.length || p.upd.length) { if (col === 'logs' || col === 'recoveries' || col === 'inspections') rtSortCol(col); }
+        });
+        // file đính kèm nhúng trong tệp (chỉ lưu trên máy để xem offline; không đẩy lên Storage)
+        const files = Array.isArray(M.obj.files) ? M.obj.files : [];
+        for (let i = 0; i < files.length; i++) {
+          const f = files[i]; if (!f || !f.id || !f.data) continue;
+          if (typeof showProgressOverlay === 'function') showProgressOverlay(true, Math.round((i + 1) / files.length * 100), `Đang lưu file ${i + 1}/${files.length}…`);
+          try { const blob = await (await fetch(f.data)).blob(); await dbPut('store_files', f.id, new File([blob], f.name || f.id, { type: f.type || blob.type })); } catch (e) { console.warn('[Nhập thủ công] bỏ qua file', f.id, e); }
+        }
+        if (typeof showProgressOverlay === 'function') showProgressOverlay(false);
+        saveData();
+        msjClose(); window.__msj = null;
+        if (typeof render === 'function') render();
+        showToast(`✓ Đã nhập vào máy: ${nAdd} bản ghi mới, ${nUpd} bản ghi cập nhật.`, 'green');
+      } catch (err) {
+        if (typeof showProgressOverlay === 'function') showProgressOverlay(false);
+        console.error('[Nhập thủ công]', err); alert('Không nhập được: ' + (err && err.message || err));
+        if (btn) { btn.disabled = false; btn.textContent = 'Nhập vào máy này'; }
+      }
+    };
+    window.manualSyncUndo = async function () {
+      const rec = await dbGet('store_data', 'before_manual_import');
+      if (!rec || !rec.cols) { alert('Không có lần nhập nào để hoàn tác.'); try { localStorage.removeItem('msj_undo_at'); } catch (e) { } if (typeof render === 'function') render(); return; }
+      if (!confirm('Hoàn tác lần nhập gần nhất? Dữ liệu nghiệp vụ trên máy sẽ quay về trạng thái TRƯỚC khi nhập (các thay đổi thêm sau đó trên máy cũng sẽ mất).')) return;
+      MSJ_COLS.forEach(([c]) => { data[c] = rec.cols[c] || []; });
+      saveData(); try { localStorage.removeItem('msj_undo_at'); } catch (e) { }
+      if (typeof render === 'function') render(); showToast('Đã hoàn tác lần nhập gần nhất.', 'green');
+    };
+    // Trạng thái đồng bộ tự động (để hướng người dùng sang đồng bộ thủ công khi cần)
+    window.autoSyncState = function () {
+      if (!localStorage.getItem('firebase_config')) return 'none';
+      if (!navigator.onLine) return 'offline';
+      return window.hasServerSyncedOnce ? 'ok' : 'waiting';
+    };
+
     /* ================= XUẤT BÁO CÁO (Excel / PDF) + BẢN IN NHẬT KÝ ĐỂ KÝ =================
        • Báo cáo kết quả kiểm tra: bố cục Đánh giá chung → Kết quả (so sánh kỳ trước) → Tồn tại/hạn chế → Nguyên nhân → Kiến nghị.
        • Nhật ký kiểm tra (bản in ký): bảng từng lượt kiểm tra + khối chữ ký.
@@ -6734,7 +6880,9 @@
       const at = window.__lastLogsSyncAt ? (d => z(d.getHours()) + ':' + z(d.getMinutes()))(new Date(window.__lastLogsSyncAt)) : '';
       const need = filterStartNK ? Number(String(filterStartNK).slice(0, 4)) : 0;
       const warn = (need && need < yrs[0]) ? `<div class="nk-note" role="status">Bộ lọc bắt đầu từ năm ${need} nhưng dữ liệu từ năm ${need} chưa được tải nên số liệu có thể thiếu. <button type="button" class="nk-note-btn" onclick="loadLogsYear(${need})">Tải dữ liệu từ năm ${need}</button></div>` : '';
-      return `<div class="nk-info" role="status">Dữ liệu đang tải: năm ${yrs.join(', ')} · ${n.toLocaleString('vi-VN')} bản ghi${at ? ' · đồng bộ lúc ' + at : ''}
+      const st = window.autoSyncState ? window.autoSyncState() : 'none';
+      const syncWarn = (st === 'waiting' || st === 'offline') ? `<div class="nk-note" role="status">${st === 'offline' ? 'Máy đang ngoại tuyến' : 'Chưa kết nối được máy chủ'} — số liệu có thể chưa mới nhất. <button type="button" class="nk-note-btn" onclick="switchTab('saoluu')">Đồng bộ thủ công từ .json</button></div>` : '';
+      return `${syncWarn}<div class="nk-info" role="status">Dữ liệu đang tải: năm ${yrs.join(', ')} · ${n.toLocaleString('vi-VN')} bản ghi${at ? ' · đồng bộ lúc ' + at : ''}
         <button type="button" class="nk-note-btn" onclick="rtResyncLogs(this)" title="Tải lại trực tiếp từ máy chủ để đối chiếu số liệu">↻ Làm mới</button></div>${warn}`;
     }
     function renderNhatky() {
@@ -9364,7 +9512,7 @@
       </div>
 
       ${secHead('Đồng bộ Cloud thủ công', 'Sao lưu & Khôi phục dữ liệu trực tiếp qua Firebase Storage.')}
-      ${(window.isAdmin && window.isAdmin()) ? '' : `<div class="bk-lock-note" role="note">🔒 Các thao tác <b>ghi đè dữ liệu dùng chung</b> (sao lưu lên Cloud, cập nhật từ Cloud, nhập .json) chỉ dành cho tài khoản admin để tránh làm hỏng số liệu của mọi người. Tài khoản của bạn vẫn <b>Tải .json</b> để lưu bản sao riêng, và có thể bấm <b>“Buộc đồng bộ ngay”</b> ở trên nếu số liệu trên máy bị lệch so với người khác.</div>`}
+      ${(window.isAdmin && window.isAdmin()) ? '' : `<div class="bk-lock-note" role="note">🔒 Hai thao tác <b>ghi đè dữ liệu dùng chung trên Cloud</b> (sao lưu lên Cloud, cập nhật từ Cloud) và <b>Nhập .json ghi đè toàn bộ</b> chỉ dành cho tài khoản admin. Nếu đồng bộ tự động bị lỗi, tài khoản nào cũng có thể dùng <b>“Đồng bộ thủ công từ .json”</b> ở mục bên dưới (gộp an toàn vào máy này).</div>`}
       <div class="grid grid-4" style="margin-bottom: 24px;">
         ${(window.isAdmin && window.isAdmin()) ? `
         <div class="card stat" style="cursor:pointer;border:1px solid var(--line);background:#f0f9ff;" onclick="cloudBackup()">
@@ -9394,13 +9542,29 @@
         ${(window.isAdmin && window.isAdmin()) ? `
         <div class="card stat" style="cursor:pointer;border:1px solid var(--line)" onclick="importJson()">
           <div class="stat-ic ic-amber">${ICONS.box}</div>
-          <div><div class="num" style="font-size:16px">Nhập .json</div><div class="lbl">Khôi phục từ Tệp</div></div>
+          <div><div class="num" style="font-size:16px">Nhập .json</div><div class="lbl">Khôi phục toàn bộ (ghi đè)</div></div>
         </div>` : `
         <div class="card stat bk-locked" aria-disabled="true" title="Chỉ tài khoản admin được thực hiện thao tác này">
           <div class="stat-ic ic-amber">${ICONS.box}</div>
-          <div><div class="num" style="font-size:16px">Nhập .json</div><div class="lbl">🔒 Chỉ admin</div></div>
+          <div><div class="num" style="font-size:16px">Nhập .json</div><div class="lbl">🔒 Chỉ admin (ghi đè toàn bộ)</div></div>
         </div>`}
       </div>
+
+      ${secHead('Đồng bộ thủ công từ tệp .json', 'Dùng khi đồng bộ tự động bị lỗi — gộp dữ liệu từ tệp sao lưu vào máy này.')}
+      ${(() => { const st = window.autoSyncState ? window.autoSyncState() : 'none', undoAt = Number(localStorage.getItem('msj_undo_at') || 0);
+        const lab = st === 'ok' ? ['#ecfdf5', '#047857', '✅ Đồng bộ tự động đang hoạt động bình thường.'] : st === 'waiting' ? ['#fffbeb', '#92400e', '⚠️ Chưa nhận được phản hồi từ máy chủ trong phiên này — dữ liệu có thể chưa mới nhất. Hãy thử “Buộc đồng bộ ngay” ở trên; nếu vẫn lỗi, dùng đồng bộ thủ công.'] : st === 'offline' ? ['#fff1f2', '#be123c', '⚠️ Máy đang ngoại tuyến — có thể dùng đồng bộ thủ công từ tệp .json.'] : ['#f3f4f6', '#4b5563', 'Chưa cấu hình Firebase — ứng dụng đang chạy độc lập trên máy.'];
+        return `<div class="bk-sync-state" style="background:${lab[0]}; color:${lab[1]};" role="status">${lab[2]}</div>
+        <div class="grid grid-4" style="margin-bottom: 24px;">
+          <div class="card stat" style="cursor:pointer;border:1px solid #fcd34d;background:#fffbeb;" onclick="manualSyncFromJson()" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();manualSyncFromJson()}">
+            <div class="stat-ic ic-amber">${ICONS.box}</div>
+            <div><div class="num" style="font-size:16px">Đồng bộ thủ công</div><div class="lbl">Nhập .json · gộp an toàn vào máy này</div></div>
+          </div>
+          ${undoAt ? `<div class="card stat" style="cursor:pointer;border:1px solid var(--line)" onclick="manualSyncUndo()" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();manualSyncUndo()}">
+            <div class="stat-ic ic-blue">${ICONS.redo}</div>
+            <div><div class="num" style="font-size:16px">Hoàn tác lần nhập</div><div class="lbl">Nhập lúc ${new Date(undoAt).toLocaleString('vi-VN')}</div></div>
+          </div>` : ''}
+        </div>
+        <div class="bk-hint">Cách làm: admin (hoặc máy đang đồng bộ tốt) bấm <b>Tải .json</b> → gửi tệp cho đồng nghiệp → họ bấm <b>Đồng bộ thủ công</b> và chọn tệp. Ứng dụng cho xem trước số bản ghi mới/cập nhật rồi mới nhập; không xoá dữ liệu nào trên máy, không đổi tài khoản/phân quyền và không ghi lên Cloud. Khi đồng bộ tự động chạy lại, dữ liệu trên máy chủ là chuẩn.</div>`; })()}
       `;
     }
 
