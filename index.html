@@ -2511,6 +2511,15 @@
         .u360-title { font-size: 18px; }
         .u360-stt { display: none; }
       }
+
+      /* ===== Đồng bộ số liệu & Sao lưu ===== */
+      .nk-info { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 4px 0 10px; font-size: 12.5px; color: #6b7280; }
+      .nk-note { margin: 0 0 10px; padding: 9px 12px; border-radius: 10px; background: #fffbeb; border: 1px solid #fde68a; color: #92400e; font-size: 13px; line-height: 1.45; }
+      .nk-note-btn { cursor: pointer; min-height: 36px; padding: 0 12px; border-radius: 8px; border: 1px solid #fcd34d; background: #fff; color: #92400e; font: inherit; font-size: 12.5px; font-weight: 700; touch-action: manipulation; }
+      .nk-note-btn:hover { background: #fffbeb; }
+      .nk-note-btn:disabled { opacity: .6; cursor: default; }
+      .bk-locked { cursor: not-allowed; opacity: .6; border: 1px dashed #d1d5db; background: #f9fafb; }
+      .bk-lock-note { margin: 0 0 14px; padding: 10px 14px; border-radius: 10px; background: #f3f4f6; border: 1px solid #e5e7eb; color: #4b5563; font-size: 13px; line-height: 1.55; }
   </style>
 </head>
 
@@ -3518,14 +3527,16 @@
       try {
         await initDB();
         const saved = await dbGet('store_data', 'default');
-        const mergeData = (source) => {
+        const mergeData = (source, cloud = false) => {
           data = Object.assign(structuredClone(DEFAULT_DATA), source);
           ['units', 'logs', 'plans', 'inspections', 'recoveries', 'docs', 'seals', 'signatures'].forEach(k => {
             if (DEFAULT_DATA[k]) {
               if (!data[k]) data[k] = [];
               if (k === 'docs') data[k] = data[k].filter(x => !['d1', 'd2', 'd3', 'd3633'].includes(x.id));
               if (k === 'seals') data[k] = data[k].filter(x => x.name !== 'Chưa cập nhật');
-              if (k !== 'seals' && k !== 'signatures') {
+              // Máy đã dùng Cloud: dữ liệu thật lấy từ máy chủ, KHÔNG nạp lại dữ liệu mẫu đóng gói cho các nhóm này
+              // (trước đây bản ghi mẫu bị thêm lại mỗi lần mở app, kể cả khi đã xoá trên máy chủ → số lượt kiểm tra bị dư).
+              if (k !== 'seals' && k !== 'signatures' && !(cloud && ['logs', 'plans', 'inspections', 'recoveries'].includes(k))) {
                 for (const item of DEFAULT_DATA[k]) {
                   const existing = data[k].find(x => x.id === item.id);
                   if (!existing) {
@@ -3539,12 +3550,12 @@
 
         const hasFirebaseConfig = !!localStorage.getItem("firebase_config");
         if (saved && hasFirebaseConfig) {
-          mergeData(saved);
+          mergeData(saved, true);
         } else if (hasFirebaseConfig) {
           // Di chuyển từ localStorage sang IndexedDB lần đầu
           const s = localStorage.getItem(STORAGE_KEY);
           if (s) {
-            mergeData(JSON.parse(s));
+            mergeData(JSON.parse(s), true);
             await dbPut('store_data', 'default', data);
           } else {
             // QUAN TRỌNG: thiết bị này chưa có bản lưu cục bộ nào (máy mới / lần đầu mở trên domain này
@@ -3552,7 +3563,7 @@
             // = undefined) và có thể bị đẩy lên Firestore, xoá mất dữ liệu thật trên cloud.
             // Luôn gọi mergeData({}) để đảm bảo cấu trúc data an toàn, đồng thời đánh dấu là
             // "đang chờ kéo dữ liệu thật từ server" để chặn mọi lượt ghi lên cho đến khi đồng bộ xong.
-            mergeData({});
+            mergeData({}, true);
             window.__waitingForCloudPull = true;
           }
         } else {
@@ -6717,6 +6728,15 @@
     };
 
     /* ================= 4. NHẬT KÝ KIỂM TRA BÓ TIỀN ================= */
+    function nkDataInfoHtml() {
+      const cy = new Date().getFullYear(), yrs = Array.from(new Set([cy].concat(Array.from(window.__logYears || [])))).sort();
+      const n = (data.logs || []).length, z = x => String(x).padStart(2, '0');
+      const at = window.__lastLogsSyncAt ? (d => z(d.getHours()) + ':' + z(d.getMinutes()))(new Date(window.__lastLogsSyncAt)) : '';
+      const need = filterStartNK ? Number(String(filterStartNK).slice(0, 4)) : 0;
+      const warn = (need && need < yrs[0]) ? `<div class="nk-note" role="status">Bộ lọc bắt đầu từ năm ${need} nhưng dữ liệu từ năm ${need} chưa được tải nên số liệu có thể thiếu. <button type="button" class="nk-note-btn" onclick="loadLogsYear(${need})">Tải dữ liệu từ năm ${need}</button></div>` : '';
+      return `<div class="nk-info" role="status">Dữ liệu đang tải: năm ${yrs.join(', ')} · ${n.toLocaleString('vi-VN')} bản ghi${at ? ' · đồng bộ lúc ' + at : ''}
+        <button type="button" class="nk-note-btn" onclick="rtResyncLogs(this)" title="Tải lại trực tiếp từ máy chủ để đối chiếu số liệu">↻ Làm mới</button></div>${warn}`;
+    }
     function renderNhatky() {
       const noUnits = data.units.length === 0;
       let list = sortDate(byUnit(data.logs)).filter(r => matchQ(unitName(r.unitId)));
@@ -6804,6 +6824,7 @@
       `;
 
       return `${filterBar(filterHtml)}
+      ${nkDataInfoHtml()}
       ${secHead('Nhật ký kiểm tra', 'Ghi nhận chi tiết từng lần kiểm tra tiền', noUnits ? null : "openForm('log')", 'Thêm bản ghi mới')}
       ${list.length === 0
           ? emptyBox('box', 'Chưa có dữ liệu', 'Bấm Thêm bản ghi để bắt đầu.')
@@ -7735,11 +7756,12 @@
         // Tải trực tiếp từ server (không qua onSnapshot) các collection của tab đang xem,
         // để số liệu hiển thị đúng ngay lập tức.
         const tabToColMap = {
-          tongquan: ['units', 'logs', 'recoveries', 'plans'], donvi: ['units', 'seals', 'signatures'],
+          tongquan: ['units', 'logs', 'recoveries', 'plans'], donvi: ['units', 'logs', 'seals', 'signatures'],
           kehoach: ['units', 'logs', 'plans'], nhatky: ['logs'], sanluong: ['inspections', 'recoveries'], thuvien: ['docs']
         };
         const colsToRefresh = tabToColMap[typeof tab !== 'undefined' ? tab : 'tongquan'] || [];
         for (const col of colsToRefresh) {
+          if (col === 'logs') { await rtResyncLogsFromServer(); continue; }     // đúng cửa sổ năm đang dùng, không kéo cả bộ sưu tập (tránh lệch số giữa các tài khoản)
           const snap = await fbFirestore.collection("app_data").doc("main").collection(col).get({ source: 'server' });
           data[col] = snap.docs.map(d => d.data());
         }
@@ -8663,6 +8685,92 @@
       return BUNDLED_STATIC_COLS.includes(col) ? BUNDLED_STATIC_VERSION : 0;
     }
 
+    /* ---------- Đồng bộ realtime: áp dụng một snapshot vào bộ nhớ ----------
+       Sửa các lỗi làm số liệu mỗi tài khoản một khác:
+       1) Bỏ qua CẢ snapshot khi có ghi chờ gửi (hasPendingWrites) → mất luôn thay đổi của người khác trong cùng snapshot. Nay chỉ bỏ qua đúng bản ghi do máy này vừa ghi.
+       2) Sự kiện 'removed' cũng được gửi khi bản ghi chỉ bị đẩy ra khỏi cửa sổ truy vấn (giới hạn/khoảng ngày), không phải bị xoá thật →
+          trước đây bản ghi còn nguyên trên máy chủ vẫn bị xoá khỏi bộ nhớ (số lượt bị hụt). Nay kiểm tra lại từng bản ghi trước khi xoá.
+       3) Bộ nhớ lưu sẵn trên máy có thể còn bản ghi đã bị xoá ở nơi khác (hoặc dữ liệu mẫu): ở snapshot đầy đủ đầu tiên từ máy chủ,
+          bản ghi trong cửa sổ nhưng KHÔNG có trên máy chủ (và không phải bản chờ đồng bộ) sẽ được gỡ bỏ. */
+    function rtUpsertLocal(col, docData) {
+      const idx = data[col].findIndex(x => x.id === docData.id);
+      if (idx >= 0) data[col][idx] = docData; else data[col].push(docData);
+    }
+    function rtSortCol(col) {
+      if (col === 'recoveries') data[col].sort((a, b) => (b.month || '').localeCompare(a.month || ''));
+      else data[col].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+    }
+    function rtVerifyRemoved(ctx, id) {
+      Promise.resolve(ctx.colRef.doc(id).get()).then(d => {
+        if (d && d.exists) rtUpsertLocal(ctx.col, d.data()); else data[ctx.col] = data[ctx.col].filter(x => x.id !== id);
+        rtSortCol(ctx.col); if (typeof handleRemoteChange === 'function') handleRemoteChange();
+      }).catch(() => { /* không xác minh được → giữ nguyên bản ghi, không xoá nhầm */ });
+    }
+    function rtApplySnapshot(ctx, snapshot) {
+      const col = ctx.col, fromCache = !!snapshot.metadata.fromCache, full = snapshot.size >= ctx.limitVal;
+      let serverReads = 0, changed = false;
+      snapshot.docChanges().forEach(change => {
+        if (change.doc.metadata.hasPendingWrites) return;      // bản ghi do chính máy này vừa ghi (đã có sẵn trong bộ nhớ)
+        if (!fromCache) serverReads++;
+        const docData = change.doc.data();
+        changed = true;
+        if (change.type === 'added' || change.type === 'modified') rtUpsertLocal(col, docData);
+        else if (change.type === 'removed') {
+          if (ctx.windowed || full) rtVerifyRemoved(ctx, docData.id);          // có thể chỉ rời khỏi cửa sổ truy vấn
+          else data[col] = data[col].filter(x => x.id !== docData.id);          // cửa sổ chưa đầy & không giới hạn khoảng → chắc chắn đã bị xoá
+        }
+      });
+      if (!fromCache && ctx.range && !ctx.reconciled && !full) {
+        ctx.reconciled = true;
+        const ids = new Set(snapshot.docs.map(d => (d.data() || {}).id || d.id));
+        const pend = new Set((typeof getPendingSyncQueue === 'function' ? getPendingSyncQueue() : []).filter(x => x.col === col).map(x => x.id));
+        const before = data[col].length;
+        data[col] = data[col].filter(x => !(x.date && x.date >= ctx.range.from && x.date < ctx.range.to) || ids.has(x.id) || pend.has(x.id));
+        if (data[col].length !== before) changed = true;
+      }
+      if (serverReads > 0) {
+        window.sessionFirestoreReads += serverReads;
+        console.log(`[Firestore Read] collection '${col}' [${ctx.scopeKey}] tải ${serverReads} docs. Tổng: ${window.sessionFirestoreReads}`);
+      }
+      if (col === 'logs' && !fromCache) window.__lastLogsSyncAt = Date.now();
+      rtSortCol(col);
+      if (changed) {
+        if (typeof handleRemoteChange === 'function') handleRemoteChange();
+        if (typeof updateSyncUI === 'function') updateSyncUI(fromCache);
+      }
+    }
+    // Tải lại TRỰC TIẾP từ máy chủ đúng cửa sổ nhật ký đang dùng (các năm đã nạp) rồi thay thế bản ghi trong cửa sổ đó.
+    window.__logYears = window.__logYears || new Set();
+    async function rtResyncLogsFromServer() {
+      const colRef = fbFirestore.collection('app_data').doc('main').collection('logs');
+      const years = Array.from(new Set([new Date().getFullYear()].concat(Array.from(window.__logYears)))).sort();
+      const pend = new Set((typeof getPendingSyncQueue === 'function' ? getPendingSyncQueue() : []).filter(x => x.col === 'logs').map(x => x.id));
+      for (const y of years) {
+        const from = y + '-01-01', to = (y + 1) + '-01-01';
+        const snap = await colRef.where('date', '>=', from).where('date', '<', to).orderBy('date', 'desc').limit(1000).get({ source: 'server' });
+        const docs = snap.docs.map(d => d.data()), ids = new Set(docs.map(x => x.id));
+        if (snap.size < 1000) data.logs = data.logs.filter(x => !(x.date && x.date >= from && x.date < to) || ids.has(x.id) || pend.has(x.id));
+        docs.forEach(d => rtUpsertLocal('logs', d));
+      }
+      rtSortCol('logs'); window.__lastLogsSyncAt = Date.now();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch (e) { }
+      try { await dbPut('store_data', 'default', data); } catch (e) { }
+    }
+    window.rtResyncLogs = async function (btn) {
+      if (!fbFirestore) { alert('Chưa cấu hình Firebase.'); return; }
+      if (!navigator.onLine) { alert('Máy đang ngoại tuyến — vui lòng kiểm tra kết nối mạng rồi thử lại.'); return; }
+      const old = btn ? btn.textContent : ''; if (btn) { btn.textContent = 'Đang làm mới…'; btn.disabled = true; }
+      try { await rtResyncLogsFromServer(); if (typeof render === 'function') render(); showToast('Đã làm mới nhật ký từ máy chủ.', 'green'); }
+      catch (e) { console.error('[Làm mới nhật ký]', e); alert('Không làm mới được từ máy chủ: ' + (e && e.message || e)); if (btn) { btn.textContent = old; btn.disabled = false; } }
+    };
+    // Nạp thêm dữ liệu các năm trước (khi bộ lọc thời gian ở Nhật ký bắt đầu trước năm đã nạp).
+    window.loadLogsYear = function (y) {
+      const cy = new Date().getFullYear(); y = Number(y); if (!(y > 2000 && y <= cy)) return;
+      for (let k = y; k < cy; k++) window.__logYears.add(k);
+      showToast('Đang tải dữ liệu từ năm ' + y + '…', 'green');
+      if (typeof window.loadTabData === 'function') window.loadTabData('nhatky');
+    };
+
     window.loadTabData = function(tabId, forceRefresh = false) {
       // FIX (2026-09): trước đây kiểm tra "window.fbFirestore", nhưng biến Firestore thật sự
       // chỉ được gán vào biến cục bộ "fbFirestore" (không có "window."), nên listener realtime
@@ -8691,74 +8799,36 @@
           const colRef = fbFirestore.collection("app_data").doc("main").collection(col);
           
           if (realtimeCols.includes(col)) {
-             const isOverviewScope = (tabId === 'tongquan' && (col === 'logs' || col === 'recoveries')) || (tabId === 'kehoach' && col === 'logs');   // cả năm để tính độ phủ từng vòng
              const currentYear = new Date().getFullYear();
-             const scopeKey = isOverviewScope ? ('year-' + currentYear) : 'latest';
+             // NHẬT KÝ (logs): mọi tab dùng CÙNG MỘT cửa sổ dữ liệu = các năm đã nạp (mặc định năm hiện tại, tối đa 1.000 bản ghi/năm).
+             // Trước đây tab Nhật ký dùng cửa sổ "200 bản ghi mới nhất" còn Tổng quan dùng "cả năm", hai cửa sổ cùng ghi vào một mảng nên
+             // số liệu mỗi tài khoản phụ thuộc vào việc đã mở tab nào trước → lệch nhau.
+             let scopes;
+             if (col === 'logs') scopes = Array.from(new Set([currentYear].concat(Array.from(window.__logYears || [])))).sort().map(y => ({ key: 'year-' + y, year: y }));
+             else if (tabId === 'tongquan' && col === 'recoveries') scopes = [{ key: 'year-' + currentYear, year: currentYear }];
+             else if (tabId === 'kehoach' && col === 'logs') scopes = [{ key: 'year-' + currentYear, year: currentYear }];
+             else scopes = [{ key: 'latest', year: null }];
              window.activeListeners[col] = window.activeListeners[col] || {};
-
-             if (!window.activeListeners[col][scopeKey]) {
+             scopes.forEach(sc => {
+                if (window.activeListeners[col][sc.key]) return;
                 const orderByField = (col === 'recoveries') ? 'month' : 'date';
-                const limitVal = isOverviewScope ? (col === 'logs' ? 1000 : 200) : (window.collectionLimit[col] || 200);
-                let query;
-
-                if (isOverviewScope) {
-                   const start = currentYear + '-01';
-                   if (col === 'logs') {
-                      query = colRef.where('date', '>=', currentYear + '-01-01')
-                                    .where('date', '<', (currentYear + 1) + '-01-01')
-                                    .orderBy('date', 'desc')
-                                    .limit(limitVal);
-                   } else {
-                      query = colRef.where('month', '>=', start)
-                                    .where('month', '<', (currentYear + 1) + '-01')
-                                    .orderBy('month', 'desc')
-                                    .limit(limitVal);
-                   }
+                const limitVal = sc.year ? (col === 'logs' ? 1000 : 200) : (window.collectionLimit[col] || 200);
+                let query, range = null;
+                if (sc.year && col === 'logs') {
+                   range = { from: sc.year + '-01-01', to: (sc.year + 1) + '-01-01' };
+                   query = colRef.where('date', '>=', range.from).where('date', '<', range.to).orderBy('date', 'desc').limit(limitVal);
+                } else if (sc.year) {
+                   query = colRef.where('month', '>=', sc.year + '-01').where('month', '<', (sc.year + 1) + '-01').orderBy('month', 'desc').limit(limitVal);
                 } else {
                    query = colRef.orderBy(orderByField, 'desc').limit(limitVal);
                 }
-                
-                window.activeListeners[col][scopeKey] = query.onSnapshot(snapshot => {
-                   if (snapshot.metadata.hasPendingWrites) return; 
-                   let serverReads = 0;
-                   let changed = false;
-                   
-                   snapshot.docChanges().forEach(change => {
-                     if (change.doc.metadata.hasPendingWrites) return;
-                     if (!snapshot.metadata.fromCache) serverReads++;
-                     const docData = change.doc.data();
-                     changed = true;
-                     if (change.type === 'added' || change.type === 'modified') {
-                        const idx = data[col].findIndex(x => x.id === docData.id);
-                        if (idx >= 0) data[col][idx] = docData;
-                        else data[col].push(docData);
-                     }
-                     if (change.type === 'removed') {
-                        data[col] = data[col].filter(x => x.id !== docData.id);
-                     }
-                   });
-                   
-                   if (serverReads > 0) {
-                      window.sessionFirestoreReads += serverReads;
-                      console.log(`[Firestore Read] collection '${col}' [${scopeKey}] tải ${serverReads} docs. Tổng: ${window.sessionFirestoreReads}`);
-                   }
-                   
-                   if (col === 'recoveries') {
-                      data[col].sort((a,b) => (b.month || '').localeCompare(a.month || ''));
-                   } else {
-                      data[col].sort((a,b) => (b.date || '').localeCompare(a.date || ''));
-                   }
-                   
-                   if (changed) {
-                       handleRemoteChange();
-                       updateSyncUI(snapshot.metadata.fromCache);
-                   }
-                }, err => {
-                   console.error('[Firestore] Listener lỗi ' + col + ' [' + scopeKey + ']:', err);
-                   try { delete window.activeListeners[col][scopeKey]; } catch (e) { }
+                const ctx = { col, scopeKey: sc.key, colRef, limitVal, range, windowed: !!sc.year, reconciled: false };
+                window.activeListeners[col][sc.key] = query.onSnapshot(snapshot => rtApplySnapshot(ctx, snapshot), err => {
+                   console.error('[Firestore] Listener lỗi ' + col + ' [' + sc.key + ']:', err);
+                   try { delete window.activeListeners[col][sc.key]; } catch (e) { }
                    if (typeof showToast === 'function') showToast('Không tải được ' + col + ': ' + (err && (err.code || err.message) || 'lỗi'), 'red');
                 });
-             }
+             });
           }
           
           if (onceCols.includes(col)) {
@@ -9294,15 +9364,25 @@
       </div>
 
       ${secHead('Đồng bộ Cloud thủ công', 'Sao lưu & Khôi phục dữ liệu trực tiếp qua Firebase Storage.')}
+      ${(window.isAdmin && window.isAdmin()) ? '' : `<div class="bk-lock-note" role="note">🔒 Các thao tác <b>ghi đè dữ liệu dùng chung</b> (sao lưu lên Cloud, cập nhật từ Cloud, nhập .json) chỉ dành cho tài khoản admin để tránh làm hỏng số liệu của mọi người. Tài khoản của bạn vẫn <b>Tải .json</b> để lưu bản sao riêng, và có thể bấm <b>“Buộc đồng bộ ngay”</b> ở trên nếu số liệu trên máy bị lệch so với người khác.</div>`}
       <div class="grid grid-4" style="margin-bottom: 24px;">
+        ${(window.isAdmin && window.isAdmin()) ? `
         <div class="card stat" style="cursor:pointer;border:1px solid var(--line);background:#f0f9ff;" onclick="cloudBackup()">
-          <div class="stat-ic ic-blue"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/><path d="M12 16v-8"/><path d="m8 12 4-4 4 4"/></svg></div>
+          <div class="stat-ic ic-blue"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg></div>
           <div><div class="num" style="font-size:15px;color:#0284c7;">☁️ Sao lưu lên Cloud</div><div class="lbl">Tạo bản sao lưu trên Cloud</div></div>
         </div>
         <div class="card stat" style="cursor:pointer;border:1px solid var(--line);background:#fffbeb;" onclick="cloudRestore()">
-          <div class="stat-ic ic-amber"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/><path d="M12 8v8"/><path d="m8 12 4 4 4-4"/></svg></div>
+          <div class="stat-ic ic-amber"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg></div>
           <div><div class="num" style="font-size:15px;color:#d97706;">⬇️ Cập nhật từ Cloud</div><div class="lbl">Khôi phục bản sao lưu từ Cloud</div></div>
+        </div>` : `
+        <div class="card stat bk-locked" aria-disabled="true" title="Chỉ tài khoản admin được thực hiện thao tác này">
+          <div class="stat-ic ic-blue"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg></div>
+          <div><div class="num" style="font-size:15px;">☁️ Sao lưu lên Cloud</div><div class="lbl">🔒 Chỉ admin</div></div>
         </div>
+        <div class="card stat bk-locked" aria-disabled="true" title="Chỉ tài khoản admin được thực hiện thao tác này">
+          <div class="stat-ic ic-amber"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg></div>
+          <div><div class="num" style="font-size:15px;">⬇️ Cập nhật từ Cloud</div><div class="lbl">🔒 Chỉ admin</div></div>
+        </div>`}
       </div>
 
       ${secHead('Sao lưu File tĩnh (Dành cho iPhone/iPad)', 'Lưu vào iCloud hoặc Tệp (Files).')}
@@ -9311,10 +9391,15 @@
           <div class="stat-ic ic-blue">${ICONS.redo}</div>
           <div><div class="num" style="font-size:16px">Tải .json</div><div class="lbl">Lưu vào Tệp</div></div>
         </div>
+        ${(window.isAdmin && window.isAdmin()) ? `
         <div class="card stat" style="cursor:pointer;border:1px solid var(--line)" onclick="importJson()">
           <div class="stat-ic ic-amber">${ICONS.box}</div>
           <div><div class="num" style="font-size:16px">Nhập .json</div><div class="lbl">Khôi phục từ Tệp</div></div>
-        </div>
+        </div>` : `
+        <div class="card stat bk-locked" aria-disabled="true" title="Chỉ tài khoản admin được thực hiện thao tác này">
+          <div class="stat-ic ic-amber">${ICONS.box}</div>
+          <div><div class="num" style="font-size:16px">Nhập .json</div><div class="lbl">🔒 Chỉ admin</div></div>
+        </div>`}
       </div>
       `;
     }
