@@ -2179,6 +2179,13 @@
       .tf-actions .tf-clear { background: #fef2f2; color: #ef4444; }
       .tf-actions .tf-clear:hover { background: #fee2e2; }
       .tf-panel { width: 340px; }
+      .tf-ph { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 14px; color: var(--ink, #1f2937); }
+      .tf-x { flex: none; width: 34px; height: 34px; min-width: 0; min-height: 0; padding: 0; border: 0; border-radius: 50%; background: #f3f4f6; color: #6b7280; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; touch-action: manipulation; }
+      .tf-x:hover { background: #fee2e2; color: #e11d48; }
+      @media (max-width: 640px) {
+        .tf-details .tf-panel { position: fixed !important; left: 10px !important; right: 10px !important; top: auto !important; bottom: calc(10px + env(safe-area-inset-bottom, 0px)) !important; width: auto !important; max-height: 82vh; overflow-y: auto; z-index: 3000; box-shadow: 0 -8px 40px rgba(0,0,0,.28); }
+        .tf-details .tf-panel::before { display: none !important; }
+      }
       .tf-lbl { font-size: 11px; font-weight: 700; color: var(--gray); text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 6px; }
       .tf-chips { display: flex; flex-wrap: wrap; gap: 6px; }
       .tf-chip { cursor: pointer; min-height: 34px; padding: 0 12px; border-radius: 999px; font: inherit; font-size: 12.5px; font-weight: 800; background: #fff; color: var(--green-dark); border: 1px solid var(--border); touch-action: manipulation; }
@@ -3763,6 +3770,7 @@
       const d = tfD(mod), P = tfPresets(), err = tfError(d);
       const chip = (k, t) => `<button type="button" class="tf-chip ${d.p === k ? 'on' : ''}" onclick="tfPick('${mod}','${k}')">${t}</button>`;
       return `
+        <div class="tf-ph"><b>Chọn thời gian</b><button type="button" class="tf-x" aria-label="Đóng bộ lọc" onclick="tfClose('${mod}')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"></line><line x1="18" y1="6" x2="6" y2="18"></line></svg></button></div>
         <div><div class="tf-lbl">Chọn nhanh</div>
           <div class="tf-chips">${Object.keys(P).map(k => chip(k, P[k][0])).join('')}${chip('custom', 'Tuỳ chọn…')}</div></div>
         <div><div class="tf-lbl">Khoảng thời gian (trong một năm)</div>
@@ -3776,6 +3784,7 @@
           <button type="button" class="tf-clear" onclick="tfReset('${mod}')">Đặt lại</button>
         </div>`;
     }
+    function tfClose(mod) { const el = document.getElementById('tfp-' + mod), dt = el && el.closest('details'); if (dt) dt.open = false; window[mod + 'FilterOpen'] = false; }
     function tfRefresh(mod) { const el = document.getElementById('tfp-' + mod); if (el) el.innerHTML = tfPanelInner(mod); }
     function tfPick(mod, k) {
       const d = tfD(mod);
@@ -4317,7 +4326,6 @@
             <div style="font-weight:700; color:#1f2937; font-size:13.5px; overflow-wrap:anywhere;">${esc(x.u.name)} <span style="color:#b45309; font-size:12px; font-weight:800; white-space:nowrap;">Gợi ý mệnh giá ›</span></div>
             <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:6px;">${x.pinned ? tqPill('#fef3c7', '#b45309', '#fcd34d', 'Đi hôm nay') : ''}${tqReasonPills(nc).join('')}${x.missed && x.missed.length ? kqMissedPill(x.missed) : ''}</div>
             <div style="margin-top:6px;">${kqRecLine(plan)}</div>
-            <div style="font-size:11.5px; color:#6b7280; margin-top:4px;">Kiểm tra bổ sung → tính vào Quý ${nc.nowQ}</div>
           </div>
           <div class="u360-stack"><button type="button" class="u360-mini" onclick="u360Open('${id}')">Hồ sơ</button><button type="button" onclick="kqGo('${id}')" style="cursor:pointer; flex-shrink:0; min-height:38px; padding:6px 14px; border-radius:999px; border:none; background:linear-gradient(135deg,#f59e0b,#d97706); color:#fff; font:inherit; font-size:12.5px; font-weight:800; box-shadow:0 4px 10px rgba(217,119,6,.25);">Kiểm tra</button></div>
         </div>`;
@@ -4331,8 +4339,7 @@
       const chip = (k, label, n, c) => { const on = F === k; return `<button type="button" onclick="tqSugSet('${k}')" aria-pressed="${on}" style="cursor:pointer; min-height:36px; padding:4px 12px; border-radius:999px; font:inherit; font-size:12.5px; font-weight:800; background:${on ? c : '#fff'}; color:${on ? '#fff' : c}; border:1px solid ${c};">${label}: ${n}</button>`; };
       return `<div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:6px;">${chip('all', 'Tất cả', cnt.all, '#92400e')}${chip('cur', 'Chưa KT Quý ' + now.q, cnt.cur, '#b45309')}${chip('viol', 'Đã vi phạm', cnt.viol, '#be123c')}${chip('few', '1–2 bó ≥ ' + TQ_NEAR_PCT + '%', cnt.few, '#b45309')}</div>` +
         (shown.length ? shown.map(tqSugRowHtml).join('') : `<div style="padding:18px; text-align:center; color:#047857; font-weight:700; background:#ecfdf5; border-radius:12px;">Không có đơn vị nào cần gợi ý trong Quý ${now.q}</div>`) +
-        (list.length > 6 ? `<div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:10px;"><button type="button" onclick="tqSugToggleAll()" style="cursor:pointer; min-height:36px; padding:4px 14px; border-radius:999px; border:1px solid #fde68a; background:#fffbeb; color:#92400e; font:inherit; font-size:12.5px; font-weight:800;">${window.__tqSugAll ? 'Thu gọn' : 'Xem thêm ' + (list.length - 6) + ' đơn vị'}</button><button type="button" onclick="switchTab('kehoach')" style="cursor:pointer; min-height:36px; padding:4px 14px; border-radius:999px; border:1px solid #e5e7eb; background:#fff; color:#4b5563; font:inherit; font-size:12.5px; font-weight:800;">Mở Lịch kiểm tra</button></div>` : '') +
-        `<div style="font-size:11.5px; color:#6b7280; margin-top:10px;">Chỉ mang tính tham khảo, tự làm mới khi sang quý mới.</div>`;
+        (list.length > 6 ? `<div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:10px;"><button type="button" onclick="tqSugToggleAll()" style="cursor:pointer; min-height:36px; padding:4px 14px; border-radius:999px; border:1px solid #fde68a; background:#fffbeb; color:#92400e; font:inherit; font-size:12.5px; font-weight:800;">${window.__tqSugAll ? 'Thu gọn' : 'Xem thêm ' + (list.length - 6) + ' đơn vị'}</button><button type="button" onclick="switchTab('kehoach')" style="cursor:pointer; min-height:36px; padding:4px 14px; border-radius:999px; border:1px solid #e5e7eb; background:#fff; color:#4b5563; font:inherit; font-size:12.5px; font-weight:800;">Mở Lịch kiểm tra</button></div>` : '');
     }
     function tqSugRefresh() { const b = document.getElementById('tq-sug-body'); if (b) b.innerHTML = tqSugBodyHtml(); }
     window.tqSugSet = function (k) { window.__tqSugF = (window.__tqSugF === k && k !== 'all') ? 'all' : k; tqSugRefresh(); };
@@ -4437,7 +4444,7 @@
         <div class="tmx-diff-l"><span><i style="background:#3b82f6"></i>Thừa <b>${d.thua}</b></span><span><i style="background:#f59e0b"></i>Thiếu <b>${d.thieu}</b></span><span><i style="background:#8b5cf6"></i>Lẫn <b>${d.lan}</b></span><span><i style="background:#e5e7eb"></i>Khớp <b>${d.n - dTot}</b></span></div>` : `<div class="tmx-muted">Không có chênh lệch trong kỳ.</div>`}</div>`;
       return `<div class="tmx"><div class="tmx-l">${tqMixDonut(M)}<div class="tmx-leg">${M.rows.filter(r => r.inv > 0).map(r => `<span><i style="background:${TQ_MIX_COL[r.v] || '#9ca3af'}"></i>${rpDenTxt(r.v)}</span>`).join('')}</div></div>
         <div class="tmx-r"><div class="tmx-ins">${ins.map(t => `<p>${t}</p>`).join('')}</div>${M.rows.map(rowHtml).join('')}</div></div>
-        <div class="tmx-note">Tỷ trọng = tờ KĐTCLT của mệnh giá ÷ tổng tờ KĐTCLT. Tỷ lệ = tờ KĐTCLT ÷ tờ kiểm tra của chính mệnh giá đó (kiểm tra theo chọn mẫu nên chỉ tỷ trọng thì chưa đủ kết luận). Bấm một mệnh giá để xem xu hướng theo tháng.</div>${diffHtml}`;
+        ${diffHtml}`;
     }
     window.tqMixPick = function (v) {
       window.tqSetDenom(String(v));
@@ -4618,7 +4625,7 @@
           <tr class="tq-wtot"><td>Tổng</td><td>${fm(g.chk)}</td><td>${fm(g.inv)}</td><td>${tqPct(r.rates[k])}</td><td>100%</td><td class="tq-wc">${r.rates[k].toFixed(2)}</td></tr></tbody></table>
         </div>`;
       }
-      return out + `<div style="font-size:11.5px; color:#6b7280;">Tờ KT = số tờ đã kiểm tra. Tỷ trọng = tờ KT của mệnh giá / tổng tờ KT. Đóng góp = tỷ trọng × tỷ lệ; cộng các đóng góp được R.</div>`;
+      return out;
     }
     window.tqProgToggle = function (id) { window.__tqProgOpen[id] = !window.__tqProgOpen[id]; tqProgRefresh(); };
 
@@ -4963,7 +4970,6 @@
           ${roundRows}
           <div style="margin-top:6px; padding-top:14px; border-top:1px dashed #fde68a;">
             <div style="font-size:13px; font-weight:800; color:#92400e; margin-bottom:4px;">Miễn trừ kế hoạch thường quy (${TQ_EXEMPT_KEYWORDS.length} TCTD)</div>
-            <div style="font-size:12.5px; color:#6b7280; margin-bottom:10px;">Giám sát đột xuất khi có lệnh nộp rút.</div>
             <div style="display:flex; flex-wrap:wrap; gap:8px;">${exemptChips}</div>
           </div>`;
 
@@ -5075,7 +5081,6 @@
       const stCnt = { up: 0, flat: 0, down: 0, wait: 0 };
       progRows.forEach(r => stCnt[r.st]++);
       const progressHtml = tqSec('prog', '#059669', '#fff', `            <h3 style="margin:0; font-size:16px; font-weight:800; color:#1f2937;">Đối chiếu tiến bộ theo lần kiểm tra</h3>
-            <div style="margin:4px 0 0; font-size:12.5px; color:#047857; font-weight:600;">R = tờ KĐTCLT / tờ kiểm tra. So với quý liền trước: Buông lỏng nếu &gt; 5% hoặc tăng ≥ 2 điểm %; Tiến bộ nếu giảm. Bấm tên đơn vị để xem tỷ trọng theo mệnh giá.</div>
 
             <div style="display:flex; height:9px; border-radius:99px; overflow:hidden; background:#f3f4f6; margin-top:8px;" role="img" aria-label="Tỷ lệ các nhóm đánh giá">${[['up','#10b981'],['flat','#f59e0b'],['down','#f43f5e'],['wait','#d1d5db']].map(([k, c]) => stCnt[k] ? `<span title="${TQ_ST[k].label}: ${stCnt[k]}" style="flex:${stCnt[k]}; background:${c};"></span>` : '').join('')}</div>
             <div style="font-size:11.5px; color:#6b7280; margin-top:4px;">Tiến bộ ${stCnt.up} · Ổn định ${stCnt.flat} · Buông lỏng ${stCnt.down} · Chưa đối chiếu ${stCnt.wait}</div>`, `          <div id="tq-prog-bar">${tqProgBarHtml()}</div>
@@ -6144,7 +6149,7 @@
       const chips = chip('all', 'Tất cả', cnt.all, '#92400e') + chip('cur', 'Chưa KT Quý ' + now.q, cnt.cur, '#b45309') + chip('miss', 'Chưa KT quý trước', cnt.miss, '#c2410c') + chip('viol', 'Đã vi phạm', cnt.viol, '#be123c') + chip('den', 'Có MG cần KT lại', cnt.den, '#e11d48') + chip('few', '1–2 bó ≥ ' + TQ_NEAR_PCT + '%', cnt.few, '#b45309') + chip('diff', 'Chênh lệch', cnt.diff, '#1d4ed8');
       const pinsHtml = L.pins.length
         ? `<div class="kq-grp"><div class="kq-grp-h"><span class="kq-grp-t">${KQ_I.pin} Đi hôm nay · ${L.pins.length}</span><button type="button" class="kq-link" onclick="kqUnpinAll()">Bỏ ghim tất cả</button></div><div class="kq-pinlist">${L.pins.map((x, i) => kqItemHtml(x, i, K.sel, 'pin')).join('')}</div></div>`
-        : (L.todo.length ? `<div class="kq-pin-hint">${KQ_I.pin.replace('width="18" height="18"', 'width="14" height="14"')}<span>Bấm biểu tượng ghim ở mỗi TCTD để lập danh sách “Đi hôm nay”, rồi kéo để sắp thứ tự.</span></div>` : '');
+        : '';
       const listHead = L.pins.length && vis.length ? `<div class="kq-grp-h plain"><span class="kq-grp-t">Ưu tiên theo quy tắc · ${vis.length}</span></div>` : '';
       const listHtml = vis.length
         ? vis.map((x, i) => kqItemHtml(x, i, K.sel, 'todo')).join('')
@@ -6288,7 +6293,7 @@
       const pdf = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M13 2v7h7"/></svg>';
       const lib = `<button type="button" class="kq-btn" onclick="u360ToLib()">Quản lý trong Thư viện</button>`;
       if (!recs.length) return `<div class="u360-empty">${seal ? 'Chưa có mẫu niêm phong' : 'Chưa có bảng chữ ký mẫu'} của đơn vị này.</div><div class="u360-fa">${lib}</div>`;
-      return `<div class="u360-hint">${recs.length} file đã tải lên của đơn vị. Bấm “Xem” để mở trình xem PDF.</div>` + recs.map(r => `<div class="u360-file"><span class="u360-fic">${pdf}</span><div class="u360-fi"><b>${esc(r.name || (seal ? 'Mẫu niêm phong bó tiền' : 'Bảng đăng ký chữ ký mẫu'))}</b><span>${esc(r.fileName || 'Tài liệu đính kèm')}</span></div><button type="button" class="kq-btn pri u360-view" onclick="u360OpenFile('${kind}','${esc(r.id)}')">Xem</button></div>`).join('') + `<div class="u360-fa">${lib}</div>`;
+      return recs.map(r => `<div class="u360-file"><span class="u360-fic">${pdf}</span><div class="u360-fi"><b>${esc(r.name || (seal ? 'Mẫu niêm phong bó tiền' : 'Bảng đăng ký chữ ký mẫu'))}</b><span>${esc(r.fileName || 'Tài liệu đính kèm')}</span></div><button type="button" class="kq-btn pri u360-view" onclick="u360OpenFile('${kind}','${esc(r.id)}')">Xem</button></div>`).join('') + `<div class="u360-fa">${lib}</div>`;
     }
     function u360Render() {
       const S = window.__u360, host = document.getElementById('u360-body'); if (!S || !host) return;
@@ -6896,10 +6901,7 @@
       const at = window.__lastLogsSyncAt ? (d => z(d.getHours()) + ':' + z(d.getMinutes()))(new Date(window.__lastLogsSyncAt)) : '';
       const need = filterStartNK ? Number(String(filterStartNK).slice(0, 4)) : 0;
       const warn = (need && need < yrs[0]) ? `<div class="nk-note" role="status">Bộ lọc bắt đầu từ năm ${need} nhưng dữ liệu từ năm ${need} chưa được tải nên số liệu có thể thiếu. <button type="button" class="nk-note-btn" onclick="loadLogsYear(${need})">Tải dữ liệu từ năm ${need}</button></div>` : '';
-      const st = window.autoSyncState ? window.autoSyncState() : 'none';
-      const syncWarn = (st === 'waiting' || st === 'offline') ? `<div class="nk-note" role="status">${st === 'offline' ? 'Máy đang ngoại tuyến' : 'Chưa kết nối được máy chủ'} — số liệu có thể chưa mới nhất. <button type="button" class="nk-note-btn" onclick="switchTab('saoluu')">Đồng bộ thủ công từ .json</button></div>` : '';
-      return `${syncWarn}<div class="nk-info" role="status">Dữ liệu đang tải: năm ${yrs.join(', ')} · ${n.toLocaleString('vi-VN')} bản ghi${at ? ' · đồng bộ lúc ' + at : ''}
-        <button type="button" class="nk-note-btn" onclick="rtResyncLogs(this)" title="Tải lại trực tiếp từ máy chủ để đối chiếu số liệu">↻ Làm mới</button></div>${warn}`;
+      return warn;
     }
     function renderNhatky() {
       const noUnits = data.units.length === 0;
