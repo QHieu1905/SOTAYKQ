@@ -2186,7 +2186,7 @@
       .tf-chip.on { background: var(--green); border-color: var(--green); color: #fff; }
       .tf-err { background: var(--red-soft); color: var(--red); border-radius: 8px; padding: 6px 10px; font-size: 12px; font-weight: 600; }
       .tf-sync { display: flex; gap: 10px; align-items: flex-start; background: var(--mint); border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; font-size: 12.5px; cursor: pointer; line-height: 1.45; }
-      .tf-sync input { margin-top: 3px; accent-color: var(--green); }
+      .tf-sync input { flex: none; width: 18px; height: 18px; min-width: 0; min-height: 0; padding: 0; margin: 2px 0 0; accent-color: var(--green); }
       .tf-actions .tf-apply:disabled { opacity: .45; cursor: not-allowed; transform: none; }
       .tf-sync-chip { cursor: pointer; font: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 999px; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; touch-action: manipulation; }
       .tf-sync-chip.off { background: var(--mint); color: var(--green-dark); border-color: var(--border); }
@@ -3771,8 +3771,6 @@
             <label class="tf-field"><span>Đến ngày</span><input type="date" value="${d.e}" ${d.s ? `min="${d.s}" max="${d.s.slice(0, 4)}-12-31"` : ''} onchange="tfEdit('${mod}','e',this.value)"></label>
           </div></div>
         ${err ? `<div class="tf-err">${err}</div>` : ''}
-        <label class="tf-sync"><input type="checkbox" ${tfSync ? 'checked' : ''} onchange="tfSetSync(this.checked,'${mod}')">
-          <span><b>Đồng bộ các module</b><br>Tổng quan, Nhật ký bó tiền và SL tiền ĐTCLT dùng chung khoảng thời gian này.</span></label>
         <div class="tf-actions">
           <button type="button" class="tf-apply" ${err ? 'disabled' : ''} onclick="tfApply('${mod}')">Áp dụng</button>
           <button type="button" class="tf-clear" onclick="tfReset('${mod}')">Đặt lại</button>
@@ -4442,25 +4440,51 @@
         <div class="tmx-note">Tỷ trọng = tờ KĐTCLT của mệnh giá ÷ tổng tờ KĐTCLT. Tỷ lệ = tờ KĐTCLT ÷ tờ kiểm tra của chính mệnh giá đó (kiểm tra theo chọn mẫu nên chỉ tỷ trọng thì chưa đủ kết luận). Bấm một mệnh giá để xem xu hướng theo tháng.</div>${diffHtml}`;
     }
     window.tqMixPick = function (v) {
-      window.__tqOpen.trend = true;
-      const d = document.querySelector('#pg-tongquan details[data-sec="trend"]'); if (d) d.open = true;
       window.tqSetDenom(String(v));
+      window.__tqCl.c2 = { open: true, sel: 'trend' }; window.tqClApply('c2');
       if (window.tqFitTrend) requestAnimationFrame(window.tqFitTrend);
-      if (d) d.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const e = document.getElementById('tqcl-c2'); if (e) e.scrollIntoView({ behavior: 'smooth', block: 'start' });
     };
 
     /* ---- Mục có thể đóng/mở trong Tổng quan (nhớ trạng thái khi vẽ lại) ---- */
     window.__tqOpen = window.__tqOpen || { viol: false, sen: false, xoi: false, sug: false, cov: false, quart: false, mix: false, trend: false, prog: false };   // mặc định thu gọn tất cả
+    /* ---- 2 cụm Segmented Tabs (mặc định đóng, ngoài chỉ hiện nội dung tổng quát) ----
+       tqSec chỉ đăng ký {head, body} vào kho; tqCluster ghép các mục thành tab. */
+    window.__tqParts = window.__tqParts || {};
+    window.__tqCl = window.__tqCl || {};
     function tqSec(id, border, bg, head, body) {
-      const open = window.__tqOpen[id] !== false && !!window.__tqOpen[id];
-      return `<details class="tq-sec" data-sec="${id}" ${open ? 'open' : ''} ontoggle="tqSecToggle('${id}', this.open)" style="background:${bg}; border:1px solid #fde68a; border-radius:16px; box-shadow:0 8px 24px rgba(217,119,6,0.05); box-sizing:border-box; width:100%;">
-        <summary style="list-style:none; cursor:pointer; outline:none; padding:12px 16px; display:flex; align-items:center; justify-content:space-between; gap:12px;">
-          <div style="min-width:0; flex:1;">${head}</div>
-          <span class="tq-chev" aria-hidden="true" style="flex-shrink:0; width:30px; height:30px; border-radius:50%; background:#f3f4f6; display:flex; align-items:center; justify-content:center; color:#6b7280; transition:transform .25s;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span>
-        </summary>
-        <div style="padding:0 16px 16px;">${body}</div>
-      </details>`;
+      window.__tqParts[id] = { head: String(head).replace(/<h3[\s\S]*?<\/h3>/, ''), body: body };   // bỏ tiêu đề: tên tab đã là tiêu đề
+      return '';
     }
+    function tqCluster(cid, title, tabs) {
+      tabs = tabs.filter(t => window.__tqParts[t.id]);
+      if (!tabs.length) return '';
+      const st = window.__tqCl[cid] = window.__tqCl[cid] || { open: false, sel: tabs[0].id };
+      if (!tabs.some(t => t.id === st.sel)) st.sel = tabs[0].id;
+      const P = id => window.__tqParts[id];
+      return `<section class="tq-cl ${st.open ? 'open' : ''}" id="tqcl-${cid}">
+        <div class="tq-cl-h"><h3>${title}</h3>
+          <button type="button" class="tq-cl-x" aria-expanded="${st.open}" aria-label="Mở hoặc thu gọn" onclick="tqClToggle('${cid}')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></button></div>
+        <div class="tq-cl-seg" role="tablist">${tabs.map(t => `<button type="button" role="tab" class="tq-tab" data-t="${t.id}" aria-selected="${t.id === st.sel}" onclick="tqClTab('${cid}','${t.id}')">${t.label}${t.badge != null ? `<em>${t.badge}</em>` : ''}</button>`).join('')}</div>
+        <div class="tq-sums">${tabs.map(t => `<div class="tq-sum" data-t="${t.id}" ${t.id === st.sel ? '' : 'hidden'}>${P(t.id).head}</div>`).join('')}</div>
+        <div class="tq-pans">${tabs.map(t => `<div class="tq-pan" data-t="${t.id}" ${st.open && t.id === st.sel ? '' : 'hidden'}>${P(t.id).body}</div>`).join('')}</div>
+      </section>`;
+    }
+    window.tqClApply = function (cid) {
+      const st = window.__tqCl[cid], el = document.getElementById('tqcl-' + cid); if (!st || !el) return;
+      el.classList.toggle('open', st.open);
+      el.querySelector('.tq-cl-x').setAttribute('aria-expanded', st.open);
+      el.querySelectorAll('.tq-tab').forEach(b => b.setAttribute('aria-selected', b.dataset.t === st.sel));
+      el.querySelectorAll('.tq-sum').forEach(d => { d.hidden = d.dataset.t !== st.sel; });
+      el.querySelectorAll('.tq-pan').forEach(d => { d.hidden = !(st.open && d.dataset.t === st.sel); });
+      if (st.open && st.sel === 'trend' && window.tqFitTrend) requestAnimationFrame(window.tqFitTrend);
+    };
+    window.tqClTab = function (cid, id) { const st = window.__tqCl[cid]; if (!st) return; st.open = !(st.open && st.sel === id); st.sel = id; window.tqClApply(cid); };
+    window.tqClToggle = function (cid) { const st = window.__tqCl[cid]; if (!st) return; st.open = !st.open; window.tqClApply(cid); };
+    window.tqRankPick = function (k) {
+      document.querySelectorAll('#tq-rank [data-b]').forEach(b => b.setAttribute('aria-pressed', b.dataset.b === k));
+      document.querySelectorAll('#tq-rank [data-p]').forEach(d => { d.hidden = d.dataset.p !== k; });
+    };
     window.tqSecToggle = function (id, open) {
       window.__tqOpen[id] = !!open;
       if (open && id === 'trend' && window.tqFitTrend) requestAnimationFrame(window.tqFitTrend);
@@ -5097,6 +5121,37 @@
           <div id="tq-cmp-panel" class="tq-cmp-panel">${tqCmpPanelHtml()}</div>
         </section>`;
 
+      // Đăng ký các mục còn lại vào kho cho 2 cụm tab (Cảnh báo vi phạm, Bông sen vàng, Mâm xôi vàng)
+      const nViolUnits = Object.keys(violatingUnitCounts).length;
+      window.__tqParts.viol = {
+        head: `<div style="font-size:12.5px; color:#ef4444; font-weight:700;">${nViolUnits ? 'Phát hiện ' + nViolUnits + ' đơn vị có vi phạm cần chú ý' : 'Chưa phát hiện đơn vị vi phạm trong kỳ'}</div>`,
+        body: nViolUnits ? `
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: 16px; box-sizing: border-box; width: 100%;">
+            ${Object.entries(violatingUnitCounts).sort((a, b) => b[1] - a[1]).map(([id, count], idx) =>
+        `<div class="violation-item-row" onclick="goToViolationLog('${id}')" title="Bấm để xem các lần vi phạm của đơn vị này trong Nhật ký kiểm tra bó tiền" style="display:flex; align-items:center; gap:16px; padding: 16px; background: #fff; border: 1px solid #f3f4f6; border-radius: 16px; transition: all 0.3s ease; box-shadow: 0 2px 10px rgba(0,0,0,0.02); cursor: pointer; box-sizing: border-box; width: 100%;" onmouseover="this.style.borderColor='#fecdd3'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 15px rgba(225,29,72,0.08)'; this.style.background='#fffbfb'" onmouseout="this.style.borderColor='#f3f4f6'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 10px rgba(0,0,0,0.02)'; this.style.background='#fff'">
+                  <div style="width: 38px; height: 38px; border-radius: 12px; background: #fff1f2; color: #e11d48; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 15px; flex-shrink: 0;">${idx + 1}</div>
+                  <div style="flex: 1; min-width: 0;">
+                    <div class="violation-item-name" style="font-weight: 700; color: #1f2937; font-size: 14.5px; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${esc(unitName(id))}">${esc(unitName(id))}</div>
+                    <div style="font-size: 13px; color: #6b7280; margin-top: 4px; display: flex; align-items: center; gap: 6px;">
+                      Số lần vi phạm: <b style="color: #ef4444; font-size: 14px;">${count}</b>
+                    </div>
+                  </div>
+                  <div style="width: 30px; height: 30px; border-radius: 50%; background: #fff1f2; color: #e11d48; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                  </div>
+              </div>`
+      ).join('')}
+          </div>
+        ` : '<div style="padding:18px; text-align:center; color:#047857; font-weight:700; background:#ecfdf5; border-radius:12px;">Không có đơn vị vi phạm trong kỳ</div>'
+      };
+      window.__tqParts.rank = {
+        head: `<div style="font-size:12.5px; color:#92400e; font-weight:700;">Bông sen vàng: 10 đơn vị tỷ lệ KĐTCLT thấp nhất · Mâm xôi vàng: 10 đơn vị cao nhất</div>`,
+        body: `<div id="tq-rank"><div class="tq-rk">
+            <button type="button" data-b="sen" aria-pressed="true" onclick="tqRankPick('sen')">Bông sen vàng</button>
+            <button type="button" data-b="xoi" aria-pressed="false" onclick="tqRankPick('xoi')">Mâm xôi vàng</button></div>
+          <div data-p="sen">${renderRateList(top10Best, 'good')}</div>
+          <div data-p="xoi" hidden>${renderRateList(top10Worst, 'bad')}</div></div>`
+      };
       requestAnimationFrame(() => window.tqFitTrend && window.tqFitTrend());
       const htmlReport = `
       ${monthFilterHtml}
@@ -5145,101 +5200,59 @@
       </div>
 
       <div style="display: flex; flex-direction: column; gap: 14px; width: 100%; box-sizing: border-box; overflow-x: hidden;">
-        <div style="display:flex; justify-content:flex-end; gap:8px; margin:0 0 -4px;">
-          <button type="button" onclick="tqSecAll(true)" style="cursor:pointer; min-height:34px; padding:4px 12px; border-radius:999px; border:1px solid #fde68a; background:#fffbeb; color:#92400e; font:inherit; font-size:12px; font-weight:800;">Mở tất cả</button>
-          <button type="button" onclick="tqSecAll(false)" style="cursor:pointer; min-height:34px; padding:4px 12px; border-radius:999px; border:1px solid #e5e7eb; background:#fff; color:#4b5563; font:inherit; font-size:12px; font-weight:800;">Thu gọn tất cả</button>
+        <div class="tq-cols">
+          ${tqCluster('c1', '🚨 Cảnh báo &amp; tác nghiệp ngay', [
+            { id: 'sug', label: 'Gợi ý KT bổ sung', badge: (window.__tqSug || []).length },
+            { id: 'viol', label: 'Đơn vị vi phạm', badge: nViolUnits }
+          ])}
+          ${tqCluster('c2', '📊 Phân tích, cơ cấu &amp; xếp hạng', [
+            { id: 'mix', label: 'Cơ cấu mệnh giá' }, { id: 'trend', label: 'Xu hướng tháng' },
+            { id: 'rank', label: 'Xếp hạng' }, { id: 'prog', label: 'Đối chiếu tiến bộ' }
+          ])}
         </div>
-        ${Object.keys(violatingUnitCounts).length > 0 ? `
-        <details class="tq-sec" data-sec="viol" ${window.__tqOpen.viol ? 'open' : ''} ontoggle="tqSecToggle('viol', this.open)" style="background: #ffffff; border: 1px solid #fee2e2; border-radius: 16px; padding: 16px; box-shadow: 0 10px 30px rgba(225, 29, 72, 0.05); transition: all 0.4s ease; box-sizing: border-box; width: 100%;" onmouseover="this.style.boxShadow='0 15px 40px rgba(225, 29, 72, 0.08)'" onmouseout="this.style.boxShadow='0 10px 30px rgba(225, 29, 72, 0.05)'">
-          <summary style="list-style: none; outline: none; cursor: pointer;">
-            <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
-              <div style="display: flex; align-items: center; gap: 12px;">
-                <div style="width: 44px; height: 44px; border-radius: 12px; background: #fff1f2; display: flex; align-items: center; justify-content: center; color: #e11d48; flex-shrink: 0;">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                </div>
-                <div>
-                  <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #1f2937; letter-spacing: -0.2px; white-space: nowrap;">Cảnh báo vi phạm TCTD</h3>
-                  <div style="margin: 4px 0 0 0; font-size: 13px; color: #ef4444; font-weight: 600; display: flex; align-items: center; gap: 6px; line-height: 1.2;">
-                    Phát hiện ${Object.keys(violatingUnitCounts).length} đơn vị có vi phạm cần chú ý
-                  </div>
-                </div>
-              </div>
-              <div style="width: 36px; height: 36px; background: #f3f4f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #6b7280; transition: transform 0.3s;" class="summary-arrow-gray"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></div>
-            </div>
-          </summary>
-          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-top: 24px; padding-top: 24px; border-top: 1px dashed #e5e7eb; box-sizing: border-box; width: 100%;">
-            ${Object.entries(violatingUnitCounts).sort((a, b) => b[1] - a[1]).map(([id, count], idx) =>
-        `<div class="violation-item-row" onclick="goToViolationLog('${id}')" title="Bấm để xem các lần vi phạm của đơn vị này trong Nhật ký kiểm tra bó tiền" style="display:flex; align-items:center; gap:16px; padding: 16px; background: #fff; border: 1px solid #f3f4f6; border-radius: 16px; transition: all 0.3s ease; box-shadow: 0 2px 10px rgba(0,0,0,0.02); cursor: pointer; box-sizing: border-box; width: 100%;" onmouseover="this.style.borderColor='#fecdd3'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 15px rgba(225,29,72,0.08)'; this.style.background='#fffbfb'" onmouseout="this.style.borderColor='#f3f4f6'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 10px rgba(0,0,0,0.02)'; this.style.background='#fff'">
-                  <div style="width: 38px; height: 38px; border-radius: 12px; background: #fff1f2; color: #e11d48; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 15px; flex-shrink: 0;">${idx + 1}</div>
-                  <div style="flex: 1; min-width: 0;">
-                    <div class="violation-item-name" style="font-weight: 700; color: #1f2937; font-size: 14.5px; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${esc(unitName(id))}">${esc(unitName(id))}</div>
-                    <div style="font-size: 13px; color: #6b7280; margin-top: 4px; display: flex; align-items: center; gap: 6px;">
-                      Số lần vi phạm: <b style="color: #ef4444; font-size: 14px;">${count}</b>
-                    </div>
-                  </div>
-                  <div style="width: 30px; height: 30px; border-radius: 50%; background: #fff1f2; color: #e11d48; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                  </div>
-              </div>`
-      ).join('')}
-          </div>
-        </details>
-        ` : ''}
-
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; align-items: start; box-sizing: border-box; width: 100%;">
-          <!-- Panel 1: Top TCTD Thu Hồi -->
-          <details class="tq-sec" data-sec="sen" ${window.__tqOpen.sen ? 'open' : ''} ontoggle="tqSecToggle('sen', this.open)" style="background: #ffffff; border: 1px solid #fef3c7; border-radius: 16px; padding: 16px; box-shadow: 0 10px 30px rgba(245, 158, 11, 0.03); transition: all 0.4s ease; box-sizing: border-box; width: 100%;" onmouseover="this.style.boxShadow='0 15px 40px rgba(245, 158, 11, 0.06)'" onmouseout="this.style.boxShadow='0 10px 30px rgba(245, 158, 11, 0.03)'">
-            <summary style="list-style: none; cursor: pointer; outline: none; margin-bottom: 0;">
-              <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                  <div style="width: 44px; height: 44px; border-radius: 12px; background: #fffbeb; display: flex; align-items: center; justify-content: center; border: 1px solid #fef3c7; flex-shrink: 0;">
-                    <img onerror="this.hidden=true" src="./SO TAY KHO QUY_files/bong_sen_vang.png" style="width: 24px; height: 24px; object-fit: contain;">
-                  </div>
-                  <div>
-                    <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #1f2937; letter-spacing: -0.2px; white-space: nowrap;">Danh sách Bông sen vàng</h3>
-                    <div style="margin: 4px 0 0 0; font-size: 13px; color: #d97706; font-weight: 600; display: flex; align-items: flex-start; gap: 6px; line-height: 1.2;">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 1px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                      <span>10 đơn vị có tỷ lệ tiền KĐTCLT thấp nhất</span>
-                    </div>
-                  </div>
-                </div>
-                              <div style="width: 36px; height: 36px; background: #f3f4f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #6b7280; transition: transform 0.3s; flex-shrink: 0;" class="summary-arrow-gray"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></div>
-              </div>
-            </summary>
-            <div style="margin-top: 24px; padding-top: 24px; border-top: 1px dashed #e5e7eb;">
-              ${renderRateList(top10Best, 'good')}
-            </div>
-          </details>
-
-          <!-- Panel 2: Hoạt động gần đây -->
-          <details class="tq-sec" data-sec="xoi" ${window.__tqOpen.xoi ? 'open' : ''} ontoggle="tqSecToggle('xoi', this.open)" style="background: #ffffff; border: 1px solid #f3e8ff; border-radius: 16px; padding: 16px; box-shadow: 0 10px 30px rgba(139, 92, 246, 0.03); transition: all 0.4s ease; box-sizing: border-box; width: 100%;" onmouseover="this.style.boxShadow='0 15px 40px rgba(139, 92, 246, 0.06)'" onmouseout="this.style.boxShadow='0 10px 30px rgba(139, 92, 246, 0.03)'">
-            <summary style="list-style: none; cursor: pointer; outline: none; margin-bottom: 0;">
-              <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                  <div style="width: 44px; height: 44px; border-radius: 12px; background: #f3e8ff; display: flex; align-items: center; justify-content: center; border: 1px solid #e9d5ff; flex-shrink: 0;">
-                    <img onerror="this.hidden=true" src="./SO TAY KHO QUY_files/mam_xoi_vang.png" style="width: 24px; height: 24px; object-fit: contain;">
-                  </div>
-                  <div>
-                    <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #1f2937; letter-spacing: -0.2px; white-space: nowrap;">Danh sách Mâm xôi vàng</h3>
-                    <div style="margin: 4px 0 0 0; font-size: 13px; color: #7c3aed; font-weight: 600; display: flex; align-items: flex-start; gap: 6px; line-height: 1.2;">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 1px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                      <span>10 đơn vị có tỷ lệ tiền KĐTCLT cao nhất</span>
-                    </div>
-                  </div>
-                </div>
-                              <div style="width: 36px; height: 36px; background: #f3f4f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #6b7280; transition: transform 0.3s; flex-shrink: 0;" class="summary-arrow-gray"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></div>
-              </div>
-            </summary>
-            <div style="margin-top: 24px; padding-top: 24px; border-top: 1px dashed #e5e7eb;">
-               ${renderRateList(top10Worst, 'bad')}
-            </div>
-          </details>
-        </div>
-        ${suggestHtml}
-        ${mixHtml}
-        ${trendHtml}
-        ${progressHtml}
         <style>
+          .tq-cols { display: grid; grid-template-columns: 42fr 58fr; gap: 14px; align-items: start; width: 100%; box-sizing: border-box; }
+          .tq-cl { background: #fff; border: 1px solid #fde68a; border-radius: 16px; box-shadow: 0 8px 24px rgba(217,119,6,0.05); min-width: 0; overflow: hidden; box-sizing: border-box; }
+          .tq-cl-h { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 12px 14px 8px; }
+          .tq-cl-h h3 { margin: 0; font-size: 15px; font-weight: 800; color: #1f2937; }
+          .tq-cl-x { flex-shrink: 0; width: 30px; height: 30px; border-radius: 50%; border: 0; background: #f3f4f6; color: #6b7280; display: flex; align-items: center; justify-content: center; cursor: pointer; touch-action: manipulation; }
+          .tq-cl-x svg { transition: transform .25s; }
+          .tq-cl.open .tq-cl-x svg { transform: rotate(180deg); }
+          .tq-cl-seg { display: flex; gap: 4px; background: #fef3c7; padding: 4px; margin: 0 14px; border-radius: 12px; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+          .tq-cl-seg::-webkit-scrollbar { display: none; }
+          .tq-tab { cursor: pointer; flex: 1 0 auto; min-height: 36px; padding: 6px 12px; border: 0; border-radius: 9px; background: transparent; font: inherit; font-size: 12.5px; font-weight: 800; color: #92400e; white-space: nowrap; touch-action: manipulation; }
+          .tq-tab[aria-selected="true"] { background: #fff; color: #1f2937; box-shadow: 0 1px 4px rgba(0,0,0,.12); }
+          .tq-tab:focus-visible { outline: 2px solid #b45309; outline-offset: 1px; }
+          .tq-tab em { font-style: normal; margin-left: 6px; font-size: 11px; background: #e11d48; color: #fff; border-radius: 8px; padding: 1px 6px; }
+          .tq-sums { padding: 10px 14px 12px; }
+          .tq-sum[hidden], .tq-pan[hidden] { display: none; }
+          .tq-pan { border-top: 1px dashed #e5e7eb; padding: 12px 14px 14px; max-height: min(520px, 70vh); overflow: auto; -webkit-overflow-scrolling: touch; animation: tq-fd .18s ease-out; }
+          @keyframes tq-fd { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+          .tq-rk { display: flex; gap: 6px; margin-bottom: 10px; }
+          .tq-rk button { cursor: pointer; min-height: 34px; padding: 4px 12px; border-radius: 999px; font: inherit; font-size: 12.5px; font-weight: 800; background: #fff; color: #92400e; border: 1px solid #fde68a; }
+          .tq-rk button[aria-pressed="true"] { background: #d97706; border-color: #d97706; color: #fff; }
+          @media (max-width: 900px) { .tq-cols { grid-template-columns: 1fr; } }
+          /* ===== Mobile: cố định khung, không phải kéo ngang — chữ co theo bề rộng màn hình, xuống dòng khi cần ===== */
+          @media (max-width: 640px) {
+            .tq-cl-h h3 { font-size: clamp(13px, 3.8vw, 15px); }
+            .tq-cl-seg { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: 3px; overflow: visible; padding: 3px; margin: 0 10px; }
+            .tq-tab { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 2px 4px; white-space: normal; text-align: center; line-height: 1.2; min-height: 40px; padding: 5px 3px; font-size: clamp(11px, 3.1vw, 12.5px); overflow-wrap: anywhere; }
+            .tq-tab em { margin-left: 0; font-size: 10.5px; padding: 1px 5px; }
+            .tq-sums { padding: 8px 12px 10px; }
+            .tq-sum, .tq-sum div { font-size: clamp(11.5px, 3.2vw, 12.5px) !important; }
+            .tq-pan { padding: 10px 10px 12px; overflow-x: hidden; }
+            .tq-swipe-hint { display: none !important; }
+            #tq-prog-scroll { overflow-x: hidden !important; }
+            #tq-prog-scroll table { table-layout: fixed; width: 100% !important; min-width: 0 !important; font-size: clamp(11px, 3vw, 12.5px) !important; }
+            #tq-prog-scroll th, #tq-prog-scroll td { padding: 6px 4px !important; font-size: clamp(10.5px, 2.9vw, 12px) !important; white-space: normal !important; overflow-wrap: anywhere; }
+            #tq-prog-scroll thead th:first-child { width: 44%; }
+            #tq-prog-scroll thead th:nth-last-child(2) { width: 20%; }
+            #tq-prog-scroll thead th:last-child { width: 36%; }
+            #tq-prog-scroll .tq-sticky-col { position: static !important; min-width: 0 !important; max-width: none !important; font-size: clamp(11.5px, 3.2vw, 13px) !important; box-shadow: none; }
+            #tq-prog-scroll td:last-child span { display: inline-block; padding: 3px 6px !important; font-size: clamp(10px, 2.8vw, 11.5px) !important; white-space: normal !important; line-height: 1.2; text-align: center; }
+            #tq-prog-bar button { min-height: 36px !important; padding: 4px 10px !important; font-size: clamp(11px, 3vw, 12.5px) !important; }
+          }
+          @media (max-width: 340px) { .tq-cl-seg { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
           details > summary::-webkit-details-marker { display: none; }
           details.tq-sec[open] > summary .tq-chev { transform: rotate(180deg); }
           .tq-ubtn { display: inline-flex; align-items: flex-start; gap: 6px; padding: 0; border: none; background: none; font: inherit; font-weight: 700; color: inherit; text-align: left; cursor: pointer; }
