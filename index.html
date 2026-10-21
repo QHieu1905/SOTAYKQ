@@ -2178,6 +2178,19 @@
       .tf-actions .tf-apply:hover { filter: brightness(1.08); transform: translateY(-1px); }
       .tf-actions .tf-clear { background: #fef2f2; color: #ef4444; }
       .tf-actions .tf-clear:hover { background: #fee2e2; }
+      .tf-panel { width: 340px; }
+      .tf-lbl { font-size: 11px; font-weight: 700; color: var(--gray); text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 6px; }
+      .tf-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+      .tf-chip { cursor: pointer; min-height: 34px; padding: 0 12px; border-radius: 999px; font: inherit; font-size: 12.5px; font-weight: 800; background: #fff; color: var(--green-dark); border: 1px solid var(--border); touch-action: manipulation; }
+      .tf-chip:hover { background: var(--mint-2); }
+      .tf-chip.on { background: var(--green); border-color: var(--green); color: #fff; }
+      .tf-err { background: var(--red-soft); color: var(--red); border-radius: 8px; padding: 6px 10px; font-size: 12px; font-weight: 600; }
+      .tf-sync { display: flex; gap: 10px; align-items: flex-start; background: var(--mint); border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; font-size: 12.5px; cursor: pointer; line-height: 1.45; }
+      .tf-sync input { margin-top: 3px; accent-color: var(--green); }
+      .tf-actions .tf-apply:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+      .tf-sync-chip { cursor: pointer; font: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 999px; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; touch-action: manipulation; }
+      .tf-sync-chip.off { background: var(--mint); color: var(--green-dark); border-color: var(--border); }
+      .tf-sync-chip u { text-underline-offset: 2px; }
     /* ===== UI/UX refresh ===== */
     .top-actions { display: flex; align-items: center; gap: 8px; margin-left: 12px; }
     .top-user { font-size: 13px; font-weight: 600; color: var(--text2); max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -3694,22 +3707,109 @@
     let filterStartTQ = '', filterEndTQ = '';
     let filterStartNK = '', filterEndNK = '';
 
+    /* ===== Bộ lọc thời gian dùng chung (Tổng quan / Nhật ký / Sản lượng) =====
+       • Chọn nhanh: Cả năm, Quý 1-4, Tháng này, Tháng trước, 30 ngày qua, Tuỳ chọn.
+       • Chỉ chọn trong MỘT năm (không lọc vắt qua hai năm).
+       • Không lưu khi tải lại trang: mở app luôn về "Cả năm".
+       • tfSync = true (mặc định): áp dụng ở module nào thì cả 3 module cùng đổi theo. */
+    let tfSync = true;
+    const tfPre = { tq: 'year', nk: 'year', sl: 'year' };   // kiểu chọn đang áp dụng của từng module
+    const tfDraft = {};                                       // bản nháp trong panel (chưa bấm Áp dụng)
+    const TF_MODS = ['tq', 'nk', 'sl'];
+    const tfPad = n => String(n).padStart(2, '0');
+    const tfYmd = d => d.getFullYear() + '-' + tfPad(d.getMonth() + 1) + '-' + tfPad(d.getDate());
+    const tfDmy = x => x ? x.slice(8, 10) + '/' + x.slice(5, 7) + '/' + x.slice(0, 4) : '';
+    function tfPresets() {
+      const now = new Date(), y = now.getFullYear(), m = now.getMonth();
+      const eom = (yy, mm) => tfYmd(new Date(yy, mm + 1, 0));
+      const pm = m === 0 ? [y - 1, 11] : [y, m - 1];
+      const today = tfYmd(now);
+      let s30 = tfYmd(new Date(now.getTime() - 29 * 864e5));
+      if (s30.slice(0, 4) !== today.slice(0, 4)) s30 = today.slice(0, 4) + '-01-01';   // không vắt qua năm
+      return {
+        year: ['Cả năm', '', ''],
+        q1: ['Quý 1', y + '-01-01', y + '-03-31'], q2: ['Quý 2', y + '-04-01', y + '-06-30'],
+        q3: ['Quý 3', y + '-07-01', y + '-09-30'], q4: ['Quý 4', y + '-10-01', y + '-12-31'],
+        m0: ['Tháng này', y + '-' + tfPad(m + 1) + '-01', eom(y, m)],
+        m1: ['Tháng trước', pm[0] + '-' + tfPad(pm[1] + 1) + '-01', eom(pm[0], pm[1])],
+        d30: ['30 ngày qua', s30, today]
+      };
+    }
+    function tfGet(mod) { return mod === 'tq' ? [filterStartTQ, filterEndTQ] : mod === 'nk' ? [filterStartNK, filterEndNK] : [filterStartSL, filterEndSL]; }
+    function tfPut(mod, p, st, en) {
+      const one = m => {
+        if (m === 'tq') { filterStartTQ = st; filterEndTQ = en; }
+        else if (m === 'nk') { filterStartNK = st; filterEndNK = en; }
+        else { filterStartSL = st; filterEndSL = en; }
+        tfPre[m] = p; delete tfDraft[m];
+      };
+      if (tfSync) TF_MODS.forEach(one); else one(mod);
+    }
+    function tfLabel(mod) {
+      const [st, en] = tfGet(mod);
+      if (!st && !en) return 'Cả năm';
+      const P = tfPresets(), k = tfPre[mod];
+      return (k !== 'custom' && P[k]) ? P[k][0] : (tfDmy(st) + ' – ' + tfDmy(en));
+    }
+    function tfD(mod) { return tfDraft[mod] || (tfDraft[mod] = { p: tfPre[mod], s: tfGet(mod)[0], e: tfGet(mod)[1] }); }
+    function tfError(d) {
+      if (d.p === 'year') return '';
+      if (!d.s || !d.e) return 'Chọn đủ Từ ngày và Đến ngày.';
+      if (d.s > d.e) return 'Ngày bắt đầu phải trước hoặc bằng ngày kết thúc.';
+      if (d.s.slice(0, 4) !== d.e.slice(0, 4)) return 'Chỉ chọn trong cùng một năm.';
+      return '';
+    }
+    function tfPanelInner(mod) {
+      const d = tfD(mod), P = tfPresets(), err = tfError(d);
+      const chip = (k, t) => `<button type="button" class="tf-chip ${d.p === k ? 'on' : ''}" onclick="tfPick('${mod}','${k}')">${t}</button>`;
+      return `
+        <div><div class="tf-lbl">Chọn nhanh</div>
+          <div class="tf-chips">${Object.keys(P).map(k => chip(k, P[k][0])).join('')}${chip('custom', 'Tuỳ chọn…')}</div></div>
+        <div><div class="tf-lbl">Khoảng thời gian (trong một năm)</div>
+          <div class="tf-row">
+            <label class="tf-field"><span>Từ ngày</span><input type="date" value="${d.s}" ${d.e ? `min="${d.e.slice(0, 4)}-01-01" max="${d.e}"` : ''} onchange="tfEdit('${mod}','s',this.value)"></label>
+            <label class="tf-field"><span>Đến ngày</span><input type="date" value="${d.e}" ${d.s ? `min="${d.s}" max="${d.s.slice(0, 4)}-12-31"` : ''} onchange="tfEdit('${mod}','e',this.value)"></label>
+          </div></div>
+        ${err ? `<div class="tf-err">${err}</div>` : ''}
+        <label class="tf-sync"><input type="checkbox" ${tfSync ? 'checked' : ''} onchange="tfSetSync(this.checked,'${mod}')">
+          <span><b>Đồng bộ các module</b><br>Tổng quan, Nhật ký bó tiền và SL tiền ĐTCLT dùng chung khoảng thời gian này.</span></label>
+        <div class="tf-actions">
+          <button type="button" class="tf-apply" ${err ? 'disabled' : ''} onclick="tfApply('${mod}')">Áp dụng</button>
+          <button type="button" class="tf-clear" onclick="tfReset('${mod}')">Đặt lại</button>
+        </div>`;
+    }
+    function tfRefresh(mod) { const el = document.getElementById('tfp-' + mod); if (el) el.innerHTML = tfPanelInner(mod); }
+    function tfPick(mod, k) {
+      const d = tfD(mod);
+      if (k === 'custom') {
+        d.p = 'custom';
+        if (!d.s || !d.e) { const t = tfPresets(); d.s = t.m0[1]; d.e = tfYmd(new Date()); }
+      } else { const P = tfPresets(); d.p = k; d.s = P[k][1]; d.e = P[k][2]; }
+      tfRefresh(mod);
+    }
+    function tfEdit(mod, f, v) { const d = tfD(mod); d[f] = v; d.p = 'custom'; tfRefresh(mod); }
+    function tfApply(mod) {
+      const d = tfD(mod); if (tfError(d)) { tfRefresh(mod); return; }
+      if (d.p === 'year') tfPut(mod, 'year', '', ''); else tfPut(mod, d.p, d.s, d.e);
+      window[mod + 'FilterOpen'] = false; render();
+    }
+    function tfReset(mod) { tfPut(mod, 'year', '', ''); window[mod + 'FilterOpen'] = false; render(); }
+    function tfSetSync(on, mod) {
+      tfSync = !!on;
+      if (tfSync) { const [st, en] = tfGet(mod); tfPut(mod, tfPre[mod], st, en); }   // module đang thao tác làm chuẩn cho cả 3
+      window[mod + 'FilterOpen'] = true; render();
+    }
+    function tfToggle(mod, el) {
+      window[mod + 'FilterOpen'] = el.open;
+      if (el.open) { delete tfDraft[mod]; tfRefresh(mod); }
+    }
+    // Giữ lại cho tương thích: chọn nhanh theo tháng 'YYYY-MM' (rỗng = Cả năm)
     function setMonthRange(m, module) {
-      if (!m) {
-        if (module === 'tq') { filterStartTQ = ''; filterEndTQ = ''; }
-        if (module === 'nk') { filterStartNK = ''; filterEndNK = ''; }
-        if (module === 'sl') { filterStartSL = ''; filterEndSL = ''; }
-        render();
-        return;
-      }
+      if (!m) { tfPut(module, 'year', '', ''); render(); return; }
       const [year, month] = m.split('-');
-      const start = `${year}-${month}-01`;
       const endDay = new Date(year, month, 0).getDate();
-      const end = `${year}-${month}-${String(endDay).padStart(2, '0')}`;
-      
-      if (module === 'tq') { filterStartTQ = start; filterEndTQ = end; window.tqFilterOpen = true; }
-      if (module === 'nk') { filterStartNK = start; filterEndNK = end; window.nkFilterOpen = true; }
-      if (module === 'sl') { filterStartSL = start; filterEndSL = end; window.slFilterOpen = true; }
+      tfPut(module, 'custom', `${year}-${month}-01`, `${year}-${month}-${String(endDay).padStart(2, '0')}`);
+      window[module + 'FilterOpen'] = true;
       render();
     }
     const DENOMS = { '500k': 500000, '200k': 200000, '100k': 100000, '50k': 50000, '20k': 20000, '10k': 10000, '5k': 5000 };
@@ -4055,32 +4155,24 @@
     ${showAdd ? `<button class="btn" onclick="${addFn}">${ICONS.plus} ${lbl}</button>` : ''}</div>`;
     }
     // Bộ lọc "Thời gian" dùng chung cho các trang (Tổng quan/Nhật ký/Sản lượng...).
-    // cfg: { className, start, end, startVar, endVar, module, color, isOpen }
+    // cfg: { className, align, module, color, isOpen } — trạng thái nằm ở tf* (xem phần state phía trên).
     function timeFilterDropdown(cfg) {
-      const hasFilter = cfg.start || cfg.end;
+      const mod = cfg.module, [st, en] = tfGet(mod);
+      const hasFilter = st || en;
       const color = cfg.color || 'var(--green)';
+      const chip = mod === 'tq' ? '' : (tfSync
+        ? `<button type="button" class="tf-sync-chip" title="Đang dùng chung bộ lọc với Tổng quan" onclick="tfSetSync(false,'${mod}')">🔗 Dùng chung · <u>Gỡ đồng bộ</u></button>`
+        : `<button type="button" class="tf-sync-chip off" title="Bộ lọc riêng của module này" onclick="tfSetSync(true,'${mod}')">Bộ lọc riêng · <u>Đồng bộ lại</u></button>`);
       return `
-        <details class="tf-details tf-${cfg.align || 'left'} ${cfg.className}" style="position:relative; z-index:10;" ${cfg.isOpen ? 'open' : ''}>
+        <span style="display:inline-flex; align-items:center; gap:8px; flex-wrap:wrap;">
+        <details class="tf-details tf-${cfg.align || 'left'} ${cfg.className}" style="position:relative; z-index:10;" ${cfg.isOpen ? 'open' : ''} ontoggle="tfToggle('${mod}', this)">
           <summary class="tf-summary">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
-            Thời gian ${hasFilter ? `<span class="tf-badge" style="background:${color}">Đã lọc</span>` : ''}
+            Thời gian ${hasFilter ? `<span class="tf-badge" style="background:${color}">${esc(tfLabel(mod))}</span>` : ''}
             <svg class="tf-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
           </summary>
-          <div class="tf-panel">
-            <div class="tf-row">
-              <label class="tf-field"><span>Từ ngày</span>
-                <input type="date" value="${cfg.start}" onchange="${cfg.startVar}=this.value">
-              </label>
-              <label class="tf-field"><span>Đến ngày</span>
-                <input type="date" value="${cfg.end}" onchange="${cfg.endVar}=this.value">
-              </label>
-            </div>
-            <div class="tf-actions">
-              <button class="tf-apply" onclick="window.${cfg.module}FilterOpen = false; render()">Áp dụng</button>
-              ${hasFilter ? `<button class="tf-clear" onclick="setMonthRange('', '${cfg.module}')">Xoá lọc</button>` : ''}
-            </div>
-          </div>
-        </details>
+          <div class="tf-panel" id="tfp-${mod}">${tfPanelInner(mod)}</div>
+        </details>${chip}</span>
       `;
     }
     function emptyBox(icon, title, hint) {
@@ -4581,7 +4673,7 @@
     function renderTongquan() {
       // Tổng quan mặc định chỉ phản ánh dữ liệu của năm hiện tại.
       // Điều này đồng thời bảo đảm KPI không bị sai khi local cache còn dữ liệu các năm trước.
-      const year = new Date().getFullYear();
+      const year = filterStartTQ ? Number(filterStartTQ.slice(0, 4)) : new Date().getFullYear();   // bộ lọc chỉ nằm trong 1 năm
       const yearPrefix = String(year) + '-';
 
       const allMonthsSet = new Set();
