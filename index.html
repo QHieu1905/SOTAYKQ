@@ -6279,7 +6279,7 @@
           <td>${r.es.map(e => `<div class="u360-de">${kqDenChip(e.v)}<span class="u360-dr${e.rate > thr ? ' bad' : ''}">${e.rate.toFixed(2)}%</span></div>`).join('')}</td>
           <td class="n${r.fail ? ' bad' : ''}">${r.lrate.toFixed(2)}%</td><td class="c">${pill(r.fail ? 'p-red' : (r.lan ? 'p-purple' : (/Thiếu|Thừa/.test(r.concl) ? 'p-amber' : 'p-green')), esc(r.concl))}</td></tr>`).join('');
       return `<div class="u360-kpis">${k(M.n, 'Lần kiểm tra', '#1f2937')}${k(M.pass, 'Đạt', '#059669')}${k(M.fail, 'Không đạt', M.fail ? '#e11d48' : '#6b7280')}${k(M.rate.toFixed(2) + '%', 'Tỷ lệ bình quân', M.rate > thr ? '#e11d48' : '#1f2937')}${k(u360Dmy(M.last), 'Lần gần nhất', '#1f2937')}</div>
-        ${S.partial ? `<div class="u360-note">Đang hiển thị dữ liệu có trong máy (không kết nối được máy chủ), có thể chưa đủ toàn bộ lịch sử.</div>` : ''}
+        
         <div class="u360-sec">Tỷ lệ KĐTCLT theo từng lần kiểm tra <span>(chấm đỏ = không đạt, tính chung cả lượt)</span></div><div class="u360-chart">${u360Chart(M.rows)}</div>
         <div class="u360-sec">Kết quả lần gần nhất theo mệnh giá</div>
         <div class="kq-detail u360-den"><div class="kq-den-head" aria-hidden="true"><span>Mệnh giá</span><span>KT gần nhất</span><span>Tỷ lệ KĐTCLT</span><span>Số lần</span><span>Gợi ý lần tới</span></div>${plan.rows.map(kqDenRow).join('')}</div>
@@ -6683,7 +6683,6 @@
         r = table(ws, r, ['STT', 'Tổ chức tín dụng', 'Số lượt KT', 'Số tờ kiểm tra', 'Số tờ KĐTCLT', 'Tỷ lệ (%)', 'Kỳ trước (%)', 'Tăng/giảm (điểm %)', 'Kết luận'],
           M.units.map((u, i) => [i + 1, u.name, u.n, u.c, u.i, +u.rate.toFixed(2), u.prate == null ? '—' : +u.prate.toFixed(2), u.delta == null ? '—' : +u.delta.toFixed(2), u.failLogs ? 'Không đạt' : (u.lan ? 'Lẫn tiền đủ TCLT' : 'Đạt')]),
           { wrapCol: 1, align: ['center', 'left', 'right', 'right', 'right', 'right', 'right', 'right', 'center'], fmt: [null, null, '#,##0', '#,##0', '#,##0', '0.00', '0.00', '+0.00;-0.00;0.00', null] });
-        merged(ws, r++, NC, 'Ghi chú: Kết luận theo TCTD xác định theo tỷ lệ chung của từng lượt kiểm tra (cùng quy ước với Nhật ký); số lượt không đạt theo mệnh giá được tính riêng từng mệnh giá.', F(10.5, false, true)); r++;
         merged(ws, r++, NC, 'III. TỒN TẠI, HẠN CHẾ', F(12, true));
         merged(ws, r++, NC, `1. Các trường hợp không đạt (tỷ lệ > ${rpThr()}%): ${M.fails.length ? M.fails.length + ' trường hợp' : 'không có'}`, F(12, true, true));
         if (M.fails.length) r = table(ws, r, ['STT', 'Tổ chức tín dụng', 'Ngày KT', 'Mệnh giá', 'Số tờ KT', 'Số tờ KĐTCLT', 'Tỷ lệ (%)'], M.fails.map((f, i) => [i + 1, f.name, rpDmy(f.date), rpDenTxt(f.v), f.c, f.i, +f.rate.toFixed(2)]), { wrapCol: 1, align: ['center', 'left', 'center', 'center', 'right', 'right', 'right'], fmt: [null, null, null, null, '#,##0', '#,##0', '0.00'] }) + 1;
@@ -6758,7 +6757,6 @@
         <table>${th(['STT', 'Tổ chức tín dụng', 'Số lượt KT', 'Số tờ kiểm tra', 'Số tờ KĐTCLT', 'Tỷ lệ (%)', 'Kỳ trước (%)', 'Tăng/giảm (điểm %)', 'Kết luận'])}<tbody>
           ${M.units.length ? M.units.map((u, i) => tr([[i + 1, 'c'], [e(u.name)], [u.n, 'n'], [rpNum(u.c), 'n'], [rpNum(u.i), 'n'], [rpPct(u.rate), 'n' + (u.failLogs ? ' bad' : '')], [u.prate == null ? '—' : rpPct(u.prate), 'n'], [dlt(u.delta), 'n'], [u.failLogs ? 'Không đạt' : (u.lan ? 'Lẫn tiền đủ TCLT' : 'Đạt'), 'c' + (u.failLogs ? ' bad' : '')]])).join('') : `<tr><td colspan="9" class="c">Không có số liệu</td></tr>`}
         </tbody></table>
-        <p class="note">Ghi chú: Kết luận theo TCTD xác định theo tỷ lệ chung của từng lượt kiểm tra (cùng quy ước với Nhật ký); số lượt không đạt theo mệnh giá được tính riêng từng mệnh giá.</p>
         <h2>III. TỒN TẠI, HẠN CHẾ</h2>
         <h3>1. Các trường hợp không đạt (tỷ lệ &gt; ${thr}%): ${M.fails.length ? M.fails.length + ' trường hợp' : 'không có'}</h3>
         ${M.fails.length ? `<table>${th(['STT', 'Tổ chức tín dụng', 'Ngày KT', 'Mệnh giá', 'Số tờ KT', 'Số tờ KĐTCLT', 'Tỷ lệ (%)'])}<tbody>${M.fails.map((f, i) => tr([[i + 1, 'c'], [e(f.name)], [rpDmy(f.date), 'c'], [rpDenTxt(f.v), 'c'], [rpNum(f.c), 'n'], [rpNum(f.i), 'n'], [rpPct(f.rate), 'n bad']])).join('')}</tbody></table>` : ''}
@@ -6791,7 +6789,7 @@
     function rpPreview(html, land, title) {
       rpClosePreview();
       const ov = document.createElement('div'); ov.id = 'rp-prev'; ov.className = 'rp-prev'; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-label', 'Xem trước bản in');
-      ov.innerHTML = `<div class="rp-prev-bar"><b>${esc(title)}</b><span class="rp-prev-hint">Bấm In → chọn “Lưu dưới dạng PDF” để xuất file PDF</span><div class="rp-prev-act"><button type="button" class="kq-btn" onclick="rpClosePreview()">Đóng</button><button type="button" class="kq-btn pri" onclick="rpPrint()">In / Lưu PDF</button></div></div>
+      ov.innerHTML = `<div class="rp-prev-bar"><b>${esc(title)}</b><span style="flex:1"></span><div class="rp-prev-act"><button type="button" class="kq-btn" onclick="rpClosePreview()">Đóng</button><button type="button" class="kq-btn pri" onclick="rpPrint()">In / Lưu PDF</button></div></div>
         <div class="rp-prev-body" id="rp-prev-body"><div class="rp-prev-sheet" id="rp-prev-sheet"><iframe id="rp-frame" title="Bản in" style="border:0;background:#fff"></iframe></div></div>`;
       document.body.appendChild(ov); document.body.style.overflow = 'hidden';
       const fr = ov.querySelector('#rp-frame'), W = land ? 1123 : 794;
@@ -6901,7 +6899,7 @@
       const at = window.__lastLogsSyncAt ? (d => z(d.getHours()) + ':' + z(d.getMinutes()))(new Date(window.__lastLogsSyncAt)) : '';
       const need = filterStartNK ? Number(String(filterStartNK).slice(0, 4)) : 0;
       const warn = (need && need < yrs[0]) ? `<div class="nk-note" role="status">Bộ lọc bắt đầu từ năm ${need} nhưng dữ liệu từ năm ${need} chưa được tải nên số liệu có thể thiếu. <button type="button" class="nk-note-btn" onclick="loadLogsYear(${need})">Tải dữ liệu từ năm ${need}</button></div>` : '';
-      return warn;
+      return '';
     }
     function renderNhatky() {
       const noUnits = data.units.length === 0;
@@ -9568,21 +9566,6 @@
         </div>`}
       </div>
 
-      ${secHead('Đồng bộ thủ công từ tệp .json', 'Dùng khi đồng bộ tự động bị lỗi — gộp dữ liệu từ tệp sao lưu vào máy này.')}
-      ${(() => { const st = window.autoSyncState ? window.autoSyncState() : 'none', undoAt = Number(localStorage.getItem('msj_undo_at') || 0);
-        const lab = st === 'ok' ? ['#ecfdf5', '#047857', '✅ Đồng bộ tự động đang hoạt động bình thường.'] : st === 'waiting' ? ['#fffbeb', '#92400e', '⚠️ Chưa nhận được phản hồi từ máy chủ trong phiên này — dữ liệu có thể chưa mới nhất. Hãy thử “Buộc đồng bộ ngay” ở trên; nếu vẫn lỗi, dùng đồng bộ thủ công.'] : st === 'offline' ? ['#fff1f2', '#be123c', '⚠️ Máy đang ngoại tuyến — có thể dùng đồng bộ thủ công từ tệp .json.'] : ['#f3f4f6', '#4b5563', 'Chưa cấu hình Firebase — ứng dụng đang chạy độc lập trên máy.'];
-        return `<div class="bk-sync-state" style="background:${lab[0]}; color:${lab[1]};" role="status">${lab[2]}</div>
-        <div class="grid grid-4" style="margin-bottom: 24px;">
-          <div class="card stat" style="cursor:pointer;border:1px solid #fcd34d;background:#fffbeb;" onclick="manualSyncFromJson()" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();manualSyncFromJson()}">
-            <div class="stat-ic ic-amber">${ICONS.box}</div>
-            <div><div class="num" style="font-size:16px">Đồng bộ thủ công</div><div class="lbl">Nhập .json · gộp an toàn vào máy này</div></div>
-          </div>
-          ${undoAt ? `<div class="card stat" style="cursor:pointer;border:1px solid var(--line)" onclick="manualSyncUndo()" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();manualSyncUndo()}">
-            <div class="stat-ic ic-blue">${ICONS.redo}</div>
-            <div><div class="num" style="font-size:16px">Hoàn tác lần nhập</div><div class="lbl">Nhập lúc ${new Date(undoAt).toLocaleString('vi-VN')}</div></div>
-          </div>` : ''}
-        </div>
-        <div class="bk-hint">Cách làm: admin (hoặc máy đang đồng bộ tốt) bấm <b>Tải .json</b> → gửi tệp cho đồng nghiệp → họ bấm <b>Đồng bộ thủ công</b> và chọn tệp. Ứng dụng cho xem trước số bản ghi mới/cập nhật rồi mới nhập; không xoá dữ liệu nào trên máy, không đổi tài khoản/phân quyền và không ghi lên Cloud. Khi đồng bộ tự động chạy lại, dữ liệu trên máy chủ là chuẩn.</div>`; })()}
       `;
     }
 
