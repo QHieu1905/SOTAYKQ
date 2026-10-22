@@ -2508,6 +2508,36 @@
       .kq-item { border: 1px solid #e5e7eb; }
       .kq-item.on { border-color: #fcd34d; }
       .kq-item:not(.done) .kq-rank { background: color-mix(in srgb, var(--tone, #9ca3af) 20%, #fff); color: #374151; }
+
+    /* ===== SỬA GIAO DIỆN MOBILE (rà soát UI) ===== */
+    /* 1) Bảng "Chọn thời gian": đưa lên trên mọi lớp nổi, làm mờ nền, ẩn nút menu tròn + các lớp nổi ở đáy để không che nút Áp dụng/Đặt lại */
+    .tf-details[open] { z-index: 21000 !important; }
+    body:has(.tf-details[open]) .fan-menu,
+    body:has(.tf-details[open]) .fan-overlay,
+    body:has(.tf-details[open]) #sync-dot,
+    body:has(.tf-details[open]) #pending-sync-badge,
+    body:has(#sidebar.open) .fan-menu { display: none !important; }
+    .tf-field input[type="date"] { font-size: 16px; min-height: 44px; padding: 8px 10px; -webkit-appearance: none; appearance: none; display: block; text-align: left; background-color: #fff;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23b45309' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='2'/%3E%3Cpath d='M16 2v4M8 2v4M3 10h18'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 10px center; padding-right: 34px; }
+    .tf-field input[type="date"]::-webkit-calendar-picker-indicator { opacity: 0; position: absolute; right: 0; top: 0; width: 100%; height: 100%; cursor: pointer; }
+    .tf-field { position: relative; }
+    @media (max-width: 640px) {
+      .tf-details .tf-panel { max-height: 80vh; max-height: 80dvh; overscroll-behavior: contain; padding: 16px; gap: 14px;
+        box-shadow: 0 0 0 100vmax rgba(15, 23, 42, .42), 0 -8px 40px rgba(0, 0, 0, .28); }
+      .tf-chip { min-height: 40px; padding: 0 14px; font-size: 13.5px; }
+      .tf-x { width: 40px; height: 40px; }
+      .tf-actions { position: sticky; bottom: -16px; background: #fff; padding: 10px 0 2px; margin: 0; }
+      .tf-actions button { min-height: 46px; font-size: 14px; }
+      .tf-sync-chip { min-height: 36px; display: inline-flex; align-items: center; }
+      .tf-row { flex-wrap: nowrap; }
+      .tf-field { flex: 1 1 0; }
+    }
+    @media (max-width: 340px) { .tf-row { flex-wrap: wrap; } .tf-field { flex: 1 1 100%; } }
+    /* 2) Nhãn nổi của nút menu không tràn khỏi màn hình khi tên module dài */
+    .fan-label { max-width: calc(100vw - 32px); overflow: hidden; text-overflow: ellipsis; }
+    /* 3) Thanh hoàn tác không rộng quá màn hình nhỏ */
+    @media (max-width: 860px) { .kq-undo-bar { min-width: 0; width: calc(100vw - 24px); max-width: 420px; } .kq-undo-msg { max-width: none; } }
   </style>
 </head>
 
@@ -4057,6 +4087,16 @@
         if (d) d.style.display = "none";
       }
     });
+
+    // Chạm ra ngoài bảng "Thời gian" (vùng nền mờ) thì đóng bảng, không kích hoạt nhầm nút bên dưới
+    document.addEventListener("click", function (e) {
+      const open = document.querySelector(".tf-details[open]");
+      if (!open || open.contains(e.target)) return;
+      if (e.target.closest && e.target.closest(".tf-sync-chip")) return;
+      e.preventDefault(); e.stopPropagation();
+      const pn = open.querySelector(".tf-panel");
+      if (pn && pn.id) tfClose(pn.id.replace(/^tfp-/, "")); else open.open = false;
+    }, true);
     function onSearch(v) {
       const vt = v.trim();
       if (vt === 'Tất cả đơn vị' || vt === '') {
