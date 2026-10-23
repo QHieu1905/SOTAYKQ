@@ -4093,7 +4093,7 @@
       const open = document.querySelector(".tf-details[open]");
       if (!open || open.contains(e.target)) return;
       if (e.target.closest && e.target.closest(".tf-sync-chip")) return;
-      e.preventDefault(); e.stopPropagation();
+      if (window.matchMedia("(max-width: 640px)").matches) { e.preventDefault(); e.stopPropagation(); }   // điện thoại: không bấm nhầm nút bên dưới
       const pn = open.querySelector(".tf-panel");
       if (pn && pn.id) tfClose(pn.id.replace(/^tfp-/, "")); else open.open = false;
     }, true);
@@ -4503,10 +4503,13 @@
       window.__tqParts[id] = { head: String(head).replace(/<h3[\s\S]*?<\/h3>/, ''), body: body };   // bỏ tiêu đề: tên tab đã là tiêu đề
       return '';
     }
+    window.tqWide = () => window.matchMedia && window.matchMedia('(min-width:1000px)').matches;
+    // Mỗi tab một nội dung: chỉ hiện tab đang chọn
+    window.tqPanShown = (cid, st, tid) => st.open && tid === st.sel;
     function tqCluster(cid, title, tabs) {
       tabs = tabs.filter(t => window.__tqParts[t.id]);
       if (!tabs.length) return '';
-      const st = window.__tqCl[cid] = window.__tqCl[cid] || { open: false, sel: tabs[0].id };
+      const st = window.__tqCl[cid] = window.__tqCl[cid] || { open: window.tqWide(), sel: tabs[0].id };   // màn hình rộng: mở sẵn
       if (!tabs.some(t => t.id === st.sel)) st.sel = tabs[0].id;
       const P = id => window.__tqParts[id];
       return `<section class="tq-cl ${st.open ? 'open' : ''}" id="tqcl-${cid}">
@@ -4514,7 +4517,7 @@
           <button type="button" class="tq-cl-x" aria-expanded="${st.open}" aria-label="Mở hoặc thu gọn" onclick="tqClToggle('${cid}')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></button></div>
         <div class="tq-cl-seg" role="tablist">${tabs.map(t => `<button type="button" role="tab" class="tq-tab" data-t="${t.id}" aria-selected="${t.id === st.sel}" onclick="tqClTab('${cid}','${t.id}')">${t.label}${t.badge != null ? `<em>${t.badge}</em>` : ''}</button>`).join('')}</div>
         <div class="tq-sums">${tabs.map(t => `<div class="tq-sum" data-t="${t.id}" ${t.id === st.sel ? '' : 'hidden'}>${P(t.id).head}</div>`).join('')}</div>
-        <div class="tq-pans">${tabs.map(t => `<div class="tq-pan" data-t="${t.id}" ${st.open && t.id === st.sel ? '' : 'hidden'}>${P(t.id).body}</div>`).join('')}</div>
+        <div class="tq-pans">${tabs.map(t => `<div class="tq-pan" data-t="${t.id}" ${window.tqPanShown(cid, st, t.id) ? '' : 'hidden'}>${P(t.id).body}</div>`).join('')}</div>
       </section>`;
     }
     window.tqClApply = function (cid) {
@@ -4523,9 +4526,22 @@
       el.querySelector('.tq-cl-x').setAttribute('aria-expanded', st.open);
       el.querySelectorAll('.tq-tab').forEach(b => b.setAttribute('aria-selected', b.dataset.t === st.sel));
       el.querySelectorAll('.tq-sum').forEach(d => { d.hidden = d.dataset.t !== st.sel; });
-      el.querySelectorAll('.tq-pan').forEach(d => { d.hidden = !(st.open && d.dataset.t === st.sel); });
+      el.querySelectorAll('.tq-pan').forEach(d => { d.hidden = !window.tqPanShown(cid, st, d.dataset.t); });
+      if (window.tqFitCols) window.tqFitCols();
       if (st.open && st.sel === 'trend' && window.tqFitTrend) requestAnimationFrame(window.tqFitTrend);
     };
+    // Màn hình rộng: kéo hai khung giãn đến hết chiều cao cửa sổ, nội dung cuộn bên trong khung
+    window.tqFitCols = function () {
+      const c = document.querySelector('#pg-tongquan .tq-cols'); if (!c) return;
+      if (!window.tqWide() || !c.querySelector('.tq-cl.open')) { c.style.height = ''; return; }   // thu gọn hết thì không ép chiều cao
+      let top = c.getBoundingClientRect().top + (window.scrollY || 0);
+      for (let n = c.parentElement; n; n = n.parentElement) top += n.scrollTop || 0;
+      c.style.height = Math.max(440, Math.round(window.innerHeight - top - 16)) + 'px';
+      const over = document.documentElement.scrollHeight - window.innerHeight;     // đệm đáy trang làm trang cuộn thừa -> trừ bớt
+      if (over > 0) c.style.height = Math.max(440, c.offsetHeight - over) + 'px';
+      if (window.tqFitTrend) window.tqFitTrend();
+    };
+    window.addEventListener('resize', () => { clearTimeout(window.__tqFitT); window.__tqFitT = setTimeout(() => window.tqFitCols && window.tqFitCols(), 120); });
     window.tqClTab = function (cid, id) { const st = window.__tqCl[cid]; if (!st) return; st.open = !(st.open && st.sel === id); st.sel = id; window.tqClApply(cid); };
     window.tqClToggle = function (cid) { const st = window.__tqCl[cid]; if (!st) return; st.open = !st.open; window.tqClApply(cid); };
     window.tqRankPick = function (k) {
@@ -5197,7 +5213,7 @@
           <div data-p="sen">${renderRateList(top10Best, 'good')}</div>
           <div data-p="xoi" hidden>${renderRateList(top10Worst, 'bad')}</div></div>`
       };
-      requestAnimationFrame(() => window.tqFitTrend && window.tqFitTrend());
+      requestAnimationFrame(() => { window.tqFitTrend && window.tqFitTrend(); window.tqFitCols && window.tqFitCols(); });
       const htmlReport = `
       ${monthFilterHtml}
 
@@ -5277,6 +5293,21 @@
           .tq-rk button { cursor: pointer; min-height: 34px; padding: 4px 12px; border-radius: 999px; font: inherit; font-size: 12.5px; font-weight: 800; background: #fff; color: #92400e; border: 1px solid #fde68a; }
           .tq-rk button[aria-pressed="true"] { background: #d97706; border-color: #d97706; color: #fff; }
           @media (max-width: 900px) { .tq-cols { grid-template-columns: 1fr; } }
+          /* Tab trong khung: co chữ/đệm để đủ chỗ ở màn hình 900-1300px (không bị cắt "Đối chiếu tiến bộ") */
+          @media (min-width: 901px) and (max-width: 1300px) { .tq-tab { flex: 1 1 auto; padding: 6px 8px; font-size: 12px; } .tq-tab em { margin-left: 4px; } }
+          /* Điện thoại: nội dung thẻ số liệu căn giữa theo chiều dọc, không bị khoảng trống lệch giữa các thẻ */
+          @media (max-width: 768px) { .tq-card-inner { justify-content: center; } }
+          /* ===== Màn hình rộng (≥1000px): hai khung lấp đầy chiều cao, cuộn bên trong ===== */
+          @media (min-width: 1000px) {
+            .tq-cols { align-items: stretch; }
+            .tq-cl { display: flex; flex-direction: column; min-height: 0; }
+            .tq-cl:not(.open) { align-self: start; }   /* khung đóng thì co lại, không bị kéo dài theo khung bên cạnh */
+            .tq-pans { flex: 1; min-height: 0; overflow: auto; -webkit-overflow-scrolling: touch; border-top: 1px dashed #e5e7eb; }
+            .tq-pans .tq-pan { max-height: none; overflow: visible; border-top: 0; }
+            .tq-pans .tq-pan + .tq-pan:not([hidden]) { border-top: 1px dashed #e5e7eb; }
+            .tq-card-inner { padding: 16px 20px; }
+            .tq-num { font-size: 26px; }
+          }
           /* ===== Mobile: cố định khung, không phải kéo ngang — chữ co theo bề rộng màn hình, xuống dòng khi cần ===== */
           @media (max-width: 640px) {
             .tq-cl-h h3 { font-size: clamp(13px, 3.8vw, 15px); }
@@ -5335,6 +5366,46 @@
             .tq-col-lan { display: none !important; }
             .tq-mini { display: block !important; }
             #tq-prog-scroll td span { font-size: 11px !important; padding: 4px 8px !important; }
+          }
+          /* ===== Bảng "Đối chiếu tiến bộ": vừa khung, không kéo ngang ===== */
+          /* Desktop / tablet (>640px): chữ nhỏ hơn, cột co theo khung, tên đơn vị tự xuống dòng */
+          @media (min-width: 641px) {
+            #tq-prog-scroll { overflow-x: hidden !important; }
+            #tq-prog-scroll table { table-layout: fixed; width: 100% !important; min-width: 0 !important; font-size: 12px !important; }
+            #tq-prog-scroll th { padding: 8px 6px !important; font-size: 10.5px !important; letter-spacing: 0 !important; white-space: normal !important; line-height: 1.2; }
+            #tq-prog-scroll td { padding: 7px 6px !important; font-size: 12px !important; }
+            #tq-prog-scroll thead th:nth-child(1) { width: 29%; }
+            #tq-prog-scroll thead th:nth-child(n+2):nth-child(-n+5) { width: 11%; }
+            #tq-prog-scroll thead th:nth-child(6) { width: 10%; }
+            #tq-prog-scroll thead th:nth-child(7) { width: 17%; }
+            #tq-prog-scroll .tq-sticky-col { position: static !important; min-width: 0 !important; max-width: none !important; font-size: 12.5px !important; line-height: 1.3; overflow-wrap: anywhere; box-shadow: none; }
+            #tq-prog-scroll td:nth-child(7) span { white-space: normal !important; text-align: center; font-size: 11px !important; padding: 3px 7px !important; line-height: 1.2; }
+            #tq-prog-bar button { min-height: 34px !important; padding: 4px 12px !important; font-size: 12px !important; }
+          }
+          /* Màn hình rộng: bảng dùng chung thanh cuộn của khung, không cuộn lồng nhau */
+          @media (min-width: 1000px) { #tq-prog-scroll { max-height: none !important; overflow: visible !important; } }
+          /* Điện thoại (≤640px): mỗi đơn vị là một thẻ — dòng 1: tên + đánh giá; dòng 2: Quý 1-4 + độ lệch */
+          @media (max-width: 640px) {
+            .tq-pan[data-t="prog"] { max-height: none; overflow: visible; }
+            #tq-prog-scroll { max-height: none !important; overflow: visible !important; border: 0 !important; border-radius: 0 !important; }
+            #tq-prog-scroll table, #tq-prog-scroll tbody { display: block; width: 100% !important; }
+            #tq-prog-scroll thead { display: none; }
+            #tq-prog-scroll tr { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px 4px; align-items: center; margin: 0 0 8px; padding: 10px 10px 9px; background: #fff; border: 1px solid #fde68a !important; border-radius: 12px; }
+            #tq-prog-scroll td { display: block; min-width: 0; padding: 0 !important; border: 0; text-align: center !important; font-size: 13px !important; white-space: normal !important; }
+            #tq-prog-scroll .tq-sticky-col { grid-column: 1 / 4; grid-row: 1; text-align: left !important; font-size: 13px !important; line-height: 1.3; background: transparent !important; overflow-wrap: anywhere; }
+            #tq-prog-scroll .tq-mini { display: none !important; }
+            #tq-prog-scroll td:nth-child(7) { grid-column: 4 / 6; grid-row: 1; justify-self: end; text-align: right !important; }
+            #tq-prog-scroll td:nth-child(7) span { white-space: nowrap !important; font-size: 11px !important; padding: 4px 8px !important; }
+            #tq-prog-scroll .tq-col-lan, #tq-prog-scroll td:nth-child(6) { display: block !important; grid-row: 2; padding-top: 7px !important; border-top: 1px dashed #fde68a; }
+            #tq-prog-scroll td:nth-child(2) { grid-column: 1; } #tq-prog-scroll td:nth-child(3) { grid-column: 2; }
+            #tq-prog-scroll td:nth-child(4) { grid-column: 3; } #tq-prog-scroll td:nth-child(5) { grid-column: 4; }
+            #tq-prog-scroll td:nth-child(6) { grid-column: 5; }
+            #tq-prog-scroll td:nth-child(n+2):nth-child(-n+6)::before { display: block; margin-bottom: 2px; font-size: 9.5px; font-weight: 800; letter-spacing: .2px; text-transform: uppercase; color: #a16207; }
+            #tq-prog-scroll td:nth-child(2)::before { content: "Quý 1"; } #tq-prog-scroll td:nth-child(3)::before { content: "Quý 2"; }
+            #tq-prog-scroll td:nth-child(4)::before { content: "Quý 3"; } #tq-prog-scroll td:nth-child(5)::before { content: "Quý 4"; }
+            #tq-prog-scroll td:nth-child(6)::before { content: "Độ lệch"; }
+            #tq-prog-scroll td[colspan] { grid-column: 1 / -1; grid-row: auto; text-align: left !important; background: transparent !important; }
+            #tq-prog-scroll tr + tr:has(> td[colspan]:only-child) { margin-top: -6px; background: #fffdf5; }
           }
           details[open] summary .summary-arrow-gray { transform: rotate(180deg); }
           .spin { animation: spin 1s linear infinite; }
