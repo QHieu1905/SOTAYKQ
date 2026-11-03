@@ -8482,20 +8482,12 @@ ${monthFilterHtml}
     }
 
     window.saveFirebaseSettings = function () {
-      let val = document.getElementById('fb_config_inp').value.trim();
-      if (!val) return alert('Vui lòng nhập cấu hình');
-      try {
-        val = val.replace(/^const\s+firebaseConfig\s*=\s*/, '');
-        val = val.replace(/;$/, '');
-        const obj = new Function('return ' + val)();
-        if (!obj.apiKey) throw new Error("Missing apiKey");
-        localStorage.setItem('firebase_config', JSON.stringify(obj));
-        alert('Đã lưu cấu hình Firebase! Ứng dụng sẽ tải lại.');
-        window.location.reload();
-      } catch (e) {
-        console.error(e);
-        alert('Lỗi: Cấu hình Firebase không hợp lệ! Đảm bảo bạn copy đúng phần nội dung trong dấu { }');
-      }
+      const val = document.getElementById('fb_config_inp').value;
+      const n = window.normalizeFirebaseConfig(val);
+      if (!n.config) return alert('Cấu hình chưa dùng được: ' + n.error);
+      localStorage.setItem('firebase_config', JSON.stringify(n.config));
+      alert('Đã lưu cấu hình Firebase' + (n.fixed.length ? ' (tự bổ sung: ' + n.fixed.join(', ') + ')' : '') + '! Ứng dụng sẽ tải lại.');
+      window.location.reload();
     }
 
     let fbApp = null;
@@ -9451,37 +9443,72 @@ ${monthFilterHtml}
       } catch (e) { /* localStorage có thể không khả dụng, bỏ qua */ }
     })();
 
-    window.initFirebase = async function () {
-      const fbConfigStr = localStorage.getItem("firebase_config");
-      if (fbConfigStr) {
-        try {
-          const config = JSON.parse(fbConfigStr);
-          if (!firebase.apps.length) {
-            fbApp = firebase.initializeApp(config);
-          } else {
-            fbApp = firebase.app();
-          }
-          fbDb = firebase.database();
-          fbStorage = firebase.storage();
-          fbFirestore = firebase.firestore();
-          
-          try {
-            await fbFirestore.enablePersistence({ synchronizeTabs: true });
-            console.log("Firebase Offline Persistence đã được bật.");
-          } catch (err) {
-            if (err.code == 'failed-precondition') {
-                console.warn('Cảnh báo: Có nhiều tab đang mở, persistence chỉ hoạt động ở tab đầu tiên.');
-            } else if (err.code == 'unimplemented') {
-                console.warn('Cảnh báo: Trình duyệt không hỗ trợ Firebase offline persistence.');
-            }
-          }
-
-          console.log("Firebase initialized");
-          setupRealtimeListener();
-        } catch (e) {
-          console.error("Firebase init error", e);
-        }
+  // ===== Chuẩn hoá cấu hình Firebase (nhận JSON, đối tượng JS, có/không "const firebaseConfig =") =====
+  window.normalizeFirebaseConfig = function (raw) {
+    const out = { config: null, error: '', fixed: [] };
+    let obj = raw;
+    if (typeof raw === 'string') {
+      let t = raw.trim();
+      if (!t) { out.error = 'Chưa nhập cấu hình.'; return out; }
+      t = t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+      const a = t.indexOf('{'), b = t.lastIndexOf('}');
+      if (a < 0 || b <= a) { out.error = 'Không thấy cặp dấu { } trong nội dung đã dán.'; return out; }
+      t = t.slice(a, b + 1);
+      try { obj = JSON.parse(t); } catch (e1) {
+        try { obj = (new Function('return (' + t + ')'))(); } catch (e2) { out.error = 'Không đọc được cấu hình. Hãy copy nguyên phần { ... } trong Firebase Console (Project settings > Your apps > SDK setup and configuration).'; return out; }
       }
+    }
+    if (!obj || typeof obj !== 'object' || Array.isArray(obj)) { out.error = 'Cấu hình phải là một đối tượng { ... }.'; return out; }
+    const c = {};
+    Object.keys(obj).forEach(k => { let v = obj[k]; if (typeof v === 'string') { v = v.trim(); if (v === '' || v === '...') return; } c[k] = v; });
+    if (!c.apiKey) { out.error = 'Thiếu "apiKey" (hoặc còn để giá trị mẫu "...").'; return out; }
+    const host = u => String(u || '').replace(/^https?:\/\//, '').split('/')[0];
+    if (!c.projectId) {
+      const guess = host(c.databaseURL).replace(/-default-rtdb.*$|\.firebaseio\.com.*$/, '') || host(c.authDomain).replace(/\.(firebaseapp\.com|web\.app)$/, '') || host(c.storageBucket).replace(/\.(appspot\.com|firebasestorage\.app)$/, '');
+      if (guess && /^[a-z0-9-]+$/i.test(guess)) { c.projectId = guess; out.fixed.push('projectId'); }
+    }
+    if (!c.projectId) { out.error = 'Thiếu "projectId" (cần để kết nối Firestore).'; return out; }
+    if (!c.authDomain) { c.authDomain = c.projectId + '.firebaseapp.com'; out.fixed.push('authDomain'); }
+    out.config = c; return out;
+  };
+  window.fbConnState = function () {
+    if (!navigator.onLine) return { ok: false, reason: 'Thiết bị đang ngoại tuyến (không có mạng).' };
+    let has = ''; try { has = localStorage.getItem('firebase_config') || ''; } catch (e) { }
+    if (!has) return { ok: false, reason: 'Thiết bị này chưa có cấu hình máy chủ. Bấm "Cấu hình Máy chủ" bên dưới và dán Firebase Config JSON.' };
+    if (window.__fbCfgError) return { ok: false, reason: 'Cấu hình máy chủ chưa đúng: ' + window.__fbCfgError + ' Bấm "Cấu hình Máy chủ" để nhập lại.' };
+    if (!fbFirestore) return { ok: false, reason: 'Chưa kết nối được máy chủ Firebase. Hãy tải lại trang rồi thử lại.' };
+    return { ok: true, reason: '' };
+  };
+  window.fbLoginNotice = function () {
+    const st = window.fbConnState();
+    if (st.ok || (!navigator.onLine && !window.__fbCfgError)) return '';
+    return '<div style="margin-top:16px; padding:10px 12px; border-radius:12px; background:#fff3d6; color:#92400e; font-size:12.5px; line-height:1.5; text-align:left;"><b>Chưa kết nối máy chủ.</b> ' + st.reason + '</div>';
+  };
+
+    window.initFirebase = async function () {
+      window.__fbCfgError = '';
+      let str = ''; try { str = localStorage.getItem("firebase_config") || ''; } catch (e) { }
+      if (!str) return;
+      if (typeof firebase === 'undefined') { window.__fbCfgError = 'Không tải được thư viện Firebase (kiểm tra mạng hoặc trình chặn quảng cáo).'; console.error(window.__fbCfgError); return; }
+      const n = window.normalizeFirebaseConfig(str);
+      if (!n.config) { window.__fbCfgError = n.error; console.error('Cấu hình Firebase không hợp lệ:', n.error); return; }
+      if (n.fixed.length) { try { localStorage.setItem('firebase_config', JSON.stringify(n.config)); } catch (e) { } }
+      try { fbApp = firebase.apps.length ? firebase.app() : firebase.initializeApp(n.config); }
+      catch (e) { window.__fbCfgError = 'Không khởi tạo được Firebase: ' + ((e && e.message) || e); console.error("Firebase init error", e); return; }
+      // Ứng dụng chỉ dùng Firestore + Storage (Realtime Database không được dùng), nên mỗi dịch vụ khởi tạo riêng:
+      // lỗi ở một dịch vụ không được làm hỏng các dịch vụ còn lại.
+      try { fbFirestore = firebase.firestore(); }
+      catch (e) { window.__fbCfgError = 'Không khởi tạo được Firestore: ' + ((e && e.message) || e); console.error("Firestore init error", e); return; }
+      try { fbStorage = firebase.storage(); } catch (e) { console.warn('Firebase Storage chưa dùng được (thiếu storageBucket?):', e && e.message); }
+      try {
+        await fbFirestore.enablePersistence({ synchronizeTabs: true });
+        console.log("Firebase Offline Persistence đã được bật.");
+      } catch (err) {
+        if (err.code == 'failed-precondition') console.warn('Cảnh báo: Có nhiều tab đang mở, persistence chỉ hoạt động ở tab đầu tiên.');
+        else if (err.code == 'unimplemented') console.warn('Cảnh báo: Trình duyệt không hỗ trợ Firebase offline persistence.');
+      }
+      console.log("Firebase initialized");
+      try { setupRealtimeListener(); } catch (e) { console.error('setupRealtimeListener', e); }
     }
 
 
@@ -10869,7 +10896,7 @@ ${(window.isAdmin && window.isAdmin()) ? `
             <input type="password" id="login-password" autocomplete="current-password" class="inp" placeholder="M\u1EADt kh\u1EA9u" style="width:100%; margin-bottom:20px; box-sizing:border-box" onkeydown="if(event.key==='Enter'){event.preventDefault(); doLogin();}">
             <button class="btn" style="background:var(--green);color:white;width:100%; padding:12px; font-size:15px; margin-bottom:15px; justify-content:center; border:none; border-radius:12px; cursor:pointer; font-weight:700; min-height:46px;" onclick="doLogin()">Đăng nhập</button>
             <div style="font-size:13px; color:var(--gray); line-height:1.5;">Chưa có tài khoản?<br><a href="#" style="color:var(--green); display:inline-block; margin-top:2px;" onclick="renderLogin('register')">Đăng ký (Người xem)</a></div>
-            <div class="cfg-link" style="font-size:12px; color:var(--gray); margin-top:20px; border-top:1px solid var(--line); padding-top:15px;">
+            ${window.fbLoginNotice()}<div class="cfg-link" style="font-size:12px; color:var(--gray); margin-top:20px; border-top:1px solid var(--line); padding-top:15px;">
               <a href="#" style="color:var(--gray); text-decoration:none; display:flex; align-items:center; justify-content:center; gap:5px;" onclick="promptFirebaseConfig(); return false;">
                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg> Cấu hình Máy chủ
               </a>
@@ -10883,7 +10910,7 @@ ${(window.isAdmin && window.isAdmin()) ? `
             <input type="password" id="reg-password" autocomplete="new-password" class="inp" placeholder="M\u1EADt kh\u1EA9u" style="width:100%; margin-bottom:20px; box-sizing:border-box">
             <button class="btn" style="background:var(--green);color:white;width:100%; padding:12px; font-size:15px; margin-bottom:15px; justify-content:center; border:none; border-radius:12px; cursor:pointer; font-weight:700; min-height:46px;" onclick="doRegister()">Đăng ký</button>
             <div style="font-size:13px; color:var(--gray); line-height:1.5;">Đã có tài khoản?<br><a href="#" style="color:var(--green); display:inline-block; margin-top:2px;" onclick="renderLogin('login')">Đăng nhập</a></div>
-            <div class="cfg-link" style="font-size:12px; color:var(--gray); margin-top:20px; border-top:1px solid var(--line); padding-top:15px;">
+            ${window.fbLoginNotice()}<div class="cfg-link" style="font-size:12px; color:var(--gray); margin-top:20px; border-top:1px solid var(--line); padding-top:15px;">
               <a href="#" style="color:var(--gray); text-decoration:none; display:flex; align-items:center; justify-content:center; gap:5px;" onclick="promptFirebaseConfig(); return false;">
                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg> Cấu hình Máy chủ
               </a>
@@ -10926,23 +10953,18 @@ ${(window.isAdmin && window.isAdmin()) ? `
 
     window.saveFirebaseConfig = function() {
       const input = document.getElementById('firebase-config-input').value;
+      const say = (msg, color) => { if (typeof showToast === 'function') showToast(msg, color); else alert(msg); };
       if (input.trim() === "") {
         localStorage.removeItem("firebase_config");
-        if (typeof showToast === 'function') showToast("Đã xóa cấu hình máy chủ. Ứng dụng sẽ hoạt động ngoại tuyến.", "amber");
-        else alert("Đã xóa cấu hình máy chủ. Ứng dụng sẽ hoạt động ngoại tuyến.");
+        say("Đã xóa cấu hình máy chủ. Ứng dụng sẽ hoạt động ngoại tuyến.", "amber");
         setTimeout(() => location.reload(), 1500);
-      } else {
-        try {
-          JSON.parse(input); // Validate JSON
-          localStorage.setItem("firebase_config", input.trim());
-          if (typeof showToast === 'function') showToast("Đã lưu cấu hình! Hệ thống sẽ tải lại để kết nối.", "green");
-          else alert("Đã lưu cấu hình! Hệ thống sẽ tải lại để kết nối.");
-          setTimeout(() => location.reload(), 1500);
-        } catch (e) {
-          if (typeof showToast === 'function') showToast("Cấu hình không hợp lệ. Vui lòng nhập đúng định dạng JSON.", "red");
-          else alert("Cấu hình không hợp lệ. Vui lòng nhập đúng định dạng JSON.");
-        }
+        return;
       }
+      const n = window.normalizeFirebaseConfig(input);
+      if (!n.config) { alert('Cấu hình chưa dùng được: ' + n.error); return; }
+      localStorage.setItem("firebase_config", JSON.stringify(n.config));
+      say("Đã lưu cấu hình" + (n.fixed.length ? " (tự bổ sung: " + n.fixed.join(', ') + ")" : "") + "! Hệ thống sẽ tải lại để kết nối.", "green");
+      setTimeout(() => location.reload(), 1500);
     };
 
     window.doRegister = async function () {
@@ -10988,10 +11010,10 @@ ${(window.isAdmin && window.isAdmin()) ? `
             }, { merge: true });
             success = true;
          } catch (e) {
-            alert('Đăng ký bị gián đoạn do lỗi mạng. Vui lòng thử lại sau!');
+            alert('Đăng ký chưa được do máy chủ từ chối hoặc lỗi mạng' + ((e && e.code) ? ' (' + e.code + ')' : '') + '. Nếu mã là permission-denied thì cần mở quyền ghi trong Firestore Rules.');
          }
       } else {
-         alert('Bạn đang ngoại tuyến. Vui lòng kết nối mạng để đăng ký!');
+         alert('Chưa thể đăng ký: ' + window.fbConnState().reason);
       }
 
       if (!success) {
@@ -11016,7 +11038,7 @@ ${(window.isAdmin && window.isAdmin()) ? `
       const u = document.getElementById('login-username').value.trim();
       const p = document.getElementById('login-password').value;
 
-      let valid = false;
+      let valid = false, serverChecked = false, serverErr = '';
       if (u === 'admin' && p === 'Hieu1234') {
         valid = true;
       } else {
@@ -11028,6 +11050,7 @@ ${(window.isAdmin && window.isAdmin()) ? `
         if (fbFirestore && navigator.onLine) {
            try {
               const docSnap = await fbFirestore.collection("app_data").doc("main").get({source: 'server'});
+            serverChecked = true;
               if (docSnap.exists) {
                  const serverData = docSnap.data();
                  if (serverData.users) data.users = serverData.users;
@@ -11035,6 +11058,7 @@ ${(window.isAdmin && window.isAdmin()) ? `
               }
            } catch (e) {
               console.warn('Lỗi kết nối server, đang kiểm tra bộ nhớ đệm (ngoại tuyến).', e);
+            serverErr = (e && (e.code || e.message)) || '';
               showToast('Đang đăng nhập bằng bộ nhớ đệm (ngoại tuyến)', 'amber');
            }
         } else {
@@ -11056,7 +11080,12 @@ ${(window.isAdmin && window.isAdmin()) ? `
         setCurrentUser(u);
         location.reload();
       } else {
-        alert("Tên đăng nhập hoặc mật khẩu không đúng!");
+        if (!serverChecked) {
+          const st = window.fbConnState();
+          alert('Không xác thực được tài khoản trên thiết bị này vì chưa hỏi được máy chủ.\n\n' + (st.ok ? ('Không đọc được dữ liệu tài khoản từ máy chủ' + (serverErr ? ' (' + serverErr + ')' : '') + '. Nếu mã là permission-denied thì cần mở quyền đọc trong Firestore Rules.') : st.reason) + '\n\nMật khẩu của bạn có thể vẫn đúng.');
+        } else {
+          alert("Tên đăng nhập hoặc mật khẩu không đúng!");
+        }
       }
     };
 
