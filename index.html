@@ -3,7 +3,7 @@
 
 <head>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap"
@@ -2571,14 +2571,14 @@
     .sbv-right .avatar { width: 44px !important; height: 44px !important; font-size: 14px !important; box-shadow: 4px 6px 12px rgba(180,83,9,.35); }
     @media (max-width: 860px) {
       .mobile-header.sbv-banner { padding: 10px 12px !important; border-radius: 22px; margin: 0 0 12px; }
-      .sbv-row { grid-template-columns: 78px 1fr 78px; grid-template-areas: "l t r" "s s s"; row-gap: 6px; }
+      .sbv-row { grid-template-columns: 56px 1fr 108px; grid-template-areas: "l t r" "s s s"; row-gap: 6px; }
       .sbv-medal { width: 48px; height: 48px; } .sbv-medal img { width: 40px; }
       .mobile-header.sbv-banner .sbv-title { font-size: 13px !important; }
       .mobile-header.sbv-banner .sbv-org { font-size: 14px !important; }
       .mobile-header.sbv-banner .sbv-dept { font-size: 11px !important; }
       .sbv-right { gap: 4px; }
-      .sbv-right .iconbtn-top { width: 36px !important; height: 36px !important; }
-      .sbv-right .avatar { width: 36px !important; height: 36px !important; font-size: 12px !important; }
+      .sbv-right .iconbtn-top { width: 32px !important; height: 32px !important; }
+      .sbv-right .avatar { width: 32px !important; height: 32px !important; font-size: 11px !important; }
     }
 
     /* --- Thanh bên (desktop) --- */
@@ -2591,6 +2591,23 @@
       .navbtn:hover { box-shadow: var(--clay-sm); }
       .navbtn.active { background: #b45309; box-shadow: 4px 6px 14px rgba(180,83,9,.35); }
     }
+    /* Chọn mệnh giá trong ô Nhập nhanh */
+    .kq-qden-wrap { position: relative; display: inline-flex; align-items: center; gap: 6px; min-height: 40px; cursor: pointer; }
+    .kq-qden-edit { font-size: 11.5px; font-weight: 700; color: #92400e; background: #fff3d6; border-radius: 999px; padding: 3px 9px; white-space: nowrap; box-shadow: 0 1px 3px rgba(190,130,60,.25); }
+    .kq-qden-sel { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; font-size: 16px; }
+    .kq-qden-wrap:focus-within { outline: 2px solid #d97706; outline-offset: 2px; border-radius: 999px; }
+    @media (max-width: 860px) { .kq-qden-wrap { min-height: 44px; } }
+    .kq-qmode { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 0 0 10px; font-size: 12.5px; }
+    .kq-qmode-btn { border: 0; background: #fffaf2; color: #92400e; font: inherit; font-weight: 700; border-radius: 999px; padding: 0 14px; min-height: 40px; cursor: pointer; box-shadow: var(--clay-sm); }
+    .kq-qmode-tip { color: var(--gray); line-height: 1.4; }
+    .kq-qskiphint { font-size: 12px; color: #92400e; background: #fff3d6; border-radius: 10px; padding: 6px 10px; }
+    .pw-dlg-ov { position: fixed; inset: 0; z-index: 40000; background: rgba(15,23,42,.45); display: flex; align-items: center; justify-content: center; padding: 16px; }
+    .pw-dlg { background: #fffaf2; border-radius: 24px; padding: 22px; width: min(400px, 100%); box-shadow: var(--clay); }
+    .pw-dlg h3 { margin: 0 0 6px; font-size: 18px; } .pw-dlg p { margin: 0 0 10px; font-size: 13px; color: var(--gray); line-height: 1.5; }
+    .pw-dlg label { display: block; margin: 10px 0 4px; font-size: 12px; font-weight: 700; color: #6b7280; text-transform: uppercase; }
+    .pw-dlg input { width: 100%; min-height: 46px; border: 1px solid #fcd34d; border-radius: 14px; padding: 0 14px; font: inherit; font-size: 16px; background: #fffdf5; box-shadow: inset 2px 3px 6px rgba(190,130,60,.12); }
+    .pw-err { min-height: 18px; margin-top: 8px; font-size: 12.5px; color: #be123c; font-weight: 600; }
+    .pw-act { display: flex; gap: 10px; justify-content: flex-end; margin-top: 8px; }
   </style>
 </head>
 
@@ -2647,6 +2664,7 @@
 <b class="sbv-title" onclick="switchTab('tongquan')">Sổ tay điện tử Kiểm tra tuyển chọn tiền KĐTCLT</b>
 <div class="sbv-sub" onclick="switchTab('tongquan')"><span class="sbv-org">Ngân hàng Nhà nước CN Khu vực 9</span><span class="sbv-dept">Phòng Tiền tệ – Kho quỹ (KV01)</span></div>
 <div class="sbv-right">
+<button class="iconbtn-top" onclick="event.stopPropagation(); changeMyPassword();" title="Đổi mật khẩu" style="cursor:pointer; position:relative; z-index:100; touch-action:manipulation; color:#92400e;"><svg style="pointer-events:none;" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4"></circle><path d="M10.8 12.2L20 3M16 7l3 3M14 9l2 2"></path></svg></button>
 <button class="iconbtn-top" onclick="event.stopPropagation(); doLogout();" title="Đăng xuất" style="cursor:pointer; position:relative; z-index:100; touch-action:manipulation; color:var(--red);"><svg style="pointer-events:none;" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg></button>
 <div class="avatar" style="background:#b45309; color:#fff;">KQ</div>
 </div>
@@ -2675,346 +2693,8 @@
 
       </div>
 
-      <div class="page active" id="pg-tongquan">
-        <div class="kpi-grid">
-          <!-- Thẻ 1: TCTD -->
-          <div class="kpi-card" onclick="switchTab('donvi')">
-            <div class="kpi-icon blue"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M3 21h18M5 21V9l7-5 7 5v12M9.5 21v-5h5v5"></path>
-              </svg></div>
-            <div class="kpi-info">
-              <div class="kpi-val">45</div>
-              <div class="kpi-lbl">TCTD ĐÃ KIỂM TRA</div>
-            </div>
-          </div>
-          <!-- Thẻ 2: Đủ TCLT -->
-          <div class="kpi-card" title="Số lượt kiểm tra tiền đủ tiêu chuẩn lưu thông">
-            <div class="kpi-icon green">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                <path d="M9 12l2 2 4-4"></path>
-              </svg>
-            </div>
-            <div class="kpi-info">
-              <div class="kpi-val">1,245 <span class="pill p-green" style="font-size: 11px; vertical-align: middle; margin-left: 8px">Đạt chuẩn</span></div>
-              <div class="kpi-lbl">KIỂM TRA TIỀN ĐỦ TCLT</div>
-            </div>
-          </div>
-          <!-- Thẻ 3: KĐTCLT & Lẫn loại -->
-          <div class="kpi-card" onclick="switchTab('nhatky')" title="Số lượt kiểm tra phát hiện KĐTCLT & Lẫn loại">
-            <div class="kpi-icon amber">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
-                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
-              </svg>
-            </div>
-            <div class="kpi-info">
-              <div class="kpi-val">109 <span class="pill p-red" style="font-size: 11px; vertical-align: middle; margin-left: 8px">16 vi phạm</span></div>
-              <div class="kpi-lbl">KIỂM KĐTCLT & LẪN LOẠI</div>
-            </div>
-          </div>
-          <!-- Thẻ 4: Sản lượng -->
-          <div class="kpi-card" onclick="switchTab('sanluong')">
-            <div class="kpi-icon green"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="3" width="18" height="18" rx="3"></rect>
-                <circle cx="12" cy="12" r="4.5"></circle>
-                <path d="M12 9.5v2.5l1.8 1.8"></path>
-              </svg></div>
-            <div class="kpi-info">
-              <div class="kpi-val">47,6 Tỷ</div>
-              <div class="kpi-lbl">SL tiền ĐTCLT kiểm tra</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="dash-grid">
-          <!-- Panel 1: Top TCTD Thu Hồi -->
-          <div class="dash-panel">
-            <div class="dash-panel-title">
-              <span>Danh sách Bông sen vàng <img onerror="this.hidden=true" src="./SO TAY KHO QUY_files/bong_sen_vang.png"
-                  style="width: 26px; height: 26px; vertical-align: middle; margin-left: 5px; border-radius: 4px;"></span>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="9"></circle>
-                <path d="m8.5 12.3 2.4 2.4 4.6-5"></path>
-              </svg>
-            </div>
-            <p style="font-size: 0.8rem; color: var(--text3); margin-top: -5px; margin-bottom: 15px;">10 đơn vị có tỷ lệ
-              tiền KĐTCLT thấp nhất</p>
-            <div class="recent-list">
-
-              <div class="recent-item" style="cursor:default;">
-                <div class="recent-ic success">1</div>
-                <div class="recent-main">
-                  <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; "
-                    title="NH TMCP Nam Á - CN Đà Nẵng">NH TMCP Nam Á - CN Đà Nẵng</div>
-                  <div class="recent-sub">Đã kiểm tra: 1,4 tỷ</div>
-                </div>
-                <div class="recent-right" style="color: var(--green); font-weight: 700;  text-align: right;">
-                  0.45%
-                </div>
-              </div>
-
-              <div class="recent-item" style="cursor:default;">
-                <div class="recent-ic success">2</div>
-                <div class="recent-main">
-                  <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; "
-                    title="NH TNHH MTV HSBC (Việt Nam) - CN Đà Nẵng">NH TNHH MTV HSBC (Việt Nam) - CN Đà Nẵng</div>
-                  <div class="recent-sub">Đã kiểm tra: 0,6 tỷ</div>
-                </div>
-                <div class="recent-right" style="color: var(--green); font-weight: 700;  text-align: right;">
-                  0.48%
-                </div>
-              </div>
-
-              <div class="recent-item" style="cursor:default;">
-                <div class="recent-ic success">3</div>
-                <div class="recent-main">
-                  <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; "
-                    title="NH TNHH MTV  PUBLIC Việt Nam - CN Đà Nẵng">NH TNHH MTV PUBLIC Việt Nam - CN Đà Nẵng</div>
-                  <div class="recent-sub">Đã kiểm tra: 1 tỷ</div>
-                </div>
-                <div class="recent-right" style="color: var(--green); font-weight: 700;  text-align: right;">
-                  0.55%
-                </div>
-              </div>
-
-              <div class="recent-item" style="cursor:default;">
-                <div class="recent-ic success">4</div>
-                <div class="recent-main">
-                  <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; "
-                    title="NH TMCP Quốc Dân - CN Đà Nẵng">NH TMCP Quốc Dân - CN Đà Nẵng</div>
-                  <div class="recent-sub">Đã kiểm tra: 0,2 tỷ</div>
-                </div>
-                <div class="recent-right" style="color: var(--green); font-weight: 700;  text-align: right;">
-                  0.70%
-                </div>
-              </div>
-
-              <div class="recent-item" style="cursor:default;">
-                <div class="recent-ic success">5</div>
-                <div class="recent-main">
-                  <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; "
-                    title="NH Nông nghiệp và Phát triển NTVN - CN Đà Nẵng">NH Nông nghiệp và Phát triển NTVN - CN Đà
-                    Nẵng</div>
-                  <div class="recent-sub">Đã kiểm tra: 1 tỷ</div>
-                </div>
-                <div class="recent-right" style="color: var(--green); font-weight: 700;  text-align: right;">
-                  0.75%
-                </div>
-              </div>
-
-              <div class="recent-item" style="cursor:default;">
-                <div class="recent-ic success">6</div>
-                <div class="recent-main">
-                  <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; "
-                    title="NH TMCP Quân Đội - CN Đà Nẵng">NH TMCP Quân Đội - CN Đà Nẵng</div>
-                  <div class="recent-sub">Đã kiểm tra: 1,2 tỷ</div>
-                </div>
-                <div class="recent-right" style="color: var(--green); font-weight: 700;  text-align: right;">
-                  0.77%
-                </div>
-              </div>
-
-              <div class="recent-item" style="cursor:default;">
-                <div class="recent-ic success">7</div>
-                <div class="recent-main">
-                  <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; "
-                    title="NH TNHH Indovina - CN Đà Nẵng">NH TNHH Indovina - CN Đà Nẵng</div>
-                  <div class="recent-sub">Đã kiểm tra: 0,3 tỷ</div>
-                </div>
-                <div class="recent-right" style="color: var(--green); font-weight: 700;  text-align: right;">
-                  0.83%
-                </div>
-              </div>
-
-              <div class="recent-item" style="cursor:default;">
-                <div class="recent-ic success">8</div>
-                <div class="recent-main">
-                  <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; "
-                    title="NH TMCP  Phát triển TPHCM - CN Đà Nẵng">NH TMCP Phát triển TPHCM - CN Đà Nẵng</div>
-                  <div class="recent-sub">Đã kiểm tra: 1,9 tỷ</div>
-                </div>
-                <div class="recent-right" style="color: var(--green); font-weight: 700;  text-align: right;">
-                  0.95%
-                </div>
-              </div>
-
-              <div class="recent-item" style="cursor:default;">
-                <div class="recent-ic success">9</div>
-                <div class="recent-main">
-                  <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; "
-                    title="NH TNHH MTV Số Vikki - CN Đà Nẵng">NH TNHH MTV Số Vikki - CN Đà Nẵng</div>
-                  <div class="recent-sub">Đã kiểm tra: 2,5 tỷ</div>
-                </div>
-                <div class="recent-right" style="color: var(--green); font-weight: 700;  text-align: right;">
-                  0.96%
-                </div>
-              </div>
-
-              <div class="recent-item" style="cursor:default;">
-                <div class="recent-ic success">10</div>
-                <div class="recent-main">
-                  <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; "
-                    title="NH TMCP Bảo Việt - CN Đà Nẵng">NH TMCP Bảo Việt - CN Đà Nẵng</div>
-                  <div class="recent-sub">Đã kiểm tra: 1,1 tỷ</div>
-                </div>
-                <div class="recent-right" style="color: var(--green); font-weight: 700;  text-align: right;">
-                  1.04%
-                </div>
-              </div>
-
-            </div>
-
-          </div>
-
-          <!-- Panel 2: Hoạt động gần đây -->
-          <div class="dash-panel">
-            <div class="dash-panel-title">
-              <span>Danh sách Mâm xôi vàng <img onerror="this.hidden=true" src="./SO TAY KHO QUY_files/mam_xoi_vang.png"
-                  style="width: 26px; height: 26px; vertical-align: middle; margin-left: 5px; border-radius: 4px;"></span>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="3" width="7" height="9" rx="2"></rect>
-                <rect x="14" y="3" width="7" height="5" rx="2"></rect>
-                <rect x="14" y="12" width="7" height="9" rx="2"></rect>
-                <rect x="3" y="16" width="7" height="5" rx="2"></rect>
-              </svg>
-            </div>
-            <p style="font-size: 0.8rem; color: var(--text3); margin-top: -5px; margin-bottom: 15px;">10 đơn vị có tỷ lệ
-              tiền KĐTCLT cao nhất</p>
-            <div class="recent-list">
-
-              <div class="recent-item" style="cursor:default;">
-                <div class="recent-ic danger">1</div>
-                <div class="recent-main">
-                  <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; "
-                    title="NH TMCP Kỹ Thương Việt Nam - CN Đà Nẵng">NH TMCP Kỹ Thương Việt Nam - CN Đà Nẵng</div>
-                  <div class="recent-sub">Đã kiểm tra: 1,6 tỷ</div>
-                </div>
-                <div class="recent-right" style="color: #ef4444; font-weight: 700;  text-align: right;">
-                  8.05%
-                </div>
-              </div>
-
-              <div class="recent-item" style="cursor:default;">
-                <div class="recent-ic danger">2</div>
-                <div class="recent-main">
-                  <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; "
-                    title="NH TMCP Lộc Phát Việt Nam - CN Đà Nẵng">NH TMCP Lộc Phát Việt Nam - CN Đà Nẵng</div>
-                  <div class="recent-sub">Đã kiểm tra: 0,1 tỷ</div>
-                </div>
-                <div class="recent-right" style="color: #ef4444; font-weight: 700;  text-align: right;">
-                  7.18%
-                </div>
-              </div>
-
-              <div class="recent-item" style="cursor:default;">
-                <div class="recent-ic danger">3</div>
-                <div class="recent-main">
-                  <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; "
-                    title="NH TMCP Đầu tư và Phát triển Việt Nam - CN Đà Nẵng">NH TMCP Đầu tư và Phát triển Việt Nam -
-                    CN Đà Nẵng</div>
-                  <div class="recent-sub">Đã kiểm tra: 0,5 tỷ</div>
-                </div>
-                <div class="recent-right" style="color: #ef4444; font-weight: 700;  text-align: right;">
-                  6.94%
-                </div>
-              </div>
-
-              <div class="recent-item" style="cursor:default;">
-                <div class="recent-ic danger">4</div>
-                <div class="recent-main">
-                  <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; "
-                    title="NH TMCP Á Châu - CN Đà Nẵng">NH TMCP Á Châu - CN Đà Nẵng</div>
-                  <div class="recent-sub">Đã kiểm tra: 0,8 tỷ</div>
-                </div>
-                <div class="recent-right" style="color: #ef4444; font-weight: 700;  text-align: right;">
-                  6.49%
-                </div>
-              </div>
-
-              <div class="recent-item" style="cursor:default;">
-                <div class="recent-ic danger">5</div>
-                <div class="recent-main">
-                  <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; "
-                    title="NH TMCP Đầu tư và Phát triển Việt Nam - CN Sông Hàn">NH TMCP Đầu tư và Phát triển Việt Nam -
-                    CN Sông Hàn</div>
-                  <div class="recent-sub">Đã kiểm tra: 1 tỷ</div>
-                </div>
-                <div class="recent-right" style="color: #ef4444; font-weight: 700;  text-align: right;">
-                  6.43%
-                </div>
-              </div>
-
-              <div class="recent-item" style="cursor:default;">
-                <div class="recent-ic danger">6</div>
-                <div class="recent-main">
-                  <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; "
-                    title="NH TMTNHH MTV VCB Công nghệ số - CN Đà Nẵng">NH TMTNHH MTV VCB Công nghệ số - CN Đà Nẵng
-                  </div>
-                  <div class="recent-sub">Đã kiểm tra: 0,2 tỷ</div>
-                </div>
-                <div class="recent-right" style="color: #ef4444; font-weight: 700;  text-align: right;">
-                  5.83%
-                </div>
-              </div>
-
-              <div class="recent-item" style="cursor:default;">
-                <div class="recent-ic danger">7</div>
-                <div class="recent-main">
-                  <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; "
-                    title="NH TMCP Bản Việt - CN Nam Đà Nẵng">NH TMCP Bản Việt - CN Nam Đà Nẵng</div>
-                  <div class="recent-sub">Đã kiểm tra: 0,3 tỷ</div>
-                </div>
-                <div class="recent-right" style="color: #ef4444; font-weight: 700;  text-align: right;">
-                  5.63%
-                </div>
-              </div>
-
-              <div class="recent-item" style="cursor:default;">
-                <div class="recent-ic success">8</div>
-                <div class="recent-main">
-                  <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; "
-                    title="NH Liên doanh Việt - Nga  CN Đà Nẵng">NH Liên doanh Việt - Nga CN Đà Nẵng</div>
-                  <div class="recent-sub">Đã kiểm tra: 0,6 tỷ</div>
-                </div>
-                <div class="recent-right" style="color: var(--green); font-weight: 700;  text-align: right;">
-                  4.12%
-                </div>
-              </div>
-
-              <div class="recent-item" style="cursor:default;">
-                <div class="recent-ic success">9</div>
-                <div class="recent-main">
-                  <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; "
-                    title="NH TMCP Tiên Phong - CN Đà Nẵng">NH TMCP Tiên Phong - CN Đà Nẵng</div>
-                  <div class="recent-sub">Đã kiểm tra: 0,2 tỷ</div>
-                </div>
-                <div class="recent-right" style="color: var(--green); font-weight: 700;  text-align: right;">
-                  3.42%
-                </div>
-              </div>
-
-              <div class="recent-item" style="cursor:default;">
-                <div class="recent-ic success">10</div>
-                <div class="recent-main">
-                  <div class="recent-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; "
-                    title="NH TMCP Hàng Hải Việt Nam - CN Đà Nẵng">NH TMCP Hàng Hải Việt Nam - CN Đà Nẵng</div>
-                  <div class="recent-sub">Đã kiểm tra: 0,5 tỷ</div>
-                </div>
-                <div class="recent-right" style="color: var(--green); font-weight: 700;  text-align: right;">
-                  3.37%
-                </div>
-              </div>
-
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="page" id="pg-donvi"></div>
+      <div class="page active" id="pg-tongquan"></div>
+<div class="page" id="pg-donvi"></div>
       <div class="page" id="pg-kehoach"></div>
       <div class="page" id="pg-nhatky"></div>
       <div class="page" id="pg-sanluong"></div>
@@ -3102,422 +2782,17 @@
       }
     };
 
-    window.setCurrentUser = function (username) {
-      localStorage.setItem(SESSION_KEY, JSON.stringify({ username, loginAt: Date.now() }));
+    window.setCurrentUser = function (username, extra) {
+      localStorage.setItem(SESSION_KEY, JSON.stringify(Object.assign({ username, loginAt: Date.now() }, extra || {})));
     };
 
     window.clearCurrentUser = function () {
       localStorage.removeItem(SESSION_KEY);
     };
+    // Dữ liệu nghiệp vụ KHÔNG còn nằm trong mã nguồn (trang này có thể được truy cập công khai).
+    // Dữ liệu thật chỉ được tải từ máy chủ sau khi người dùng đăng nhập; quản trị viên nạp dữ liệu gốc một lần bằng "Sao lưu > Nhập .json".
     const DEFAULT_DATA = {
-      units: [
-        { id: 'u1', name: 'Trung tâm Quản lý tiền mặt Đà Nẵng- VIETINBANK', code: 'VIETINBANK' },
-        { id: 'u2', name: 'NH TMCP Đầu tư và Phát triển Việt Nam - CN Đà Nẵng', code: 'Đà Nẵng' },
-        { id: 'u3', name: 'NH TMCP Đầu tư và Phát triển Việt Nam - CN  Hải Vân', code: 'Hải Vân' },
-        { id: 'u4', name: 'NH TMCP Đầu tư và Phát triển Việt Nam - CN Sông Hàn', code: 'Sông Hàn' },
-        { id: 'u5', name: 'NH TMCP Ngoại thương Việt Nam -  CN  Đà Nẵng', code: 'Đà Nẵng' },
-        { id: 'u6', name: 'NH TMCP Ngoại thương Việt Nam - CN  Nam Đà Nẵng', code: 'Nam Đà Nẵng' },
-        { id: 'u7', name: 'NH TMCP Ngoại thương Việt Nam - CN Bắc Đà Nẵng', code: 'Bắc Đà Nẵng' },
-        { id: 'u8', name: 'NH Nông nghiệp và Phát triển NTVN - CN Đà Nẵng', code: 'Đà Nẵng' },
-        { id: 'u9', name: 'NH Nông nghiệp và Phát triển NTVN - CN Nam Đà Nẵng', code: 'Nam Đà Nẵng' },
-        { id: 'u10', name: 'NH TMCP Hàng Hải Việt Nam - CN Đà Nẵng', code: 'Đà Nẵng' },
-        { id: 'u11', name: 'NH TMCP Sài Gòn Tài Lộc - CN Đà Nẵng', code: 'Đà Nẵng' },
-        { id: 'u12', name: 'NH TNHH MTV Số Vikki - CN Đà Nẵng', code: 'Đà Nẵng' },
-        { id: 'u13', name: 'NH TMCP Xuất Nhập Khẩu Việt Nam - CN Đà Nẵng', code: 'Đà Nẵng' },
-        { id: 'u14', name: 'NH TMCP Nam Á - CN Đà Nẵng', code: 'Đà Nẵng' },
-        { id: 'u15', name: 'NH TMCP Á Châu - CN Đà Nẵng', code: 'Đà Nẵng' },
-        { id: 'u16', name: 'NHTMCP Sài Gòn Công Thương - CN Đà Nẵng', code: 'Đà Nẵng' },
-        { id: 'u17', name: 'NH TMCP Việt Nam Thịnh Vượng - CN Đà Nẵng', code: 'Đà Nẵng' },
-        { id: 'u18', name: 'NH TMCP Kỹ Thương Việt Nam - CN Đà Nẵng', code: 'Đà Nẵng' },
-        { id: 'u19', name: 'NH TMCP Quân đội - CN Đà Nẵng', code: 'Đà Nẵng' },
-        { id: 'u20', name: 'NH TMCP Bắc Á - CN Đà Nẵng', code: 'Đà Nẵng' },
-        { id: 'u21', name: 'NH TMCP Quốc Tế Việt Nam - CN Đà Nẵng', code: 'Đà Nẵng' },
-        { id: 'u22', name: 'NH TMCP Đông Nam Á - CN Đà Nẵng', code: 'Đà Nẵng' },
-        { id: 'u23', name: 'NH TM TNHH MTV Việt Nam Hiện Đại - CN Đà Nẵng', code: 'Đà Nẵng' },
-        { id: 'u24', name: 'NH TMTNHH MTV Kỷ Nguyên Thịnh Vương - CN Đà Nẵng', code: 'Đà Nẵng' },
-        { id: 'u25', name: 'NH TMCP  Phát triển TPHCM - CN Đà Nẵng', code: 'Đà Nẵng' },
-        { id: 'u26', name: 'NH TMCP An Bình - CN Đà Nẵng', code: 'Đà Nẵng' },
-        { id: 'u27', name: 'NH TMCP Bản Việt - CN Đà Nẵng', code: 'Đà Nẵng' },
-        { id: 'u28', name: 'NH TMCP Bản Việt - CN Nam Đà Nẵng', code: 'Nam Đà Nẵng' },
-        { id: 'u29', name: 'NH TMCP Phương đông - CN Đà Nẵng', code: 'Đà Nẵng' },
-        { id: 'u30', name: 'NH TMTNHH MTV VCB Công nghệ số -  CN Đà Nẵng', code: 'Đà Nẵng' },
-        { id: 'u31', name: 'NH TMCP Thịnh vượng và Phát triển - CN Đà Nẵng', code: 'Đà Nẵng' },
-        { id: 'u32', name: 'NH TMCP Sài Gòn - Hà Nội CN Đà Nẵng', code: 'Đà Nẵng' },
-        { id: 'u33', name: 'NH TMCP Quốc Dân - CN  Đà Nẵng', code: 'Đà Nẵng' },
-        { id: 'u34', name: 'NH TMCP Kiên Long - CN  Đà Nẵng', code: 'Đà Nẵng' },
-        { id: 'u35', name: 'NH TMCP Việt á - CN Đà Nẵng', code: 'Đà Nẵng' },
-        { id: 'u36', name: 'NH TMCP Việt Nam Thương Tín - CN  	Đà Nẵng', code: 'Đà Nẵng' },
-        { id: 'u37', name: 'NH TMCP Lộc Phát Việt Nam - CN Đà Nẵng', code: 'Đà Nẵng' },
-        { id: 'u38', name: 'NH TMCP Tiên Phong - CN Đà Nẵng', code: 'Đà Nẵng' },
-        { id: 'u39', name: 'NH TMCP Bảo Việt - CN Đà Nẵng', code: 'Đà Nẵng' },
-        { id: 'u40', name: 'NH TMCP Đại chúng Việt Nam - CN Đà Nẵng', code: 'Đà Nẵng' },
-        { id: 'u41', name: 'NH TNHH MTV  PUBLIC Việt Nam - CN Đà Nẵng', code: 'Đà Nẵng' },
-        { id: 'u42', name: 'NH TNHH MTV Public Việt Nam - CN Thanh Khê', code: 'Thanh Khê' },
-        { id: 'u43', name: 'NH TNHH Indovina  - CN Đà Nẵng', code: 'Đà Nẵng' },
-        { id: 'u44', name: 'NH Liên doanh Việt - Nga CN Đà Nẵng', code: 'Đà Nẵng' },
-        { id: 'u45', name: 'NH TNHH MTV HSBC (Việt Nam) - CN Đà Nẵng', code: 'Đà Nẵng' },
-        { id: 'u46', name: 'NH TMCP Sài Gòn - CN Đà Nẵng', code: 'Đà Nẵng' },
-        { id: 'u47', name: 'NH TNHH MTV Shinhan Việt Nam - CN Đà Nẵng', code: 'Đà Nẵng' },
-        { id: 'u48', name: 'NH TNHH MTV Woori Việt Nam - CN Đà Nẵng', code: 'Đà Nẵng' }
-      ],
-      logs: [
-        { id: 'log1', unitId: 'u1', date: '2026-01-20', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log2', unitId: 'u1', date: '2026-03-23', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log3', unitId: 'u2', date: '2026-03-16', denom1: '200.000đ', amount1: 1000, invalidAmount1: 86, denom2: '100.000đ', amount2: 1000, invalidAmount2: 37, diff: 'khop', diffQty: 0 },
-        { id: 'log4', unitId: 'u2', date: '2026-05-14', denom1: '100.000đ', amount1: 1000, invalidAmount1: 63, denom2: '50.000đ', amount2: 1000, invalidAmount2: 81, diff: 'khop', diffQty: 0 },
-        { id: 'log5', unitId: 'u3', date: '2026-03-04', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log6', unitId: 'u4', date: '2026-03-05', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log7', unitId: 'u4', date: '2026-06-10', denom1: '200.000đ', amount1: 1000, invalidAmount1: 54, denom2: '100.000đ', amount2: 0, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log8', unitId: 'u5', date: '2026-02-26', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log9', unitId: 'u5', date: '2026-03-26', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log10', unitId: 'u5', date: '2026-05-18', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log11', unitId: 'u6', date: '2026-04-01', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log12', unitId: 'u7', date: '2026-02-26', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log13', unitId: 'u8', date: '2026-02-25', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log14', unitId: 'u9', date: '2026-03-02', denom1: '500.000đ', amount1: 1000, invalidAmount1: 19, denom2: '100.000đ', amount2: 1000, invalidAmount2: 105, diff: 'khop', diffQty: 0 },
-        { id: 'log15', unitId: 'u10', date: '2026-03-11', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log16', unitId: 'u11', date: '2026-01-27', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log17', unitId: 'u11', date: '2026-05-13', denom1: '100.000đ', amount1: 1000, invalidAmount1: 9, denom2: '20.000đ', amount2: 1000, invalidAmount2: 93, diff: 'khop', diffQty: 0 },
-        { id: 'log18', unitId: 'u12', date: '2026-02-25', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log19', unitId: 'u12', date: '2026-04-14', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log20', unitId: 'u12', date: '2026-05-14', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log21', unitId: 'u13', date: '2026-01-14', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log22', unitId: 'u13', date: '2026-03-03', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log23', unitId: 'u13', date: '2026-04-14', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log24', unitId: 'u13', date: '2026-06-03', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log25', unitId: 'u13', date: '2026-06-18', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log26', unitId: 'u14', date: '2026-03-04', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log27', unitId: 'u14', date: '2026-05-06', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log28', unitId: 'u15', date: '2026-03-26', denom1: '20.000đ', amount1: 1000, invalidAmount1: 92, denom2: '10.000đ', amount2: 1000, invalidAmount2: 15, diff: 'khop', diffQty: 0 },
-        { id: 'log29', unitId: 'u15', date: '2026-05-11', denom1: '500.000đ', amount1: 1000, invalidAmount1: 60, denom2: '200.000đ', amount2: 1000, invalidAmount2: 82, diff: 'khop', diffQty: 0 },
-        { id: 'log30', unitId: 'u16', date: '2026-04-02', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log31', unitId: 'u16', date: '2026-06-11', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log32', unitId: 'u17', date: '2026-01-27', denom1: '500.000đ', amount1: 1000, invalidAmount1: 16, denom2: '100.000đ', amount2: 1000, invalidAmount2: 138, diff: 'khop', diffQty: 0 },
-        { id: 'log33', unitId: 'u17', date: '2026-03-25', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 0, invalidAmount2: 0, diff: 'lan', diffQty: 55 },
-        { id: 'log34', unitId: 'u18', date: '2026-03-17', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log35', unitId: 'u18', date: '2026-05-06', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log36', unitId: 'u18', date: '2026-05-04', denom1: '500.000đ', amount1: 1000, invalidAmount1: 113, denom2: '100.000đ', amount2: 1000, invalidAmount2: 190, diff: 'khop', diffQty: 0 },
-        { id: 'log37', unitId: 'u18', date: '2026-05-12', denom1: '500.000đ', amount1: 1000, invalidAmount1: 55, denom2: '100.000đ', amount2: 1000, invalidAmount2: 121, diff: 'khop', diffQty: 0 },
-        { id: 'log38', unitId: 'u18', date: '2026-06-03', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'lan', diffQty: 100 },
-        { id: 'log39', unitId: 'u19', date: '2026-04-13', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log40', unitId: 'u19', date: '2026-06-09', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log41', unitId: 'u20', date: '2026-02-25', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log42', unitId: 'u20', date: '2026-03-23', denom1: '100.000đ', amount1: 1000, invalidAmount1: 85, denom2: '50.000đ', amount2: 0, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log43', unitId: 'u20', date: '2026-05-18', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log44', unitId: 'u21', date: '2026-03-09', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log45', unitId: 'u22', date: '2026-01-19', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log46', unitId: 'u22', date: '2026-03-30', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log47', unitId: 'u23', date: '2026-03-23', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log48', unitId: 'u24', date: '2026-01-13', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log49', unitId: 'u25', date: '2026-01-27', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log50', unitId: 'u25', date: '2026-04-29', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 0, invalidAmount2: 0, diff: 'lan', diffQty: 30 },
-        { id: 'log51', unitId: 'u26', date: '2026-03-19', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log52', unitId: 'u26', date: '2026-05-13', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log53', unitId: 'u27', date: '2026-06-02', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log54', unitId: 'u28', date: '2026-06-03', denom1: '200.000đ', amount1: 1000, invalidAmount1: 43, denom2: '100.000đ', amount2: 1000, invalidAmount2: 83, diff: 'khop', diffQty: 0 },
-        { id: 'log55', unitId: 'u29', date: '2026-01-20', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log56', unitId: 'u29', date: '2026-03-25', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log57', unitId: 'u29', date: '2026-04-14', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log58', unitId: 'u30', date: '2026-04-01', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log59', unitId: 'u31', date: '2026-01-07', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log60', unitId: 'u31', date: '2026-03-24', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log61', unitId: 'u32', date: '2026-01-12', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log62', unitId: 'u32', date: '2026-03-12', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log63', unitId: 'u32', date: '2026-05-05', denom1: '100.000đ', amount1: 1000, invalidAmount1: 38, denom2: '50.000đ', amount2: 1000, invalidAmount2: 102, diff: 'khop', diffQty: 0 },
-        { id: 'log64', unitId: 'u32', date: '2026-06-11', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log66', unitId: 'u34', date: '2026-06-10', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log67', unitId: 'u35', date: '2026-03-04', denom1: '100.000đ', amount1: 1000, invalidAmount1: 0, denom2: '50.000đ', amount2: 0, invalidAmount2: 0, diff: 'lan', diffQty: 27 },
-        { id: 'log68', unitId: 'u36', date: '2026-05-11', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log69', unitId: 'u37', date: '2026-03-09', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log70', unitId: 'u38', date: '2026-03-26', denom1: '200.000đ', amount1: 1000, invalidAmount1: 30, denom2: '20.000đ', amount2: 1000, invalidAmount2: 76, diff: 'khop', diffQty: 0 },
-        { id: 'log71', unitId: 'u39', date: '2026-03-04', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log72', unitId: 'u39', date: '2026-06-15', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log73', unitId: 'u40', date: '2026-01-13', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log74', unitId: 'u40', date: '2026-03-24', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log75', unitId: 'u40', date: '2026-05-04', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log76', unitId: 'u41', date: '2026-06-09', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log78', unitId: 'u43', date: '2026-03-02', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log79', unitId: 'u44', date: '2026-05-14', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 },
-        { id: 'log80', unitId: 'u45', date: '2026-03-25', denom1: '500.000đ', amount1: 1000, invalidAmount1: 0, denom2: '200.000đ', amount2: 1000, invalidAmount2: 0, diff: 'khop', diffQty: 0 }
-      ],
-      plans: [
-        { id: 'p1', unitId: 'u1', week: '2026-W31', status: 'chua', note: '' },
-        { id: 'p2', unitId: 'u2', week: '2026-W31', status: 'chua', note: '' },
-        { id: 'p3', unitId: 'u3', week: '2026-W31', status: 'chua', note: '' },
-        { id: 'p4', unitId: 'u4', week: '2026-W31', status: 'chua', note: '' },
-        { id: 'p5', unitId: 'u5', week: '2026-W31', status: 'chua', note: '' },
-        { id: 'p6', unitId: 'u6', week: '2026-W31', status: 'chua', note: '' },
-        { id: 'p7', unitId: 'u7', week: '2026-W31', status: 'chua', note: '' },
-        { id: 'p8', unitId: 'u8', week: '2026-W31', status: 'chua', note: '' },
-        { id: 'p9', unitId: 'u9', week: '2026-W31', status: 'chua', note: '' },
-        { id: 'p10', unitId: 'u10', week: '2026-W31', status: 'chua', note: '' },
-        { id: 'p11', unitId: 'u11', week: '2026-W31', status: 'chua', note: '' },
-        { id: 'p12', unitId: 'u12', week: '2026-W31', status: 'chua', note: '' },
-        { id: 'p13', unitId: 'u13', week: '2026-W31', status: 'chua', note: '' },
-        { id: 'p14', unitId: 'u14', week: '2026-W31', status: 'chua', note: '' },
-        { id: 'p15', unitId: 'u15', week: '2026-W31', status: 'chua', note: '' },
-        { id: 'p16', unitId: 'u16', week: '2026-W31', status: 'chua', note: '' },
-        { id: 'p17', unitId: 'u17', week: '2026-W31', status: 'chua', note: '' },
-        { id: 'p18', unitId: 'u18', week: '2026-W31', status: 'chua', note: '' },
-        { id: 'p19', unitId: 'u19', week: '2026-W31', status: 'chua', note: '' },
-        { id: 'p20', unitId: 'u20', week: '2026-W31', status: 'chua', note: '' },
-        { id: 'p21', unitId: 'u21', week: '2026-W31', status: 'chua', note: '' },
-        { id: 'p22', unitId: 'u22', week: '2026-W31', status: 'chua', note: '' },
-        { id: 'p23', unitId: 'u23', week: '2026-W31', status: 'chua', note: '' },
-        { id: 'p24', unitId: 'u24', week: '2026-W31', status: 'chua', note: '' },
-        { id: 'p25', unitId: 'u25', week: '2026-W31', status: 'chua', note: '' },
-        { id: 'p26', unitId: 'u26', week: '2026-W31', status: 'chua', note: '' },
-        { id: 'p27', unitId: 'u27', week: '2026-W31', status: 'chua', note: '' },
-        { id: 'p28', unitId: 'u28', week: '2026-W31', status: 'chua', note: '' },
-        { id: 'p29', unitId: 'u29', week: '2026-W31', status: 'chua', note: '' },
-        { id: 'p30', unitId: 'u30', week: '2026-W31', status: 'chua', note: '' },
-        { id: 'p31', unitId: 'u31', week: '2026-W31', status: 'chua', note: '' },
-        { id: 'p32', unitId: 'u32', week: '2026-W31', status: 'chua', note: '' },
-        { id: 'p33', unitId: 'u33', week: '2026-W31', status: 'chua', note: '' },
-        { id: 'p34', unitId: 'u34', week: '2026-W31', status: 'chua', note: '' },
-        { id: 'p35', unitId: 'u35', week: '2026-W31', status: 'chua', note: '' },
-        { id: 'p36', unitId: 'u36', week: '2026-W31', status: 'chua', note: '' },
-        { id: 'p37', unitId: 'u37', week: '2026-W31', status: 'chua', note: '' },
-        { id: 'p38', unitId: 'u38', week: '2026-W31', status: 'chua', note: '' },
-        { id: 'p39', unitId: 'u39', week: '2026-W31', status: 'chua', note: '' },
-        { id: 'p40', unitId: 'u40', week: '2026-W31', status: 'chua', note: '' },
-        { id: 'p41', unitId: 'u41', week: '2026-W31', status: 'chua', note: '' },
-        { id: 'p42', unitId: 'u42', week: '2026-W31', status: 'chua', note: '' },
-        { id: 'p43', unitId: 'u43', week: '2026-W31', status: 'chua', note: '' },
-        { id: 'p44', unitId: 'u44', week: '2026-W31', status: 'chua', note: '' },
-        { id: 'p45', unitId: 'u45', week: '2026-W31', status: 'chua', note: '' },
-        { id: 'p46', unitId: 'u46', week: '2026-W31', status: 'chua', note: '' },
-        { id: 'p47', unitId: 'u47', week: '2026-W31', status: 'chua', note: '' },
-        { id: 'p48', unitId: 'u48', week: '2026-W31', status: 'chua', note: '' }
-      ],
-      inspections: [
-        { id: 'i1', unitId: 'u1', date: '2026-07-31', severity: 'nhe', status: 'chua', note: '', c0: 'dat', c1: 'dat', c2: 'dat', c3: 'dat', c4: 'dat', c5: 'dat' },
-        { id: 'i2', unitId: 'u2', date: '2026-07-31', severity: 'nhe', status: 'chua', note: '', c0: 'dat', c1: 'dat', c2: 'dat', c3: 'dat', c4: 'dat', c5: 'dat' },
-        { id: 'i3', unitId: 'u3', date: '2026-07-31', severity: 'nhe', status: 'chua', note: '', c0: 'dat', c1: 'dat', c2: 'dat', c3: 'dat', c4: 'dat', c5: 'dat' },
-        { id: 'i4', unitId: 'u4', date: '2026-07-31', severity: 'nhe', status: 'chua', note: '', c0: 'dat', c1: 'dat', c2: 'dat', c3: 'dat', c4: 'dat', c5: 'dat' },
-        { id: 'i5', unitId: 'u5', date: '2026-07-31', severity: 'nhe', status: 'chua', note: '', c0: 'dat', c1: 'dat', c2: 'dat', c3: 'dat', c4: 'dat', c5: 'dat' },
-        { id: 'i6', unitId: 'u6', date: '2026-07-31', severity: 'nhe', status: 'chua', note: '', c0: 'dat', c1: 'dat', c2: 'dat', c3: 'dat', c4: 'dat', c5: 'dat' },
-        { id: 'i7', unitId: 'u7', date: '2026-07-31', severity: 'nhe', status: 'chua', note: '', c0: 'dat', c1: 'dat', c2: 'dat', c3: 'dat', c4: 'dat', c5: 'dat' },
-        { id: 'i8', unitId: 'u8', date: '2026-07-31', severity: 'nhe', status: 'chua', note: '', c0: 'dat', c1: 'dat', c2: 'dat', c3: 'dat', c4: 'dat', c5: 'dat' },
-        { id: 'i9', unitId: 'u9', date: '2026-07-31', severity: 'nhe', status: 'chua', note: '', c0: 'dat', c1: 'dat', c2: 'dat', c3: 'dat', c4: 'dat', c5: 'dat' },
-        { id: 'i10', unitId: 'u10', date: '2026-07-31', severity: 'nhe', status: 'chua', note: '', c0: 'dat', c1: 'dat', c2: 'dat', c3: 'dat', c4: 'dat', c5: 'dat' },
-        { id: 'i11', unitId: 'u11', date: '2026-07-31', severity: 'nhe', status: 'chua', note: '', c0: 'dat', c1: 'dat', c2: 'dat', c3: 'dat', c4: 'dat', c5: 'dat' },
-        { id: 'i12', unitId: 'u12', date: '2026-07-31', severity: 'nhe', status: 'chua', note: '', c0: 'dat', c1: 'dat', c2: 'dat', c3: 'dat', c4: 'dat', c5: 'dat' },
-        { id: 'i13', unitId: 'u13', date: '2026-07-31', severity: 'nhe', status: 'chua', note: '', c0: 'dat', c1: 'dat', c2: 'dat', c3: 'dat', c4: 'dat', c5: 'dat' },
-        { id: 'i14', unitId: 'u14', date: '2026-07-31', severity: 'nhe', status: 'chua', note: '', c0: 'dat', c1: 'dat', c2: 'dat', c3: 'dat', c4: 'dat', c5: 'dat' },
-        { id: 'i15', unitId: 'u15', date: '2026-07-31', severity: 'nhe', status: 'chua', note: '', c0: 'dat', c1: 'dat', c2: 'dat', c3: 'dat', c4: 'dat', c5: 'dat' },
-        { id: 'i16', unitId: 'u16', date: '2026-07-31', severity: 'nhe', status: 'chua', note: '', c0: 'dat', c1: 'dat', c2: 'dat', c3: 'dat', c4: 'dat', c5: 'dat' },
-        { id: 'i17', unitId: 'u17', date: '2026-07-31', severity: 'nhe', status: 'chua', note: '', c0: 'dat', c1: 'dat', c2: 'dat', c3: 'dat', c4: 'dat', c5: 'dat' },
-        { id: 'i18', unitId: 'u18', date: '2026-07-31', severity: 'nhe', status: 'chua', note: '', c0: 'dat', c1: 'dat', c2: 'dat', c3: 'dat', c4: 'dat', c5: 'dat' },
-        { id: 'i19', unitId: 'u19', date: '2026-07-31', severity: 'nhe', status: 'chua', note: '', c0: 'dat', c1: 'dat', c2: 'dat', c3: 'dat', c4: 'dat', c5: 'dat' },
-        { id: 'i20', unitId: 'u20', date: '2026-07-31', severity: 'nhe', status: 'chua', note: '', c0: 'dat', c1: 'dat', c2: 'dat', c3: 'dat', c4: 'dat', c5: 'dat' },
-        { id: 'i21', unitId: 'u21', date: '2026-07-31', severity: 'nhe', status: 'chua', note: '', c0: 'dat', c1: 'dat', c2: 'dat', c3: 'dat', c4: 'dat', c5: 'dat' },
-        { id: 'i22', unitId: 'u22', date: '2026-07-31', severity: 'nhe', status: 'chua', note: '', c0: 'dat', c1: 'dat', c2: 'dat', c3: 'dat', c4: 'dat', c5: 'dat' },
-        { id: 'i23', unitId: 'u23', date: '2026-07-31', severity: 'nhe', status: 'chua', note: '', c0: 'dat', c1: 'dat', c2: 'dat', c3: 'dat', c4: 'dat', c5: 'dat' },
-        { id: 'i24', unitId: 'u24', date: '2026-07-31', severity: 'nhe', status: 'chua', note: '', c0: 'dat', c1: 'dat', c2: 'dat', c3: 'dat', c4: 'dat', c5: 'dat' },
-        { id: 'i25', unitId: 'u25', date: '2026-07-31', severity: 'nhe', status: 'chua', note: '', c0: 'dat', c1: 'dat', c2: 'dat', c3: 'dat', c4: 'dat', c5: 'dat' },
-        { id: 'i26', unitId: 'u26', date: '2026-07-31', severity: 'nhe', status: 'chua', note: '', c0: 'dat', c1: 'dat', c2: 'dat', c3: 'dat', c4: 'dat', c5: 'dat' },
-        { id: 'i27', unitId: 'u27', date: '2026-07-31', severity: 'nhe', status: 'chua', note: '', c0: 'dat', c1: 'dat', c2: 'dat', c3: 'dat', c4: 'dat', c5: 'dat' },
-        { id: 'i28', unitId: 'u28', date: '2026-07-31', severity: 'nhe', status: 'chua', note: '', c0: 'dat', c1: 'dat', c2: 'dat', c3: 'dat', c4: 'dat', c5: 'dat' },
-        { id: 'i29', unitId: 'u29', date: '2026-07-31', severity: 'nhe', status: 'chua', note: '', c0: 'dat', c1: 'dat', c2: 'dat', c3: 'dat', c4: 'dat', c5: 'dat' },
-        { id: 'i30', unitId: 'u30', date: '2026-07-31', severity: 'nhe', status: 'chua', note: '', c0: 'dat', c1: 'dat', c2: 'dat', c3: 'dat', c4: 'dat', c5: 'dat' },
-        { id: 'i31', unitId: 'u31', date: '2026-07-31', severity: 'nhe', status: 'chua', note: '', c0: 'dat', c1: 'dat', c2: 'dat', c3: 'dat', c4: 'dat', c5: 'dat' },
-        { id: 'i32', unitId: 'u32', date: '2026-07-31', severity: 'nhe', status: 'chua', note: '', c0: 'dat', c1: 'dat', c2: 'dat', c3: 'dat', c4: 'dat', c5: 'dat' },
-        { id: 'i33', unitId: 'u33', date: '2026-07-31', severity: 'nhe', status: 'chua', note: '', c0: 'dat', c1: 'dat', c2: 'dat', c3: 'dat', c4: 'dat', c5: 'dat' },
-        { id: 'i34', unitId: 'u34', date: '2026-07-31', severity: 'nhe', status: 'chua', note: '', c0: 'dat', c1: 'dat', c2: 'dat', c3: 'dat', c4: 'dat', c5: 'dat' },
-        { id: 'i35', unitId: 'u35', date: '2026-07-31', severity: 'nhe', status: 'chua', note: '', c0: 'dat', c1: 'dat', c2: 'dat', c3: 'dat', c4: 'dat', c5: 'dat' },
-        { id: 'i36', unitId: 'u36', date: '2026-07-31', severity: 'nhe', status: 'chua', note: '', c0: 'dat', c1: 'dat', c2: 'dat', c3: 'dat', c4: 'dat', c5: 'dat' },
-        { id: 'i37', unitId: 'u37', date: '2026-07-31', severity: 'nhe', status: 'chua', note: '', c0: 'dat', c1: 'dat', c2: 'dat', c3: 'dat', c4: 'dat', c5: 'dat' },
-        { id: 'i38', unitId: 'u38', date: '2026-07-31', severity: 'nhe', status: 'chua', note: '', c0: 'dat', c1: 'dat', c2: 'dat', c3: 'dat', c4: 'dat', c5: 'dat' },
-        { id: 'i39', unitId: 'u39', date: '2026-07-31', severity: 'nhe', status: 'chua', note: '', c0: 'dat', c1: 'dat', c2: 'dat', c3: 'dat', c4: 'dat', c5: 'dat' },
-        { id: 'i40', unitId: 'u40', date: '2026-07-31', severity: 'nhe', status: 'chua', note: '', c0: 'dat', c1: 'dat', c2: 'dat', c3: 'dat', c4: 'dat', c5: 'dat' },
-        { id: 'i41', unitId: 'u41', date: '2026-07-31', severity: 'nhe', status: 'chua', note: '', c0: 'dat', c1: 'dat', c2: 'dat', c3: 'dat', c4: 'dat', c5: 'dat' },
-        { id: 'i42', unitId: 'u42', date: '2026-07-31', severity: 'nhe', status: 'chua', note: '', c0: 'dat', c1: 'dat', c2: 'dat', c3: 'dat', c4: 'dat', c5: 'dat' },
-        { id: 'i43', unitId: 'u43', date: '2026-07-31', severity: 'nhe', status: 'chua', note: '', c0: 'dat', c1: 'dat', c2: 'dat', c3: 'dat', c4: 'dat', c5: 'dat' },
-        { id: 'i44', unitId: 'u44', date: '2026-07-31', severity: 'nhe', status: 'chua', note: '', c0: 'dat', c1: 'dat', c2: 'dat', c3: 'dat', c4: 'dat', c5: 'dat' },
-        { id: 'i45', unitId: 'u45', date: '2026-07-31', severity: 'nhe', status: 'chua', note: '', c0: 'dat', c1: 'dat', c2: 'dat', c3: 'dat', c4: 'dat', c5: 'dat' },
-        { id: 'i46', unitId: 'u46', date: '2026-07-31', severity: 'nhe', status: 'chua', note: '', c0: 'dat', c1: 'dat', c2: 'dat', c3: 'dat', c4: 'dat', c5: 'dat' },
-        { id: 'i47', unitId: 'u47', date: '2026-07-31', severity: 'nhe', status: 'chua', note: '', c0: 'dat', c1: 'dat', c2: 'dat', c3: 'dat', c4: 'dat', c5: 'dat' },
-        { id: 'i48', unitId: 'u48', date: '2026-07-31', severity: 'nhe', status: 'chua', note: '', c0: 'dat', c1: 'dat', c2: 'dat', c3: 'dat', c4: 'dat', c5: 'dat' }
-      ],
-      recoveries: [
-        { id: 'r1', unitId: 'u1', month: '2026-07', denom: '500k', qty: 0 },
-        { id: 'r2', unitId: 'u2', month: '2026-07', denom: '500k', qty: 0 },
-        { id: 'r3', unitId: 'u3', month: '2026-07', denom: '500k', qty: 0 },
-        { id: 'r4', unitId: 'u4', month: '2026-07', denom: '500k', qty: 0 },
-        { id: 'r5', unitId: 'u5', month: '2026-07', denom: '500k', qty: 0 },
-        { id: 'r6', unitId: 'u6', month: '2026-07', denom: '500k', qty: 0 },
-        { id: 'r7', unitId: 'u7', month: '2026-07', denom: '500k', qty: 0 },
-        { id: 'r8', unitId: 'u8', month: '2026-07', denom: '500k', qty: 0 },
-        { id: 'r9', unitId: 'u9', month: '2026-07', denom: '500k', qty: 0 },
-        { id: 'r10', unitId: 'u10', month: '2026-07', denom: '500k', qty: 0 },
-        { id: 'r11', unitId: 'u11', month: '2026-07', denom: '500k', qty: 0 },
-        { id: 'r12', unitId: 'u12', month: '2026-07', denom: '500k', qty: 0 },
-        { id: 'r13', unitId: 'u13', month: '2026-07', denom: '500k', qty: 0 },
-        { id: 'r14', unitId: 'u14', month: '2026-07', denom: '500k', qty: 0 },
-        { id: 'r15', unitId: 'u15', month: '2026-07', denom: '500k', qty: 0 },
-        { id: 'r16', unitId: 'u16', month: '2026-07', denom: '500k', qty: 0 },
-        { id: 'r17', unitId: 'u17', month: '2026-07', denom: '500k', qty: 0 },
-        { id: 'r18', unitId: 'u18', month: '2026-07', denom: '500k', qty: 0 },
-        { id: 'r19', unitId: 'u19', month: '2026-07', denom: '500k', qty: 0 },
-        { id: 'r20', unitId: 'u20', month: '2026-07', denom: '500k', qty: 0 },
-        { id: 'r21', unitId: 'u21', month: '2026-07', denom: '500k', qty: 0 },
-        { id: 'r22', unitId: 'u22', month: '2026-07', denom: '500k', qty: 0 },
-        { id: 'r23', unitId: 'u23', month: '2026-07', denom: '500k', qty: 0 },
-        { id: 'r24', unitId: 'u24', month: '2026-07', denom: '500k', qty: 0 },
-        { id: 'r25', unitId: 'u25', month: '2026-07', denom: '500k', qty: 0 },
-        { id: 'r26', unitId: 'u26', month: '2026-07', denom: '500k', qty: 0 },
-        { id: 'r27', unitId: 'u27', month: '2026-07', denom: '500k', qty: 0 },
-        { id: 'r28', unitId: 'u28', month: '2026-07', denom: '500k', qty: 0 },
-        { id: 'r29', unitId: 'u29', month: '2026-07', denom: '500k', qty: 0 },
-        { id: 'r30', unitId: 'u30', month: '2026-07', denom: '500k', qty: 0 },
-        { id: 'r31', unitId: 'u31', month: '2026-07', denom: '500k', qty: 0 },
-        { id: 'r32', unitId: 'u32', month: '2026-07', denom: '500k', qty: 0 },
-        { id: 'r33', unitId: 'u33', month: '2026-07', denom: '500k', qty: 0 },
-        { id: 'r34', unitId: 'u34', month: '2026-07', denom: '500k', qty: 0 },
-        { id: 'r35', unitId: 'u35', month: '2026-07', denom: '500k', qty: 0 },
-        { id: 'r36', unitId: 'u36', month: '2026-07', denom: '500k', qty: 0 },
-        { id: 'r37', unitId: 'u37', month: '2026-07', denom: '500k', qty: 0 },
-        { id: 'r38', unitId: 'u38', month: '2026-07', denom: '500k', qty: 0 },
-        { id: 'r39', unitId: 'u39', month: '2026-07', denom: '500k', qty: 0 },
-        { id: 'r40', unitId: 'u40', month: '2026-07', denom: '500k', qty: 0 },
-        { id: 'r41', unitId: 'u41', month: '2026-07', denom: '500k', qty: 0 },
-        { id: 'r42', unitId: 'u42', month: '2026-07', denom: '500k', qty: 0 },
-        { id: 'r43', unitId: 'u43', month: '2026-07', denom: '500k', qty: 0 },
-        { id: 'r44', unitId: 'u44', month: '2026-07', denom: '500k', qty: 0 },
-        { id: 'r45', unitId: 'u45', month: '2026-07', denom: '500k', qty: 0 },
-        { id: 'r46', unitId: 'u46', month: '2026-07', denom: '500k', qty: 0 },
-        { id: 'r47', unitId: 'u47', month: '2026-07', denom: '500k', qty: 0 },
-        { id: 'r48', unitId: 'u48', month: '2026-07', denom: '500k', qty: 0 }
-      ],
-      docs: [],
-      seals: [
-        { id: 'se1', unitId: 'u1', name: 'Mẫu niêm phong bó tiền', fileName: 'TT QLTM.pdf' },
-        { id: 'se2', unitId: 'u2', name: 'Mẫu niêm phong bó tiền', fileName: 'DAU TU DA NANG.pdf' },
-        { id: 'se3', unitId: 'u3', name: 'Mẫu niêm phong bó tiền', fileName: 'DAU TU HAI VAN.pdf' },
-        { id: 'se4', unitId: 'u4', name: 'Mẫu niêm phong bó tiền', fileName: 'BIDV SONG HAN.pdf' },
-        { id: 'se5', unitId: 'u5', name: 'Mẫu niêm phong bó tiền', fileName: 'NGOAI THUONG DA NANG.pdf' },
-        { id: 'se6', unitId: 'u6', name: 'Mẫu niêm phong bó tiền', fileName: 'NGOAI THUONG NAM 02.pdf' },
-        { id: 'se7', unitId: 'u7', name: 'Mẫu niêm phong bó tiền', fileName: 'NGOAI THUONG BAC.pdf' },
-        { id: 'se8', unitId: 'u8', name: 'Mẫu niêm phong bó tiền', fileName: 'NONG NGHIEP DA NANG.pdf' },
-        { id: 'se9', unitId: 'u9', name: 'Mẫu niêm phong bó tiền', fileName: 'NONG NGHIEP NAM.pdf' },
-        { id: 'se10', unitId: 'u10', name: 'Mẫu niêm phong bó tiền', fileName: 'HANG HAI.pdf' },
-        { id: 'se11', unitId: 'u11', name: 'Mẫu niêm phong bó tiền', fileName: 'SÀI GÒN TÀI LỘC CK.pdf' },
-        { id: 'se12', unitId: 'u12', name: 'Mẫu niêm phong bó tiền', fileName: 'VIKKIpdf.pdf' },
-        { id: 'se13', unitId: 'u13', name: 'Mẫu niêm phong bó tiền', fileName: 'XNK DA NANG 2026.pdf' },
-        { id: 'se14', unitId: 'u14', name: 'Mẫu niêm phong bó tiền', fileName: 'NAM A.pdf' },
-        { id: 'se15', unitId: 'u15', name: 'Mẫu niêm phong bó tiền', fileName: 'A CHAU.pdf' },
-        { id: 'se16', unitId: 'u16', name: 'Mẫu niêm phong bó tiền', fileName: 'SAI GON CONG THUONG.pdf' },
-        { id: 'se17', unitId: 'u17', name: 'Mẫu niêm phong bó tiền', fileName: 'VN THINH VUONG.pdf' },
-        { id: 'se18', unitId: 'u18', name: 'Mẫu niêm phong bó tiền', fileName: 'KY THUONG.pdf' },
-        { id: 'se19', unitId: 'u19', name: 'Mẫu niêm phong bó tiền', fileName: 'QUAN  DOI DA NANG.pdf' },
-        { id: 'se20', unitId: 'u20', name: 'Mẫu niêm phong bó tiền', fileName: 'BAC A.pdf' },
-        { id: 'se21', unitId: 'u21', name: 'Mẫu niêm phong bó tiền', fileName: 'QUOC TE.pdf' },
-        { id: 'se22', unitId: 'u22', name: 'Mẫu niêm phong bó tiền', fileName: 'DONG NAM A.pdf' },
-        { id: 'se23', unitId: 'u23', name: 'Mẫu niêm phong bó tiền', fileName: 'VN HIEN DAI.pdf' },
-        { id: 'se24', unitId: 'u24', name: 'Mẫu niêm phong bó tiền', fileName: 'KY NGUYEN THINH VUONG.pdf' },
-        { id: 'se25', unitId: 'u25', name: 'Mẫu niêm phong bó tiền', fileName: 'PHAT TRIEN HCM.pdf' },
-        { id: 'se26', unitId: 'u26', name: 'Mẫu niêm phong bó tiền', fileName: 'AN BINH 2026.pdf' },
-        { id: 'se27', unitId: 'u27', name: 'Mẫu niêm phong bó tiền', fileName: 'BAN VIET.pdf' },
-        { id: 'se29', unitId: 'u29', name: 'Mẫu niêm phong bó tiền', fileName: 'PHUONG DONG.pdf' },
-        { id: 'se30', unitId: 'u30', name: 'Mẫu niêm phong bó tiền', fileName: 'VCB NEO.pdf' },
-        { id: 'se31', unitId: 'u31', name: 'Mẫu niêm phong bó tiền', fileName: 'THINH VUONG & PHAT TRIEN.pdf' },
-        { id: 'se32', unitId: 'u32', name: 'Mẫu niêm phong bó tiền', fileName: 'SAI GON HA NOI.pdf' },
-        { id: 'se33', unitId: 'u33', name: 'Mẫu niêm phong bó tiền', fileName: 'QUOC DAN.pdf' },
-        { id: 'se34', unitId: 'u34', name: 'Mẫu niêm phong bó tiền', fileName: 'KIEN LONG.pdf' },
-        { id: 'se35', unitId: 'u35', name: 'Mẫu niêm phong bó tiền', fileName: 'VIET A.pdf' },
-        { id: 'se36', unitId: 'u36', name: 'Mẫu niêm phong bó tiền', fileName: 'VN THUONG TIN.pdf' },
-        { id: 'se37', unitId: 'u37', name: 'Mẫu niêm phong bó tiền', fileName: 'LOC PHAT.pdf' },
-        { id: 'se38', unitId: 'u38', name: 'Mẫu niêm phong bó tiền', fileName: 'TIEN PHONG.pdf' },
-        { id: 'se39', unitId: 'u39', name: 'Mẫu niêm phong bó tiền', fileName: 'BAO VIET.pdf' },
-        { id: 'se40', unitId: 'u40', name: 'Mẫu niêm phong bó tiền', fileName: 'DAI CHUNG.pdf' },
-        { id: 'se41', unitId: 'u41', name: 'Mẫu niêm phong bó tiền', fileName: 'PUBLIC DA NANG.pdf' },
-        { id: 'se42', unitId: 'u42', name: 'Mẫu niêm phong bó tiền', fileName: 'PUBLIC THANH KHE.pdf' },
-        { id: 'se43', unitId: 'u43', name: 'Mẫu niêm phong bó tiền', fileName: 'INDOVINA.pdf' },
-        { id: 'se44', unitId: 'u44', name: 'Mẫu niêm phong bó tiền', fileName: 'VIET NGA.pdf' },
-        { id: 'se45', unitId: 'u45', name: 'Mẫu niêm phong bó tiền', fileName: 'HSBC.pdf' },
-        { id: 'se46', unitId: 'u46', name: 'Mẫu niêm phong bó tiền', fileName: 'SAI GON.pdf' },
-        { id: 'se47', unitId: 'u47', name: 'Mẫu niêm phong bó tiền', fileName: 'SHINHAN.pdf' },
-        { id: 'se48', unitId: 'u48', name: 'Mẫu niêm phong bó tiền', fileName: 'WOORI.pdf' }
-      ],
-      signatures: [
-        { id: 'si1', unitId: 'u1', fileName: 'TT QLTM 2.pdf' },
-        { id: 'si2', unitId: 'u1', fileName: 'TT QLTM.pdf' },
-        { id: 'si3', unitId: 'u2', fileName: 'DAU TU DA NANG 2.pdf' },
-        { id: 'si4', unitId: 'u2', fileName: 'DAU TU DA NANG.pdf' },
-        { id: 'si5', unitId: 'u3', fileName: 'DAU TU HAI VAN.pdf' },
-        { id: 'si6', unitId: 'u4', fileName: 'DAU TU SONG HAN.pdf' },
-        { id: 'si7', unitId: 'u5', fileName: 'NGOAI THUONG DN.pdf' },
-        { id: 'si8', unitId: 'u6', fileName: 'NGOAI THUONG NAM.pdf' },
-        { id: 'si9', unitId: 'u7', fileName: 'NGOAI THUONG BAC.pdf' },
-        { id: 'si10', unitId: 'u8', fileName: 'NONG NGHIEP DN 6.pdf' },
-        { id: 'si11', unitId: 'u8', fileName: 'NONG NGHIEP DN 5.pdf' },
-        { id: 'si12', unitId: 'u8', fileName: 'NongNghiepDN4.pdf' },
-        { id: 'si13', unitId: 'u8', fileName: 'NONG NGHIEP DN3.pdf' },
-        { id: 'si14', unitId: 'u8', fileName: 'NONG NGHIEP DN2.jpg' },
-        { id: 'si15', unitId: 'u8', fileName: 'NONG NGHIEP DN 2.pdf' },
-        { id: 'si16', unitId: 'u8', fileName: 'NONG NGHIEP DN.pdf' },
-        { id: 'si17', unitId: 'u9', fileName: 'NONG NGHIEP NAM4.pdf' },
-        { id: 'si18', unitId: 'u9', fileName: 'NONGNGHIEPNAM3.pdf' },
-        { id: 'si19', unitId: 'u9', fileName: 'NONGNGHIEPNAM2.pdf' },
-        { id: 'si20', unitId: 'u9', fileName: 'NONG NGHIEP NAM.pdf' },
-        { id: 'si21', unitId: 'u10', fileName: 'HANG HAI 02.pdf' },
-        { id: 'si22', unitId: 'u10', fileName: 'HANG HAI.pdf' },
-        { id: 'si23', unitId: 'u11', fileName: 'SÀI GÒN TÀI LỘC.pdf' },
-        { id: 'si24', unitId: 'u12', fileName: '' },
-        { id: 'si25', unitId: 'u13', fileName: 'NH XUAT NHAP KHAU T102025.pdf' },
-        { id: 'si26', unitId: 'u13', fileName: 'XUAT NHAP KHAU DN2.jpg' },
-        { id: 'si27', unitId: 'u13', fileName: 'XUAT NHAP KHAU 2.pdf' },
-        { id: 'si28', unitId: 'u13', fileName: 'XUAT NHAP KHAU.pdf' },
-        { id: 'si29', unitId: 'u14', fileName: 'NAM A.pdf' },
-        { id: 'si30', unitId: 'u15', fileName: 'A  CHAU 02.pdf' },
-        { id: 'si31', unitId: 'u15', fileName: 'A CHAU.pdf' },
-        { id: 'si32', unitId: 'u15', fileName: 'ACB HOI AN.pdf' },
-        { id: 'si33', unitId: 'u16', fileName: 'SAI GON CONG THUONG2.pdf' },
-        { id: 'si34', unitId: 'u16', fileName: 'SAI GON CONG THƯƠNG.pdf' },
-        { id: 'si35', unitId: 'u17', fileName: 'VN THINH VUONG 2.pdf' },
-        { id: 'si36', unitId: 'u17', fileName: 'VN THINH VUONG.pdf' },
-        { id: 'si37', unitId: 'u17', fileName: 'VP 2025.pdf' },
-        { id: 'si38', unitId: 'u18', fileName: 'KY THUONG.pdf' },
-        { id: 'si39', unitId: 'u19', fileName: 'MB 2026(1).pdf' },
-        { id: 'si40', unitId: 'u19', fileName: 'MB 2026.pdf' },
-        { id: 'si41', unitId: 'u19', fileName: 'QUAN DOI.pdf' },
-        { id: 'si42', unitId: 'u20', fileName: 'BAC A.pdf' },
-        { id: 'si43', unitId: 'u21', fileName: 'QUOC TE2 .pdf' },
-        { id: 'si44', unitId: 'u21', fileName: 'QUOC TE.pdf' },
-        { id: 'si45', unitId: 'u22', fileName: 'DONG NAM A.pdf' },
-        { id: 'si46', unitId: 'u23', fileName: '' },
-        { id: 'si47', unitId: 'u24', fileName: '' },
-        { id: 'si48', unitId: 'u25', fileName: 'PHAT TRIEN HCM.pdf' },
-        { id: 'si49', unitId: 'u26', fileName: 'AN BINH.pdf' },
-        { id: 'si50', unitId: 'u27', fileName: 'BAN VIET T112025.pdf' },
-        { id: 'si51', unitId: 'u27', fileName: 'BAN VIET.pdf' },
-        { id: 'si52', unitId: 'u28', fileName: 'BVB NAM.pdf' },
-        { id: 'si53', unitId: 'u29', fileName: 'PHUONG DONG.pdf' },
-        { id: 'si54', unitId: 'u30', fileName: '' },
-        { id: 'si55', unitId: 'u31', fileName: 'THINH VUONG & PHAT TRIEN.pdf' },
-        { id: 'si56', unitId: 'u32', fileName: 'SAI GON HA NOI.pdf' },
-        { id: 'si57', unitId: 'u33', fileName: 'QUOC DAN.pdf' },
-        { id: 'si58', unitId: 'u34', fileName: 'KIEN LONG.pdf' },
-        { id: 'si59', unitId: 'u35', fileName: 'VIET A 072025.pdf' },
-        { id: 'si60', unitId: 'u35', fileName: 'VIET A 2.pdf' },
-        { id: 'si61', unitId: 'u35', fileName: 'VIET A.pdf' },
-        { id: 'si62', unitId: 'u36', fileName: 'VN THUONG TIN.pdf' },
-        { id: 'si63', unitId: 'u37', fileName: 'BUU DIEN LIEN VIET.pdf' },
-        { id: 'si64', unitId: 'u38', fileName: 'TIEN PHONG.pdf' },
-        { id: 'si65', unitId: 'u39', fileName: 'BAO VIET.pdf' },
-        { id: 'si66', unitId: 'u40', fileName: 'DAI CHUNG.pdf' },
-        { id: 'si67', unitId: 'u41', fileName: 'PUBLIC ĐN 2026.pdf' },
-        { id: 'si68', unitId: 'u41', fileName: 'PUBLIC DA NANG.pdf' },
-        { id: 'si69', unitId: 'u42', fileName: 'PUBLIC THANH KHE.pdf' },
-        { id: 'si70', unitId: 'u43', fileName: 'INDOVINA.pdf' },
-        { id: 'si71', unitId: 'u44', fileName: 'VIET NGA.pdf' },
-        { id: 'si72', unitId: 'u45', fileName: 'HSBC.pdf' },
-        { id: 'si73', unitId: 'u46', fileName: 'SAI GON.pdf' },
-        { id: 'si74', unitId: 'u47', fileName: 'SHINHAN.pdf' },
-        { id: 'si75', unitId: 'u48', fileName: 'Woori02.pdf' },
-        { id: 'si76', unitId: 'u48', fileName: 'WOORI.pdf' }
-      ]
+      units: [], logs: [], plans: [], inspections: [], recoveries: [], docs: [], seals: [], signatures: []
     };
     let data = structuredClone(DEFAULT_DATA);
     let tab = 'tongquan';
@@ -4076,6 +3351,7 @@
 
       render();
       if (typeof window.loadTabData === 'function') window.loadTabData(id);
+      if (id === 'users' && window.isAdmin && window.isAdmin()) window.adminLoadUsers(true);   // tải danh sách tài khoản từ máy chủ
     }
     window.goToLogAndOpenForm = function (unitId, d1, d2) {
       window.__kqPrefill = d1 ? { d1: kqDenKey(d1), d2: d2 ? kqDenKey(d2) : 'none' } : null;   // mệnh giá gợi ý điền sẵn vào form
@@ -4193,9 +3469,7 @@
   </div>`;
     }
     window.isAdmin = function () {
-      const user = getCurrentUser();
-      if (!user) return false;
-      return user.username === 'admin';
+      return window.currentRole() === 'admin';   // vai trò lấy từ hồ sơ trên máy chủ (users/{uid}); quyền thật do Security Rules quyết định
     };
     // Chế độ Bảo trì: admin bật để tạm khoá thao tác chỉnh sửa của người dùng khi nâng cấp app.
     // Admin luôn không bị ảnh hưởng bởi bảo trì.
@@ -4207,11 +3481,11 @@
     // Vai trò lấy từ danh sách tài khoản hiện hành (phiên đăng nhập chỉ lưu username nên không có role).
     // Không tìm thấy tài khoản hoặc chưa xác định => coi như chỉ được xem (mặc định an toàn).
     window.currentRole = function () {
-      const user = getCurrentUser();
-      if (!user) return null;
-      if (user.username === 'admin') return 'admin';
-      const rec = (typeof data !== 'undefined' && data && Array.isArray(data.users)) ? data.users.find(x => x.username === user.username) : null;
-      return rec ? (rec.role || 'viewer') : 'viewer';
+      const user = getCurrentUser(); if (!user) return null;
+      const rec = window.__myRec;
+      if (rec && (!user.uid || rec.uid === user.uid)) return rec.role || 'viewer';
+      const own = (typeof data !== 'undefined' && data && Array.isArray(data.users)) ? data.users.find(x => x.uid && x.uid === user.uid) : null;
+      return own ? (own.role || 'viewer') : (user.role || 'viewer');
     };
     window.canEdit = function () {
       const user = getCurrentUser();
@@ -4546,6 +3820,11 @@
       window.__tqParts[id] = { head: String(head).replace(/<h3[\s\S]*?<\/h3>/, ''), body: body };   // bỏ tiêu đề: tên tab đã là tiêu đề
       return '';
     }
+    window.tqEmptyNotice = function () {
+      if ((data.units || []).length) return '';
+      const adm = window.isAdmin && window.isAdmin();
+      return '<div class="card" style="padding:16px 20px;margin:0 0 16px;border:1px solid #fcd34d !important;background:#fff7e0 !important;"><b>Chưa có dữ liệu nghiệp vụ.</b> ' + (adm ? 'Dữ liệu đã được gỡ khỏi mã nguồn. Hãy vào <b>Sao lưu &amp; Khôi phục &gt; Nhập .json</b> để nạp tệp dữ liệu gốc (hoặc <b>Cập nhật từ Cloud</b> nếu đám mây đã có dữ liệu).' : 'Dữ liệu sẽ hiện sau khi đồng bộ từ máy chủ. Nếu vẫn trống, hãy liên hệ quản trị viên.') + '</div>';
+    };
     window.tqGreeting = function () {
       const d = new Date(), h = d.getHours();
       const g = h >= 5 && h < 11 ? 'Chào buổi sáng' : h >= 11 && h < 14 ? 'Chào buổi trưa' : h >= 14 && h < 18 ? 'Chào buổi chiều' : 'Chào buổi tối';
@@ -5269,6 +4548,7 @@
       requestAnimationFrame(() => { window.tqFitTrend && window.tqFitTrend(); window.tqFitCols && window.tqFitCols(); });
       const htmlReport = `
 ${window.tqGreeting()}
+${window.tqEmptyNotice()}
 ${monthFilterHtml}
 
       <div class="tq-grid">
@@ -5859,7 +5139,70 @@ ${monthFilterHtml}
     // Biểu mẫu nhập nhanh có thể xuất hiện ở 2 nơi (cột phải + bottom-sheet) → luôn ưu tiên bản đang mở trong sheet
     const kqQ = id => { const sh = document.getElementById('kq-sheet'); return (sh && sh.querySelector('#' + id)) || document.getElementById(id); };
 
-    // Kiểm tra tổng hợp: gom MỌI cảnh báo vào một khung (trước đây sửa ô này làm mất cảnh báo của ô kia)
+    // ===== Tuỳ chọn mệnh giá trong ô Nhập nhanh (mặc định là mệnh giá hệ thống gợi ý) =====
+  function kqDenTag(plan, v) {
+    const s = plan.by[v]; if (!s) return '';
+    return s.today ? ' · đã KT hôm nay' : s.mand === 'must' ? ' · bắt buộc' : plan.rec.includes(v) ? ' · gợi ý' : s.state === 'never' ? ' · chưa KT' : s.state === 'fail' ? ' · cần KT lại' : '';
+  }
+  function kqDenPicker(plan, n, val, otherVal, dis) {
+    const opts = KQ_DENS.map(v => `<option value="${v}"${v === val ? ' selected' : ''}${v === otherVal ? ' disabled' : ''}>${kqDenFull(v)}${kqDenTag(plan, v)}</option>`).join('');
+    return `<span class="kq-qden-wrap">${kqDenChip(val)}<span class="kq-qden-edit" aria-hidden="true">Đổi ▾</span><select id="kq-qden-${n}" class="kq-qden-sel" aria-label="Chọn mệnh giá ${n}"${dis ? ' disabled' : ''} onchange="kqQuickDenChange(${n})">${opts}</select></span>`;
+  }
+  window.kqQuickDenChange = function (n) {
+    const sel = kqQ('kq-qden-' + n), other = kqQ('kq-qden-' + (n === 1 ? 2 : 1)), warn = kqQ('kq-qwarn');
+    if (!sel) return;
+    const v = Number(sel.value), it = warn ? kqItem(warn.dataset.unit) : null, wrap = sel.closest('.kq-qden-wrap');
+    const chip = wrap && wrap.querySelector('.kq-den-chip'); if (chip) chip.outerHTML = kqDenChip(v);
+    if (other) Array.from(other.options).forEach(o => { o.disabled = Number(o.value) === v; });
+    const lab = kqQ('kq-qlab-' + n);
+    if (lab && it) { const sug = it.plan.rec[n - 1]; lab.textContent = kqRecLabel(it.plan.by[v]) + (sug === undefined ? ' · tuỳ chọn thêm' : v !== sug ? ' · tự chọn' : ''); }
+    kqQuickRemember();
+    kqQuickModeRefresh();
+    kqQuickValidate();
+  };
+  // Mệnh giá đang chọn trong 2 ô (mặc định theo gợi ý)
+  function kqQuickDens(plan) {
+    const s1 = kqQ('kq-qden-1'), s2 = kqQ('kq-qden-2'), sk = kqQ('kq-qskip-2');
+    const d1 = s1 ? Number(s1.value) : plan.rec[0];
+    const d2 = s2 ? Number(s2.value) : (plan.rec[1] || 0);
+    return { d1, d2, skip2: !!(sk && sk.checked) };
+  }
+  // Ghi nhớ lựa chọn mệnh giá theo từng đơn vị (khung có thể bị vẽ lại khi dữ liệu đồng bộ)
+  function kqQuickRemember() {
+    const warn = kqQ('kq-qwarn'); if (!warn) return;
+    const q1 = kqQ('kq-qden-1'), q2 = kqQ('kq-qden-2'), sk = kqQ('kq-qskip-2');
+    window.__kq = window.__kq || {}; window.__kq.den = window.__kq.den || {};
+    window.__kq.den[warn.dataset.unit] = { 1: q1 ? Number(q1.value) : 0, 2: q2 ? Number(q2.value) : 0, skip2: !!(sk && sk.checked) };
+  }
+  function kqQuickModified(plan) {
+    const d = kqQuickDens(plan), rec = plan.rec;
+    if (d.d1 !== rec[0]) return true;
+    return rec[1] ? (d.skip2 || d.d2 !== rec[1]) : !d.skip2;
+  }
+  function kqQuickModeHtml(modified) {
+    return modified
+      ? '<span class="c a">✎ Đã chỉnh theo ý bạn</span><button type="button" class="kq-qmode-btn" onclick="kqQuickUseSuggestion()">↩ Dùng lại gợi ý của hệ thống</button>'
+      : '<span class="c g">✓ Đang theo gợi ý của hệ thống</span><span class="kq-qmode-tip">Muốn đổi? Bấm “Đổi ▾” cạnh mệnh giá, hoặc tick “Bỏ qua” để không kiểm tra MG 2.</span>';
+  }
+  window.kqQuickModeRefresh = function () {
+    const el = kqQ('kq-qmode'), warn = kqQ('kq-qwarn'); if (!el || !warn) return;
+    const it = kqItem(warn.dataset.unit); if (!it) return;
+    el.innerHTML = kqQuickModeHtml(kqQuickModified(it.plan));
+  };
+  window.kqQuickUseSuggestion = function () {
+    const warn = kqQ('kq-qwarn'); if (!warn) return;
+    const it = kqItem(warn.dataset.unit); if (!it) return; const p = it.plan;
+    const s1 = kqQ('kq-qden-1'), s2 = kqQ('kq-qden-2'), sk = kqQ('kq-qskip-2');
+    [s1, s2].forEach(sel => { if (sel) Array.from(sel.options).forEach(o => { o.disabled = false; }); });
+    if (s1) s1.value = String(p.rec[0]);
+    if (s2 && p.rec[1]) s2.value = String(p.rec[1]);
+    if (sk) { sk.checked = !p.rec[1]; kqQuickToggleSkip2(sk); }
+    kqQuickDenChange(1); if (s2) kqQuickDenChange(2);
+    if (window.__kq && window.__kq.den) delete window.__kq.den[warn.dataset.unit];
+    kqQuickModeRefresh();
+  };
+
+  // Kiểm tra tổng hợp: gom MỌI cảnh báo vào một khung (trước đây sửa ô này làm mất cảnh báo của ô kia)
     window.kqQuickValidate = function () {
       const warnEl = kqQ('kq-qwarn');
       if (!warnEl) return { errors: [], notes: [] };
@@ -5877,7 +5220,8 @@ ${monthFilterHtml}
         if (dEl.value > kqToday()) errors.push(`Ngày kiểm tra ${fmtDate(dEl.value)} ở tương lai.`);
         else if ((data.logs || []).some(l => l.unitId === unitId && l.date === dEl.value)) notes.push(`Đã có bản ghi của TCTD này ngày ${fmtDate(dEl.value)} — lưu sẽ tạo thêm một bản ghi nữa.`);
       }
-      warnEl.classList.toggle('show', errors.length + notes.length > 0);
+      { const itx = kqItem(unitId); if (itx && itx.plan.rule && itx.plan.rule.mode === 'must') { const dn = kqQuickDens(itx.plan); const ch = [dn.d1].concat(dn.d2 && !dn.skip2 ? [dn.d2] : []); if (!ch.some(v => v > 0 && v <= KQ_SMALL)) notes.push('Quy định: lần này cần có 1 mệnh giá từ ' + kqDenFull(KQ_SMALL) + ' trở xuống trong các mệnh giá kiểm tra.'); } }
+  warnEl.classList.toggle('show', errors.length + notes.length > 0);
       warnEl.classList.toggle('soft', errors.length === 0);
       warnEl.innerHTML = errors.concat(notes).map(t => `<div>${errors.includes(t) ? '⚠️' : 'ℹ️'} ${esc(t)}</div>`).join('');
       return { errors, notes };
@@ -5920,14 +5264,16 @@ ${monthFilterHtml}
       }
     };
 
-    window.kqQuickToggleSkip2 = function (chk) {
-      const card2 = kqQ('kq-qcard-2');
-      if (!card2) return;
-      const inps = card2.querySelectorAll('input:not(#kq-qskip-2), select');
-      inps.forEach(el => { el.disabled = chk.checked; });
-      card2.classList.toggle('skipped', chk.checked);
-      kqQuickValidate();
-    };
+  window.kqQuickToggleSkip2 = function (chk) {
+    const card2 = kqQ('kq-qcard-2');
+    if (!card2) return;
+    const inps = card2.querySelectorAll('input:not(#kq-qskip-2), select');
+    inps.forEach(el => { el.disabled = chk.checked; });
+    card2.classList.toggle('skipped', chk.checked);
+    const hint = kqQ('kq-qskiphint'); if (hint) hint.hidden = !chk.checked;
+    kqQuickRemember(); kqQuickModeRefresh();
+    kqQuickValidate();
+  };
 
     window.kqNextTodoUnit = function (currentId) {
       const L = kqBuildList(), Q = L.pins.concat(L.todo);
@@ -5961,8 +5307,10 @@ ${monthFilterHtml}
       }
 
       const p = it.plan;
-      const d1 = p.rec[0];
-      const d2 = p.rec[1];
+  const dsel = kqQuickDens(p);
+  const d1 = dsel.d1;
+  const d2 = dsel.d2 || undefined;
+  if (d2 && d1 === d2 && !dsel.skip2) { if (typeof showToast === 'function') showToast('Hai ô đang chọn cùng một mệnh giá. Hãy đổi một ô sang mệnh giá khác.', 'amber'); else alert('Hai ô đang chọn cùng một mệnh giá.'); return; }
 
       const amt1Inp = kqQ('kq-qamt-1');
       const inv1Inp = kqQ('kq-qinv-1');
@@ -6013,6 +5361,9 @@ ${monthFilterHtml}
         }
       }
 
+  if (p.rule && p.rule.mode === 'must' && ![d1].concat(hasD2 ? [d2] : []).some(v => v > 0 && v <= KQ_SMALL)) {
+    if (!confirm('Quy định: lần này cần có 1 mệnh giá từ ' + kqDenFull(KQ_SMALL) + ' trở xuống, nhưng bạn đang chọn ' + [d1].concat(hasD2 ? [d2] : []).map(kqDenFull).join(' và ') + '.\n\nBạn vẫn muốn lưu?')) return;
+  }
       // Chống nhập sai 3: Trùng TCTD và ngày đã có
       const dup = (data.logs || []).find(l => l.unitId === unitId && l.date === dateVal);
       if (dup) {
@@ -6042,6 +5393,7 @@ ${monthFilterHtml}
       const afterIds = preIdx >= 0 ? preList.slice(preIdx + 1).map(x => x.u.id) : [];
 
       upsert('logs', rec);
+  if (window.__kq && window.__kq.den) delete window.__kq.den[unitId];
 
       if (goToNext) {
         // Tìm TCTD kế tiếp trong danh sách todo
@@ -6079,18 +5431,26 @@ ${monthFilterHtml}
 
       let quickFormHtml = '';
       if (p.rec.length > 0) {
-        const d1 = p.rec[0];
-        const d2 = p.rec[1];
-        const s1 = p.by[d1];
-        const s2 = d2 ? p.by[d2] : null;
+        const pref = ((window.__kq && window.__kq.den) || {})[unitId] || {};
+  let d1 = p.rec[0];
+  if (KQ_DENS.includes(pref[1])) d1 = pref[1];
+  // Ô MG 2 luôn có và hoàn toàn tuỳ chọn: mặc định = gợi ý thứ 2 của hệ thống; nếu hệ thống chỉ gợi ý 1 MG thì
+  // ô này để sẵn một mệnh giá khác MG 1 ở trạng thái "Bỏ qua" (bỏ tick để dùng).
+  let d2 = p.rec[1];
+  if (KQ_DENS.includes(pref[2]) && pref[2] !== d1) d2 = pref[2];
+  if (!d2 || d2 === d1) d2 = (p.rec[1] && p.rec[1] !== d1) ? p.rec[1] : (KQ_DENS.find(v => v !== d1 && !(p.by[v] && p.by[v].today)) || KQ_DENS.find(v => v !== d1));
+  const skip2 = pref.skip2 !== undefined ? !!pref.skip2 : !p.rec[1];
+  const modified = d1 !== p.rec[0] || (p.rec[1] ? (skip2 || d2 !== p.rec[1]) : !skip2);
+  const s1 = p.by[d1];
+  const s2 = p.by[d2];
 
         const card1 = `
           <div class="kq-qcard" id="kq-qcard-1">
             <div class="kq-qcard-top">
               <div class="kq-qcard-den">
                 <span class="kq-rn" style="background:#b45309;">1</span>
-                ${kqDenChip(d1)}
-                <span style="font-size:12px; font-weight:700; color:#b45309;">${kqRecLabel(s1)}</span>
+                ${kqDenPicker(p, 1, d1, d2)}
+                <span id="kq-qlab-1" style="font-size:12px; font-weight:700; color:#b45309;">${kqRecLabel(s1)}${d1 !== p.rec[0] ? ' · tự chọn' : ''}</span>
               </div>
             </div>
             <div class="kq-qfields">
@@ -6118,26 +5478,27 @@ ${monthFilterHtml}
           </div>
         `;
 
-        const card2 = d2 ? `
-          <div class="kq-qcard" id="kq-qcard-2">
+        const card2 = `
+          <div class="kq-qcard${skip2 ? ' skipped' : ''}" id="kq-qcard-2">
             <div class="kq-qcard-top">
               <div class="kq-qcard-den">
                 <span class="kq-rn" style="background:#78350f;">2</span>
-                ${kqDenChip(d2)}
-                <span style="font-size:12px; font-weight:700; color:#4b5563;">${kqRecLabel(s2)}</span>
+                ${kqDenPicker(p, 2, d2, d1, skip2)}
+                <span id="kq-qlab-2" style="font-size:12px; font-weight:700; color:#4b5563;">${kqRecLabel(s2)}${p.rec[1] ? (d2 !== p.rec[1] ? ' · tự chọn' : '') : ' · tuỳ chọn thêm'}</span>
               </div>
               <label style="font-size:11.5px; font-weight:700; color:#6b7280; display:inline-flex; align-items:center; gap:4px; cursor:pointer;">
-                <input type="checkbox" id="kq-qskip-2" onchange="kqQuickToggleSkip2(this)"> Bỏ qua
+                <input type="checkbox" id="kq-qskip-2" onchange="kqQuickToggleSkip2(this)"${skip2 ? ' checked' : ''}> Bỏ qua
               </label>
             </div>
-            <div class="kq-qfields">
+            <div id="kq-qskiphint" class="kq-qskiphint"${skip2 ? '' : ' hidden'}>Đang bỏ qua mệnh giá thứ 2. Bỏ dấu tick “Bỏ qua” nếu muốn kiểm tra thêm mệnh giá này.</div>
+<div class="kq-qfields">
               <div class="kq-qfield">
                 <label for="kq-qamt-2">Số tờ kiểm tra</label>
-                <input type="number" id="kq-qamt-2" value="1000" inputmode="numeric" pattern="[0-9]*" min="0" step="1" enterkeyhint="next" autocomplete="off" class="kq-qinp" oninput="kqQuickCalc(2)">
+                <input type="number" id="kq-qamt-2" value="1000" inputmode="numeric" pattern="[0-9]*" min="0" step="1" enterkeyhint="next" autocomplete="off" class="kq-qinp" oninput="kqQuickCalc(2)"${skip2 ? ' disabled' : ''}>
               </div>
               <div class="kq-qfield">
                 <label for="kq-qinv-2">Số tờ KĐTCLT</label>
-                <input type="number" id="kq-qinv-2" value="" inputmode="numeric" pattern="[0-9]*" placeholder="0" class="kq-qinp" oninput="kqQuickCalc(2)">
+                <input type="number" id="kq-qinv-2" value="" inputmode="numeric" pattern="[0-9]*" placeholder="0" class="kq-qinp" oninput="kqQuickCalc(2)"${skip2 ? ' disabled' : ''}>
               </div>
             </div>
             <div id="kq-qrate-2" class="kq-qrate-pill pass">
@@ -6145,7 +5506,7 @@ ${monthFilterHtml}
             </div>
             <div class="kq-qfield">
               <label for="kq-qdiff-2">Chênh lệch</label>
-              <select id="kq-qdiff-2" class="kq-qdiff-sel">
+              <select id="kq-qdiff-2" class="kq-qdiff-sel"${skip2 ? ' disabled' : ''}>
                 <option value="khop">Khớp đúng</option>
                 <option value="thua">Thừa tiền</option>
                 <option value="thieu">Thiếu tiền</option>
@@ -6153,7 +5514,7 @@ ${monthFilterHtml}
               </select>
             </div>
           </div>
-        ` : '';
+  `;
 
         quickFormHtml = `
           <div class="kq-quick-box">
@@ -6167,7 +5528,8 @@ ${monthFilterHtml}
                 <input type="date" id="kq-qdate" value="${kqToday()}" max="${kqToday()}" class="kq-qdate-inp" onchange="kqQuickValidate()" aria-label="Ngày kiểm tra">
               </div>
             </div>
-            <div id="kq-qwarn" class="kq-qwarn" role="alert" data-unit="${sid}"></div>
+            <div id="kq-qmode" class="kq-qmode">${kqQuickModeHtml(modified)}</div>
+<div id="kq-qwarn" class="kq-qwarn" role="alert" data-unit="${sid}"></div>
             <div class="kq-qcards">${card1}${card2}</div>
             <div class="kq-qactions">
               <button type="button" class="kq-qbtn-next" onclick="kqSaveQuickLog('${sid}', true)">
@@ -8099,7 +7461,7 @@ ${monthFilterHtml}
         const mainSnap = await fbFirestore.collection("app_data").doc("main").get({ source: 'server' });
         if (mainSnap.exists) {
           const serverData = mainSnap.data();
-          data.users = serverData.users || [];
+          data.users = data.users || [];
           data.auditLogs = serverData.auditLogs || [];
           data.settings = serverData.settings || {};
           data.lastUpdated = serverData.lastUpdated || {};
@@ -8494,6 +7856,7 @@ ${monthFilterHtml}
     let fbDb = null;
     let fbStorage = null;
     let fbFirestore = null;
+    let fbAuth = null;
     let fbSyncing = false;
     let isRemoteUpdating = false;
     let pendingData = null;
@@ -8696,6 +8059,7 @@ ${monthFilterHtml}
     async function syncUsersMetaToFirestore(docData) {
       if (!fbFirestore) return false;
       try {
+        docData = Object.assign({}, docData); delete docData.users;   // tuyệt đối không ghi danh sách tài khoản/mật khẩu lên app_data/main
         await fbFirestore.collection("app_data").doc("main").set(docData, { merge: true });
         removeFromPendingSyncQueue('__usersMeta', 'main');
         return true;
@@ -8708,7 +8072,6 @@ ${monthFilterHtml}
 
     function buildUsersMetaPayload() {
       return {
-        users: data.users || [],
         auditLogs: data.auditLogs || [],
         settings: data.settings || {},
         lastUpdated: data.lastUpdated || {}
@@ -8944,30 +8307,13 @@ ${monthFilterHtml}
 
         if (doc.exists) {
           const newData = doc.data();
-          if (!newData.users) newData.users = [];
           if (!newData.auditLogs) newData.auditLogs = [];
           if (!newData.settings) newData.settings = {};
           
-          data.users = newData.users;
           data.auditLogs = newData.auditLogs;
           data.settings = newData.settings;
           
-          // Kiểm tra và vô hiệu hoá phiên đăng nhập nếu tài khoản bị xoá
-          const cu = getCurrentUser();
-          if (cu) {
-            try {
-              if (cu && cu.username !== 'admin') {
-                const stillExists = data.users && data.users.some(u => u.username === cu.username);
-                if (!stillExists) {
-                  clearCurrentUser();
-                  alert("Tài khoản của bạn đã bị quản trị viên xoá. Bạn sẽ bị đăng xuất.");
-                  location.reload();
-                  return;
-                }
-              }
-            } catch(e){}
-          }
-          
+          // (Tài khoản bị khóa/xóa được phát hiện qua hồ sơ users/{uid} của chính người dùng: watchMyRecord)
           if (!doc.metadata.fromCache) {
              data.lastUpdated = newData.lastUpdated || {};
           } else {
@@ -9500,6 +8846,7 @@ ${monthFilterHtml}
       try { fbFirestore = firebase.firestore(); }
       catch (e) { window.__fbCfgError = 'Không khởi tạo được Firestore: ' + ((e && e.message) || e); console.error("Firestore init error", e); return; }
       try { fbStorage = firebase.storage(); } catch (e) { console.warn('Firebase Storage chưa dùng được (thiếu storageBucket?):', e && e.message); }
+      try { fbAuth = firebase.auth(); await fbAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL); } catch (e) { fbAuth = null; console.warn('Firebase Authentication chưa dùng được (đã nạp firebase-auth.js và bật Email/Mật khẩu chưa?):', e && e.message); }
       try {
         await fbFirestore.enablePersistence({ synchronizeTabs: true });
         console.log("Firebase Offline Persistence đã được bật.");
@@ -9508,7 +8855,9 @@ ${monthFilterHtml}
         else if (err.code == 'unimplemented') console.warn('Cảnh báo: Trình duyệt không hỗ trợ Firebase offline persistence.');
       }
       console.log("Firebase initialized");
-      try { setupRealtimeListener(); } catch (e) { console.error('setupRealtimeListener', e); }
+      try { await window.authStartup(); } catch (e) { console.warn('authStartup', e); }   // đồng bộ phiên với Firebase Authentication
+      // Chỉ kéo dữ liệu từ máy chủ khi đã đăng nhập (trang đăng nhập không tải dữ liệu nghiệp vụ).
+      if (window.getCurrentUser && window.getCurrentUser()) { try { setupRealtimeListener(); } catch (e) { console.error('setupRealtimeListener', e); } }
     }
 
 
@@ -9516,74 +8865,8 @@ ${monthFilterHtml}
     // FIX (2026-09): trước đây hàm này chỉ gọi saveData() (đẩy lên Cloud có debounce 1.2s, có
     // thể bị treo/mất nếu người dùng khoá màn hình ngay sau đó), khiến thay đổi không kịp lên
     // server. Nay ghi thẳng và CHỜ xác nhận thật từ Firestore trước khi báo thành công.
-    async function resetUserPassword(username, btnEl) {
-      if (!window.requireAdmin()) return;
-      if (!confirm(`Khôi phục mật khẩu cho tài khoản "${username}" về mặc định "123456"?`)) return;
-      const u = data.users.find(x => x.username === username);
-      if (!u) return;
-      u.password = "123456";
-      saveData();
 
-      const oldText = btnEl ? btnEl.innerText : null;
-      if (btnEl) { btnEl.innerText = 'Đang xử lý...'; btnEl.disabled = true; }
 
-      const synced = await pushUsersMetaNow();
-
-      if (btnEl) { btnEl.innerText = oldText; btnEl.disabled = false; }
-
-      if (synced) {
-        alert("Khôi phục thành công! Mật khẩu mới là 123456 (đã đồng bộ lên máy chủ)");
-      } else {
-        alert("Đã khôi phục cục bộ, nhưng KHÔNG đồng bộ được lên máy chủ ngay (mất mạng hoặc đang chờ đồng bộ lần đầu). Hệ thống sẽ tự thử lại — vui lòng giữ mạng ổn định và không xoá dữ liệu ứng dụng cho tới khi đồng bộ xong.");
-      }
-      render();
-    }
-
-    async function changeUserRole(username, newRole, btnEl) {
-      if (!window.requireAdmin()) return;
-      const u = data.users.find(x => x.username === username);
-      if (!u) return;
-      if (u.role === newRole) return;
-      u.role = newRole;
-      saveData();
-
-      const oldText = btnEl ? btnEl.innerText : null;
-      if (btnEl) { btnEl.innerText = 'Đang xử lý...'; btnEl.disabled = true; }
-
-      const synced = await pushUsersMetaNow();
-
-      if (btnEl) { btnEl.innerText = oldText; btnEl.disabled = false; }
-
-      if (synced) {
-        showToast(`Đã cập nhật quyền cho "${username}"`, 'green');
-      } else {
-        alert(`Đã đổi quyền cục bộ cho "${username}", nhưng KHÔNG đồng bộ được lên máy chủ ngay (mất mạng hoặc đang chờ đồng bộ lần đầu). Hệ thống sẽ tự thử lại — vui lòng giữ mạng ổn định cho tới khi đồng bộ xong.`);
-      }
-      render();
-    }
-
-    async function changeUserRegion(username, newRegion, btnEl) {
-      const u = data.users.find(x => x.username === username);
-      if (!u) return;
-      if (!ALL_REGIONS.includes(newRegion)) return;
-      if (u.region === newRegion) return;
-      u.region = newRegion;
-      saveData();
-
-      const oldText = btnEl ? btnEl.innerText : null;
-      if (btnEl) { btnEl.disabled = true; }
-
-      const synced = await pushUsersMetaNow();
-
-      if (btnEl) { btnEl.disabled = false; }
-
-      if (synced) {
-        showToast(`Đã chuyển "${username}" sang ${newRegion}`, 'green');
-      } else {
-        alert(`Đã đổi khu vực cục bộ cho "${username}", nhưng KHÔNG đồng bộ được lên máy chủ ngay (mất mạng hoặc đang chờ đồng bộ lần đầu). Hệ thống sẽ tự thử lại.`);
-      }
-      render();
-    }
 
     async function toggleMaintenanceMode(btnEl) {
       if (!window.requireAdmin()) return;
@@ -9609,54 +8892,143 @@ ${monthFilterHtml}
       render();
     }
 
-    async function deleteUser(username, btnEl) {
+// ===== Quản lý tài khoản (quản trị viên): thao tác trên hồ sơ Firestore users/{uid} =====
+    async function userDocUpdate(uid, patch, okMsg, btnEl) {
+      if (!window.requireAdmin()) return false;
+      const old = btnEl ? btnEl.innerText : null;
+      if (btnEl) { btnEl.disabled = true; btnEl.innerText = 'Đang xử lý...'; }
+      let ok = false;
+      try {
+        await fbFirestore.collection('users').doc(uid).update(patch);
+        const u = (data.users || []).find(x => x.uid === uid); if (u) Object.assign(u, patch);
+        if (okMsg && typeof showToast === 'function') showToast(okMsg, 'green');
+        ok = true;
+      } catch (e) { alert('Chưa thực hiện được' + ((e && e.code) ? ' (' + e.code + ')' : '') + '. Nếu mã là permission-denied thì kiểm tra Firestore Rules.'); }
+      if (btnEl) { btnEl.disabled = false; btnEl.innerText = old; }
+      render();
+      return ok;
+    }
+    function userAudit(action, text) { try { addAuditLog(action, 'Tài khoản', text); } catch (e) { } }
+    async function changeUserRole(uid, newRole, btnEl) {
+      if (!['viewer', 'editor'].includes(newRole)) return;
+      const u = (data.users || []).find(x => x.uid === uid); if (!u) return;
+      if (await userDocUpdate(uid, { role: newRole }, newRole === 'editor' ? 'Đã cấp quyền Chỉnh sửa' : 'Đã chuyển về quyền Xem', btnEl)) userAudit('Sửa', 'Đổi quyền tài khoản "' + u.username + '" thành ' + newRole);
+    }
+    async function changeUserRegion(uid, newRegion, selEl) {
+      const u = (data.users || []).find(x => x.uid === uid); if (!u || !ALL_REGIONS.includes(newRegion)) return;
+      if (await userDocUpdate(uid, { region: newRegion }, 'Đã đổi khu vực', selEl)) userAudit('Sửa', 'Đổi khu vực tài khoản "' + u.username + '" thành ' + newRegion);
+    }
+    async function approveUser(uid, btnEl) {
+      const u = (data.users || []).find(x => x.uid === uid); if (!u) return;
+      if (await userDocUpdate(uid, { status: 'active' }, 'Đã duyệt tài khoản', btnEl)) userAudit('Sửa', 'Duyệt tài khoản "' + u.username + '"');
+    }
+    async function setUserStatus(uid, status, btnEl) {
+      const u = (data.users || []).find(x => x.uid === uid); if (!u) return;
+      if (status === 'disabled' && !confirm('Khóa tài khoản "' + u.username + '"? Người này sẽ không đăng nhập hoặc truy cập dữ liệu được nữa.')) return;
+      if (await userDocUpdate(uid, { status }, status === 'disabled' ? 'Đã khóa tài khoản' : 'Đã mở khóa tài khoản', btnEl)) userAudit('Sửa', (status === 'disabled' ? 'Khóa' : 'Mở khóa') + ' tài khoản "' + u.username + '"');
+    }
+    async function deleteUser(uid, btnEl) {
       if (!window.requireAdmin()) return;
-      if (!confirm(`Bạn có chắc muốn xóa vĩnh viễn tài khoản "${username}"?`)) return;
-      data.users = data.users.filter(x => x.username !== username);
-      saveData();
-
-      const oldText = btnEl ? btnEl.innerText : null;
-      if (btnEl) { btnEl.innerText = 'Đang xử lý...'; btnEl.disabled = true; }
-
-      const synced = await pushUsersMetaNow();
-
-      if (btnEl) { btnEl.innerText = oldText; btnEl.disabled = false; }
-
-      if (synced) {
-        showToast(`Đã xoá và đồng bộ tài khoản "${username}" lên máy chủ`, 'green');
-      } else {
-        alert(`Đã xoá tài khoản "${username}" trên máy này, nhưng KHÔNG đồng bộ được lên máy chủ ngay (mất mạng hoặc đang chờ đồng bộ lần đầu). Hệ thống sẽ tự thử lại. Lưu ý: KHÔNG nên "Sao lưu lên Cloud" cho tới khi thấy thông báo đã đồng bộ thành công, nếu không bản sao lưu có thể không phản ánh đúng việc xoá này.`);
+      const u = (data.users || []).find(x => x.uid === uid); if (!u) return;
+      if (!confirm('Xóa hồ sơ tài khoản "' + u.username + '"?\n\nNgười này sẽ mất quyền truy cập. (Danh tính đăng nhập trên Firebase vẫn tồn tại; muốn dùng lại tên này hãy dùng "Cấp lại mật khẩu" thay vì xóa.)')) return;
+      try {
+        await fbFirestore.collection('users').doc(uid).delete();
+        data.users = (data.users || []).filter(x => x.uid !== uid);
+        userAudit('Xóa', 'Xóa hồ sơ tài khoản "' + u.username + '"');
+        if (typeof showToast === 'function') showToast('Đã xóa hồ sơ tài khoản', 'green');
+      } catch (e) { alert('Chưa xóa được' + ((e && e.code) ? ' (' + e.code + ')' : '') + '.'); }
+      render();
+    }
+    // Cấp lại mật khẩu: quản trị viên không thể đặt mật khẩu của người khác trực tiếp, nên tạo một danh tính đăng nhập mới
+    // cho cùng tên đăng nhập (mật khẩu tạm, bắt buộc đổi ở lần đăng nhập đầu) và khóa danh tính cũ.
+    async function reissueUser(uid, btnEl) {
+      if (!window.requireAdmin()) return;
+      const rec = (data.users || []).find(x => x.uid === uid); if (!rec) return;
+      if (!confirm('Cấp lại mật khẩu cho "' + rec.username + '"?\n\nHệ thống tạo mật khẩu tạm (hiện một lần) và khóa mật khẩu cũ. Người dùng phải đổi mật khẩu khi đăng nhập lần đầu.')) return;
+      const old = btnEl ? btnEl.innerText : null; if (btnEl) { btnEl.disabled = true; btnEl.innerText = 'Đang xử lý...'; }
+      try {
+        const tmp = window.genTempPassword(); let newUid = null, alias = (rec.authIndex || 1) + 1;
+        for (; alias <= AUTH_ALIAS_MAX; alias++) {
+          try { newUid = await window.authCreateAccount(rec.username, tmp, alias); break; }
+          catch (e) { if (!e || e.code !== 'auth/email-already-in-use') throw e; }
+        }
+        if (!newUid) { alert('Đã cấp lại quá nhiều lần cho tên này, không tạo thêm được.'); return; }
+        await fbFirestore.collection('users').doc(newUid).set({ username: rec.username, role: rec.role || 'viewer', region: rec.region || 'KV01', status: 'active', mustChangePassword: true, authIndex: alias, reissuedFrom: uid, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+        await fbFirestore.collection('users').doc(uid).update({ status: 'disabled' });
+        userAudit('Sửa', 'Cấp lại mật khẩu cho tài khoản "' + rec.username + '"');
+        await window.adminLoadUsers(false);
+        alert('Mật khẩu tạm của "' + rec.username + '":\n\n' + tmp + '\n\nHãy chuyển cho người dùng ngay (chỉ hiện một lần). Họ phải đổi mật khẩu ở lần đăng nhập đầu.');
+      } catch (e) { alert('Chưa cấp lại được' + ((e && (e.code || e.message)) ? ' (' + (e.code || e.message) + ')' : '') + '.'); }
+      if (btnEl) { btnEl.disabled = false; btnEl.innerText = old; }
+      render();
+    }
+    // Chuyển tài khoản đăng ký theo cách cũ (mật khẩu lưu chữ thường trong app_data/main) sang đăng nhập Firebase Authentication.
+    async function migrateOldUsers(btnEl) {
+      if (!window.requireAdmin()) return;
+      if (!confirm('Chuyển các tài khoản cũ sang hệ thống đăng nhập mới?\n\nMỗi tài khoản được tạo lại bằng CHÍNH mật khẩu cũ và bị buộc đổi mật khẩu ở lần đăng nhập đầu.')) return;
+      const old = btnEl ? btnEl.innerText : null; if (btnEl) { btnEl.disabled = true; btnEl.innerText = 'Đang chuyển...'; }
+      let oldUsers = [];
+      try { const s = await fbFirestore.collection('app_data').doc('main').get({ source: 'server' }); oldUsers = (s.exists && s.data().users) || []; }
+      catch (e) { alert('Không đọc được danh sách tài khoản cũ' + ((e && e.code) ? ' (' + e.code + ')' : '') + '.'); if (btnEl) { btnEl.disabled = false; btnEl.innerText = old; } return; }
+      await window.adminLoadUsers(false);
+      const have = new Set((data.users || []).map(u => window.authNormUser(u.username)));
+      const rep = { ok: [], skip: [], err: [] };
+      for (const o of oldUsers) {
+        const name = o && o.username; if (!name || window.authNormUser(name) === 'admin') continue;
+        const norm = window.authNormUser(name);
+        if (!norm) { rep.skip.push(name + ' (tên không hợp lệ)'); continue; }
+        if (have.has(norm)) { rep.skip.push(name + ' (đã có)'); continue; }
+        let pw = String(o.password || ''), tmp = false; if (pw.length < 6) { pw = window.genTempPassword(); tmp = true; }
+        try {
+          const uid = await window.authCreateAccount(name, pw, 1);
+          await fbFirestore.collection('users').doc(uid).set({ username: name, role: o.role === 'editor' ? 'editor' : 'viewer', region: o.region || 'KV01', status: 'active', mustChangePassword: true, authIndex: 1, createdAt: firebase.firestore.FieldValue.serverTimestamp(), migratedAt: firebase.firestore.FieldValue.serverTimestamp() });
+          rep.ok.push(name + (tmp ? ' — mật khẩu tạm: ' + pw : '')); have.add(norm);
+        } catch (e) { rep.err.push(name + ': ' + ((e && (e.code || e.message)) || 'lỗi')); }
       }
+      await window.adminLoadUsers(false);
+      alert('Kết quả chuyển tài khoản:\n• Đã chuyển: ' + rep.ok.length + '\n• Bỏ qua: ' + rep.skip.length + '\n• Lỗi: ' + rep.err.length + (rep.ok.some(x => x.includes('mật khẩu tạm')) ? '\n\nTài khoản có mật khẩu tạm:\n' + rep.ok.filter(x => x.includes('mật khẩu tạm')).join('\n') : '') + (rep.err.length ? '\n\nLỗi:\n' + rep.err.join('\n') : ''));
+      if (rep.ok.length && confirm('Xóa danh sách mật khẩu cũ (chữ thường) khỏi máy chủ ngay bây giờ?\n\nChỉ chọn "OK" sau khi bạn chắc các tài khoản trên đã chuyển xong.')) {
+        try { await fbFirestore.collection('app_data').doc('main').update({ users: firebase.firestore.FieldValue.delete() }); alert('Đã xóa danh sách mật khẩu cũ khỏi máy chủ.'); }
+        catch (e) { alert('Chưa xóa được' + ((e && e.code) ? ' (' + e.code + ')' : '') + '.'); }
+      }
+      if (btnEl) { btnEl.disabled = false; btnEl.innerText = old; }
       render();
     }
     function renderUsers() {
-      const users = (data.users || []).filter(u => u.username !== "admin");
-      const editorCount = users.filter(u => u.role === 'editor').length;
-      const listHtml = users.length === 0 ? `<div style="padding:20px; text-align:center; color:var(--gray)">Chưa có tài khoản nào đăng ký</div>` :
-        users.map(u => {
-          const isEditor = u.role === 'editor';
-          const userRegion = u.region || 'KV01';
-          const regionOptions = ALL_REGIONS.map(r => `<option value="${r}" ${r === userRegion ? 'selected' : ''}>${r}</option>`).join('');
-          return `
-          <div style="background:#fff; border:1px solid var(--line); border-radius:12px; padding:15px; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+      const me = getCurrentUser() || {};
+      const users = (data.users || []).filter(u => u.uid !== me.uid);
+      const pend = users.filter(u => u.status === 'pending');
+      const act = users.filter(u => u.status !== 'pending');
+      const editorCount = act.filter(u => u.role === 'editor').length;
+      const rowStyle = 'background:#fff; border:1px solid var(--line); border-radius:16px; padding:15px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;';
+      const bst = (bg, col) => `padding:7px 12px; background:${bg}; color:${col}; font-size:12px; border-radius:999px; font-weight:600; min-height:34px;`;
+      const regionSel = u => { const r = u.region || 'KV01'; return `<select onchange="changeUserRegion('${u.uid}', this.value, this)" style="border:1px solid var(--line); border-radius:6px; padding:2px 6px; font-size:12px; font-weight:600;">${ALL_REGIONS.map(x => `<option value="${x}" ${x === r ? 'selected' : ''}>${x}</option>`).join('')}</select>`; };
+      const chip = u => u.status === 'disabled' ? '<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:#fee2e2;color:#b91c1c;">Đã khóa</span>' : '<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:#dcfce7;color:#166534;">Đang hoạt động</span>';
+      const pendHtml = pend.length ? `<div class="dash-panel-title" style="margin:0 0 12px;">Chờ duyệt (${pend.length})</div>` + pend.map(u => `
+          <div style="${rowStyle} border-color:#fcd34d; background:#fffbeb;">
+            <div><div style="font-weight:600; font-size:15px; color:var(--primary);">${esc(u.username)}</div><div style="font-size:12.5px; color:var(--gray); margin-top:2px;">Đăng ký xin quyền Xem · Khu vực ${esc(u.region || 'KV01')}</div></div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn" style="${bst('#16a34a', '#fff')}" onclick="approveUser('${u.uid}', this)">✓ Duyệt</button>
+              <button class="btn" style="${bst('#fee2e2', '#b91c1c')}" onclick="deleteUser('${u.uid}', this)">✕ Từ chối</button>
+            </div>
+          </div>`).join('') + '<div style="height:14px"></div>' : '';
+      const actHtml = act.length === 0 ? `<div style="padding:20px; text-align:center; color:var(--gray)">Chưa có tài khoản nào</div>` : act.map(u => {
+        const isEditor = u.role === 'editor', off = u.status === 'disabled';
+        return `
+          <div style="${rowStyle}${off ? ' opacity:.75;' : ''}">
             <div>
-              <div style="font-weight:600; font-size:15px; color:var(--primary); margin-bottom:4px;">${esc(u.username)}</div>
+              <div style="font-weight:600; font-size:15px; color:var(--primary); margin-bottom:4px;">${esc(u.username)} ${chip(u)}</div>
               <div style="font-size:13px; color:${isEditor ? '#2563eb' : 'var(--gray)'};">Quyền: ${isEditor ? '✏️ Chỉnh sửa' : '👁️ Xem'}</div>
-              <div style="font-size:13px; color:var(--gray); margin-top:2px; display:flex; align-items:center; gap:6px;">Khu vực:
-                <select onchange="changeUserRegion('${u.username}', this.value, this)" style="border:1px solid var(--line); border-radius:6px; padding:2px 6px; font-size:12px; font-weight:600;">${regionOptions}</select>
-              </div>
+              <div style="font-size:13px; color:var(--gray); margin-top:2px; display:flex; align-items:center; gap:6px;">Khu vực: ${regionSel(u)}</div>
             </div>
-            <div style="display:flex; gap:10px; flex-wrap:wrap;">
-              ${isEditor
-                ? `<button class="btn" style="padding:6px 12px; background:var(--hover); color:var(--text); font-size:12px; border-radius:6px; font-weight:600;" onclick="changeUserRole('${u.username}','viewer', this)">👁️ Chuyển về Xem</button>`
-                : `<button class="btn" style="padding:6px 12px; background:#dbeafe; color:#2563eb; font-size:12px; border-radius:6px; font-weight:600;" onclick="changeUserRole('${u.username}','editor', this)">✏️ Cấp quyền Chỉnh sửa</button>`}
-              <button class="btn" style="padding:6px 12px; background:var(--mint); color:var(--green-dark); font-size:12px; border-radius:6px; font-weight:600;" onclick="resetUserPassword('${u.username}', this)">🔄 Khôi phục MK</button>
-              <button class="btn" style="padding:6px 12px; background:#fee2e2; color:#ef4444; font-size:12px; border-radius:6px; font-weight:600;" onclick="deleteUser('${u.username}', this)">❌ Xóa</button>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              ${isEditor ? `<button class="btn" style="${bst('var(--hover)', 'var(--text)')}" onclick="changeUserRole('${u.uid}', 'viewer', this)">Hạ xuống Xem</button>` : `<button class="btn" style="${bst('#dbeafe', '#2563eb')}" onclick="changeUserRole('${u.uid}', 'editor', this)">Cấp quyền Sửa</button>`}
+              <button class="btn" style="${bst('var(--mint)', 'var(--green-dark)')}" onclick="reissueUser('${u.uid}', this)">Cấp lại mật khẩu</button>
+              ${off ? `<button class="btn" style="${bst('#dcfce7', '#166534')}" onclick="setUserStatus('${u.uid}', 'active', this)">Mở khóa</button><button class="btn" style="${bst('#fee2e2', '#ef4444')}" onclick="deleteUser('${u.uid}', this)">Xóa hồ sơ</button>` : `<button class="btn" style="${bst('#fee2e2', '#ef4444')}" onclick="setUserStatus('${u.uid}', 'disabled', this)">Khóa</button>`}
             </div>
-          </div>
-        `;
-        }).join("");
-
+          </div>`;
+      }).join('');
+      const listHtml = pendHtml + actHtml;
       const maintenanceOn = window.isMaintenanceOn();
 
       return `
@@ -9669,6 +9041,7 @@ ${monthFilterHtml}
                 <p style="color:var(--gray); font-size:0.9rem">Quản lý người dùng đăng ký ứng dụng và phân quyền</p>
             </div>
         </div>
+<div style="margin:-8px 0 20px; display:flex; gap:10px; flex-wrap:wrap;"><button class="btn btn-ghost" onclick="changeMyPassword()">🔑 Đổi mật khẩu của tôi</button><button class="btn btn-ghost" onclick="migrateOldUsers(this)">⬆ Chuyển tài khoản cũ</button></div>
 
         <div class="card" style="margin-bottom:24px; border:1px solid ${maintenanceOn ? '#f59e0b' : 'var(--line)'}; background:${maintenanceOn ? '#fffbeb' : '#fff'};">
           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
@@ -10967,129 +10340,215 @@ ${(window.isAdmin && window.isAdmin()) ? `
       setTimeout(() => location.reload(), 1500);
     };
 
+    // ===================== ĐĂNG NHẬP BẰNG FIREBASE AUTHENTICATION =====================
+    // Xác thực do máy chủ Firebase thực hiện. Tên đăng nhập được ánh xạ thành một email nội bộ (không gửi thư).
+    // Vai trò/trạng thái nằm ở Firestore users/{uid}; Security Rules dựa vào đó để cho phép hay chặn truy cập.
+    const AUTH_ALIAS_MAX = 8;
+    window.authNormUser = function (u) {
+      const t = String(u || '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/\s+/g, '.');
+      return /^[a-z0-9._-]{2,40}$/.test(t) ? t : '';
+    };
+    window.authEmailFor = function (u, n) {
+      const t = window.authNormUser(u); if (!t) return '';
+      let dom = 'app.firebaseapp.com';
+      try { const c = JSON.parse(localStorage.getItem('firebase_config') || '{}'); dom = c.authDomain || ((c.projectId || 'app') + '.firebaseapp.com'); } catch (e) { }
+      return t + (n > 1 ? '+' + n : '') + '@' + dom;
+    };
+    const authErrText = function (e) {
+      const c = (e && e.code) || '';
+      if (c === 'auth/network-request-failed') return 'Không kết nối được máy chủ xác thực. Kiểm tra mạng rồi thử lại.';
+      if (c === 'auth/too-many-requests') return 'Thử sai quá nhiều lần. Vui lòng chờ vài phút rồi thử lại.';
+      if (c === 'auth/operation-not-allowed') return 'Chưa bật đăng nhập Email/Mật khẩu trong Firebase Console (Authentication > Sign-in method).';
+      if (c === 'auth/user-disabled') return 'Tài khoản này đã bị vô hiệu hóa.';
+      if (c === 'auth/weak-password') return 'Mật khẩu quá yếu.';
+      if (c === 'auth/invalid-api-key' || c === 'auth/api-key-not-valid.-please-pass-a-valid-api-key.') return 'Khóa API trong cấu hình máy chủ chưa đúng.';
+      return 'Tên đăng nhập hoặc mật khẩu không đúng!';
+    };
+    window.pwRule = v => (!v[0] || v[0].length < 8) ? 'Mật khẩu cần ít nhất 8 ký tự.' : (!/[A-Za-z]/.test(v[0]) || !/\d/.test(v[0])) ? 'Mật khẩu cần có cả chữ và số.' : (v[0] !== v[1]) ? 'Hai lần nhập chưa giống nhau.' : '';
+    window.genTempPassword = function () {
+      const al = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789', b = crypto.getRandomValues(new Uint8Array(10));
+      let p = ''; b.forEach(x => { p += al[x % al.length]; });
+      return p.slice(0, 8) + '7' + 'a';   // luôn có chữ và số
+    };
+    // Hộp thoại nhập mật khẩu (che ký tự). opts: {title, note, fields[], ok, validate(vals)->lỗi}
+    window.kqPwDialog = function (o) {
+      return new Promise(resolve => {
+        const ov = document.createElement('div'); ov.className = 'pw-dlg-ov'; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true');
+        ov.innerHTML = '<div class="pw-dlg"><h3>' + o.title + '</h3>' + (o.note ? '<p>' + o.note + '</p>' : '') +
+          o.fields.map((f, i) => '<label for="pwd-' + i + '">' + f + '</label><input id="pwd-' + i + '" type="password" autocomplete="' + (i === 0 && o.fields.length === 3 ? 'current-password' : 'new-password') + '">').join('') +
+          '<div class="pw-err" aria-live="polite"></div><div class="pw-act"><button type="button" class="btn btn-ghost" data-x="cancel">' + (o.cancel || 'Hủy') + '</button><button type="button" class="btn" data-x="ok">' + (o.ok || 'Đồng ý') + '</button></div></div>';
+        document.body.appendChild(ov);
+        const inputs = Array.from(ov.querySelectorAll('input')); inputs[0].focus();
+        const close = v => { ov.remove(); resolve(v); };
+        const submit = () => { const vals = inputs.map(i => i.value); const err = o.validate ? o.validate(vals) : ''; if (err) { ov.querySelector('.pw-err').textContent = err; return; } close(vals); };
+        ov.addEventListener('click', e => { const x = e.target.dataset && e.target.dataset.x; if (x === 'ok') submit(); else if (x === 'cancel' || (e.target === ov && !o.modal)) close(null); });
+        ov.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); else if (e.key === 'Escape' && !o.modal) close(null); });
+      });
+    };
+    const authBusy = function (sel, on, txt) { const b = document.querySelector(sel); if (!b) return; if (on) { b.dataset.old = b.innerText; b.innerText = txt || 'Đang xử lý...'; b.disabled = true; } else { b.innerText = b.dataset.old || b.innerText; b.disabled = false; } };
+
+    // ---------- Đăng ký: tạo tài khoản Firebase + hồ sơ "chờ duyệt" (chưa truy cập được dữ liệu cho đến khi admin duyệt) ----------
     window.doRegister = async function () {
       const u = document.getElementById('reg-username').value.trim();
       const p = document.getElementById('reg-password').value;
       if (!u || !p) { alert('Vui lòng nhập đủ thông tin!'); return; }
-      if (u === 'admin') { alert('Không thể dùng tên đăng nhập này!'); return; }
-
-      if (fbFirestore && navigator.onLine) {
+      if (!window.authNormUser(u)) { alert('Tên đăng nhập chỉ gồm chữ, số, dấu chấm, gạch ngang, gạch dưới (2–40 ký tự).'); return; }
+      if (window.authNormUser(u) === 'admin') { alert('Không thể dùng tên đăng nhập này!'); return; }
+      const pe = window.pwRule([p, p]); if (pe) { alert(pe); return; }
+      const st = window.fbConnState();
+      if (!fbAuth || !st.ok) { alert('Chưa thể đăng ký: ' + (st.ok ? 'Chưa kết nối máy chủ xác thực.' : st.reason)); return; }
+      authBusy('button[onclick="doRegister()"]', true, 'Đang gửi yêu cầu...');
+      try {
+        let cred;
+        try { cred = await fbAuth.createUserWithEmailAndPassword(window.authEmailFor(u, 1), p); }
+        catch (e) { alert(e.code === 'auth/email-already-in-use' ? 'Tên đăng nhập đã tồn tại hoặc đã từng được dùng. Hãy chọn tên khác, hoặc nhờ quản trị viên cấp lại tài khoản.' : authErrText(e)); return; }
         try {
-          const docSnap = await fbFirestore.collection("app_data").doc("main").get({source: 'server'});
-          if (docSnap.exists) {
-            const serverData = docSnap.data();
-            if (serverData.users) data.users = serverData.users;
-          }
+          await fbFirestore.collection('users').doc(cred.user.uid).set({ username: u, role: 'viewer', region: getActiveRegions()[0] || 'KV01', status: 'pending', mustChangePassword: false, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
         } catch (e) {
-          console.warn('Lỗi lấy dữ liệu từ server, dùng cache.', e);
+          try { await cred.user.delete(); } catch (_) { }
+          alert('Không gửi được yêu cầu đăng ký' + ((e && e.code) ? ' (' + e.code + ')' : '') + '. Nếu mã là permission-denied thì cần cập nhật Firestore Rules.'); return;
         }
-      }
-
-      if (!data.users) data.users = [];
-      if (data.users.find(x => x.username === u)) {
-        alert('Tài khoản đã tồn tại!'); return;
-      }
-
-      const btn = document.querySelector('button[onclick="doRegister()"]');
-      const oldText = btn.innerText;
-      btn.innerText = 'Đang xử lý...';
-      btn.disabled = true;
-
-      // Tài khoản mới tự đăng ký được gán vào khu vực đang hoạt động đầu tiên
-      // (hiện tại luôn là KV01, vì KV02-04 chưa mở). Khi mở thêm khu vực, admin
-      // đổi khu vực cho tài khoản qua changeUserRegion() nếu cần.
-      const regionForNewUser = getActiveRegions()[0] || 'KV01';
-      const newUser = { username: u, password: p, role: 'viewer', region: regionForNewUser };
-      data.users.push(newUser);
-      
-      let success = false;
-      if (fbFirestore && navigator.onLine) {
-         try {
-            await fbFirestore.collection("app_data").doc("main").set({ 
-               users: firebase.firestore.FieldValue.arrayUnion(newUser) 
-            }, { merge: true });
-            success = true;
-         } catch (e) {
-            alert('Đăng ký chưa được do máy chủ từ chối hoặc lỗi mạng' + ((e && e.code) ? ' (' + e.code + ')' : '') + '. Nếu mã là permission-denied thì cần mở quyền ghi trong Firestore Rules.');
-         }
-      } else {
-         alert('Chưa thể đăng ký: ' + window.fbConnState().reason);
-      }
-
-      if (!success) {
-         data.users = data.users.filter(x => x.username !== u);
-      } else {
-         try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch (e) { }
-         try { await dbPut('store_data', 'default', data); } catch (e) { }
-         alert('Đăng ký thành công! Vui lòng đăng nhập.');
-         renderLogin('login');
-      }
-      
-      btn.innerText = oldText;
-      btn.disabled = false;
+        try { await fbAuth.signOut(); } catch (_) { }
+        alert('Đã gửi yêu cầu đăng ký. Tài khoản chỉ dùng được sau khi quản trị viên duyệt.');
+        renderLogin('login');
+      } finally { authBusy('button[onclick="doRegister()"]', false); }
     };
 
-    window.doLogout = function () {
+    // ---------- Đăng nhập ----------
+    window.doLogin = async function () {
+      const u = (document.getElementById('login-username').value || '').trim();
+      const p = document.getElementById('login-password').value;
+      if (!u || !p) { alert('Vui lòng nhập tên đăng nhập và mật khẩu.'); return; }
+      const st = window.fbConnState();
+      if (!fbAuth || !st.ok) { alert('Chưa đăng nhập được: ' + (st.ok ? 'Chưa kết nối máy chủ xác thực.' : st.reason)); return; }
+      if (!window.authNormUser(u)) { alert('Tên đăng nhập chỉ gồm chữ, số, dấu chấm, gạch ngang, gạch dưới (2–40 ký tự).'); return; }
+      authBusy('button[onclick="doLogin()"]', true, 'Đang xác thực...');
+      try {
+        let cred = null, lastErr = null;
+        for (let n = 1; n <= AUTH_ALIAS_MAX; n++) {
+          try { cred = await fbAuth.signInWithEmailAndPassword(window.authEmailFor(u, n), p); break; }
+          catch (e) { lastErr = e; if (e.code === 'auth/network-request-failed' || e.code === 'auth/too-many-requests' || e.code === 'auth/operation-not-allowed') break; }
+        }
+        if (!cred) { alert(authErrText(lastErr)); return; }
+        let rec = null;
+        try { const s = await fbFirestore.collection('users').doc(cred.user.uid).get(); rec = s.exists ? s.data() : null; }
+        catch (e) { try { await fbAuth.signOut(); } catch (_) { } alert('Không đọc được hồ sơ tài khoản' + ((e && e.code) ? ' (' + e.code + ')' : '') + '. Nếu mã là permission-denied thì cần cập nhật Firestore Rules.'); return; }
+        const fail = async msg => { try { await fbAuth.signOut(); } catch (_) { } alert(msg); };
+        if (!rec) { await fail('Tài khoản chưa có hồ sơ trên hệ thống. Hãy liên hệ quản trị viên.'); return; }
+        if (rec.status === 'pending') { await fail('Tài khoản đang chờ quản trị viên duyệt.'); return; }
+        if (rec.status !== 'active') { await fail('Tài khoản đã bị khóa. Hãy liên hệ quản trị viên.'); return; }
+        if (window.authNormUser(rec.username) !== window.authNormUser(u)) { await fail('Hồ sơ tài khoản không khớp. Hãy liên hệ quản trị viên.'); return; }
+        window.__myRec = Object.assign({ uid: cred.user.uid }, rec);
+        setCurrentUser(rec.username, { uid: cred.user.uid, role: rec.role || 'viewer' });
+        data.users = [window.__myRec];
+        location.reload();
+      } finally { authBusy('button[onclick="doLogin()"]', false); }
+    };
+
+    window.doLogout = async function () {
+      try { if (fbAuth) await fbAuth.signOut(); } catch (e) { }
+      window.__myRec = null;
       clearCurrentUser();
       location.reload();
     };
 
-    window.doLogin = async function () {
-      const u = document.getElementById('login-username').value.trim();
-      const p = document.getElementById('login-password').value;
-
-      let valid = false, serverChecked = false, serverErr = '';
-      if (u === 'admin' && p === 'Hieu1234') {
-        valid = true;
-      } else {
-        const btn = document.querySelector('button[onclick="doLogin()"]');
-        const oldText = btn.innerText;
-        btn.innerText = 'Đang xác thực...';
-        btn.disabled = true;
-
-        if (fbFirestore && navigator.onLine) {
-           try {
-              const docSnap = await fbFirestore.collection("app_data").doc("main").get({source: 'server'});
-            serverChecked = true;
-              if (docSnap.exists) {
-                 const serverData = docSnap.data();
-                 if (serverData.users) data.users = serverData.users;
-                 try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(e){}
-              }
-           } catch (e) {
-              console.warn('Lỗi kết nối server, đang kiểm tra bộ nhớ đệm (ngoại tuyến).', e);
-            serverErr = (e && (e.code || e.message)) || '';
-              showToast('Đang đăng nhập bằng bộ nhớ đệm (ngoại tuyến)', 'amber');
-           }
-        } else {
-           if (typeof showToast === 'function') showToast('Bạn đang ngoại tuyến. Đăng nhập bằng bộ nhớ đệm.', 'amber');
-        }
-
-        if (typeof data !== 'undefined' && data.users && data.users.length > 0) {
-          const user = data.users.find(x => x.username === u && x.password === p);
-          if (user) {
-            valid = true;
-          }
-        }
-        
-        btn.innerText = oldText;
-        btn.disabled = false;
+    // ---------- Đổi mật khẩu của chính mình (cũng dùng để bắt buộc đổi ở lần đăng nhập đầu) ----------
+    window.changeMyPassword = async function (forced) {
+      const user = fbAuth && fbAuth.currentUser;
+      if (!user) { alert('Bạn chưa đăng nhập.'); return null; }
+      const vals = await window.kqPwDialog({
+        title: forced ? 'Bạn cần đổi mật khẩu' : 'Đổi mật khẩu',
+        note: forced ? 'Mật khẩu hiện tại là mật khẩu tạm hoặc mật khẩu cũ. Hãy đặt mật khẩu mới (ít nhất 8 ký tự, có cả chữ và số).' : 'Ít nhất 8 ký tự, có cả chữ và số.',
+        fields: forced ? ['Mật khẩu mới', 'Nhập lại mật khẩu mới'] : ['Mật khẩu hiện tại', 'Mật khẩu mới', 'Nhập lại mật khẩu mới'],
+        ok: 'Đổi mật khẩu', cancel: forced ? 'Đăng xuất' : 'Hủy', modal: !!forced,
+        validate: v => forced ? window.pwRule(v) : (!v[0] ? 'Hãy nhập mật khẩu hiện tại.' : window.pwRule([v[1], v[2]]))
+      });
+      if (!vals) return null;
+      const np = forced ? vals[0] : vals[1];
+      try {
+        if (!forced) await user.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(user.email, vals[0]));
+        await user.updatePassword(np);
+        try { await fbFirestore.collection('users').doc(user.uid).update({ mustChangePassword: false }); } catch (e) { }
+        if (window.__myRec) window.__myRec.mustChangePassword = false;
+        alert('Đã đổi mật khẩu.'); return true;
+      } catch (e) {
+        const c = (e && e.code) || '';
+        alert(c === 'auth/wrong-password' || c === 'auth/invalid-credential' ? 'Mật khẩu hiện tại chưa đúng.' : c === 'auth/requires-recent-login' ? 'Phiên đăng nhập đã cũ. Hãy đăng xuất, đăng nhập lại rồi đổi mật khẩu.' : (c === 'auth/weak-password' ? 'Mật khẩu quá yếu.' : 'Chưa đổi được mật khẩu: ' + (c || e.message)));
+        return false;
       }
-
-      if (valid) {
-        setCurrentUser(u);
-        location.reload();
-      } else {
-        if (!serverChecked) {
-          const st = window.fbConnState();
-          alert('Không xác thực được tài khoản trên thiết bị này vì chưa hỏi được máy chủ.\n\n' + (st.ok ? ('Không đọc được dữ liệu tài khoản từ máy chủ' + (serverErr ? ' (' + serverErr + ')' : '') + '. Nếu mã là permission-denied thì cần mở quyền đọc trong Firestore Rules.') : st.reason) + '\n\nMật khẩu của bạn có thể vẫn đúng.');
-        } else {
-          alert("Tên đăng nhập hoặc mật khẩu không đúng!");
-        }
+    };
+    window.enforcePasswordChange = async function () {
+      for (let i = 0; i < 20; i++) {
+        const r = await window.changeMyPassword(true);
+        if (r === true) return;
+        if (r === null) { window.doLogout(); return; }
       }
     };
 
-    (async () => {
+    // ---------- Hồ sơ của chính mình: lấy vai trò từ máy chủ, theo dõi khóa/xóa tài khoản ----------
+    window.refreshMyRecord = async function () {
+      const u = getCurrentUser(); if (!u || !u.uid || !fbFirestore) return null;
+      try {
+        const s = await fbFirestore.collection('users').doc(u.uid).get();
+        if (!s.exists) { alert('Tài khoản của bạn không còn trên hệ thống. Bạn sẽ được đăng xuất.'); window.doLogout(); return null; }
+        const rec = Object.assign({ uid: u.uid }, s.data());
+        if (rec.status !== 'active') { alert('Tài khoản của bạn đã bị khóa hoặc chưa được duyệt. Bạn sẽ được đăng xuất.'); window.doLogout(); return null; }
+        window.__myRec = rec;
+        data.users = (data.users || []).filter(x => x.uid !== u.uid).concat([rec]);
+        if (u.role !== rec.role) { try { setCurrentUser(rec.username, { uid: u.uid, role: rec.role }); } catch (e) { } }
+        return rec;
+      } catch (e) { console.warn('refreshMyRecord (ngoại tuyến?)', e && e.code); return window.__myRec || null; }
+    };
+    window.watchMyRecord = function () {
+      const u = getCurrentUser(); if (!u || !u.uid || !fbFirestore || window.__myRecUnsub) return;
+      window.__myRecUnsub = fbFirestore.collection('users').doc(u.uid).onSnapshot(s => {
+        if (s.metadata && s.metadata.fromCache && !s.exists) return;
+        if (!s.exists) { alert('Tài khoản của bạn đã bị xóa khỏi hệ thống. Bạn sẽ được đăng xuất.'); window.doLogout(); return; }
+        const rec = Object.assign({ uid: u.uid }, s.data());
+        if (rec.status !== 'active') { alert('Tài khoản của bạn đã bị khóa. Bạn sẽ được đăng xuất.'); window.doLogout(); return; }
+        const roleChanged = !window.__myRec || window.__myRec.role !== rec.role;
+        window.__myRec = rec;
+        if (roleChanged && typeof render === 'function') render();
+      }, e => console.warn('watchMyRecord', e && e.code));
+    };
+    // Gọi sau khi Firebase khởi tạo: đồng bộ phiên cục bộ với Firebase Auth
+    window.authStartup = async function () {
+      if (!fbAuth) return;
+      // Dọn danh sách tài khoản kiểu cũ (có mật khẩu chữ thường) còn lưu trong bộ nhớ máy: chỉ giữ hồ sơ mới (có uid)
+      if (typeof data !== 'undefined' && data && Array.isArray(data.users)) data.users = data.users.filter(u => u && u.uid);
+      const user = await new Promise(res => { let done = false; const un = fbAuth.onAuthStateChanged(u => { if (!done) { done = true; un(); res(u); } }); setTimeout(() => { if (!done) { done = true; res(fbAuth.currentUser); } }, 4000); });
+      const cu = getCurrentUser();
+      if (cu && !user) { clearCurrentUser(); return; }                 // phiên cục bộ nhưng Firebase đã đăng xuất -> bắt đăng nhập lại
+      if (!cu && user) { try { await fbAuth.signOut(); } catch (e) { } return; }
+      if (cu && user && cu.uid && cu.uid !== user.uid) { await fbAuth.signOut(); clearCurrentUser(); return; }
+      if (cu && user) {
+        const rec = await window.refreshMyRecord();
+        if (rec) { window.watchMyRecord(); if (rec.mustChangePassword) setTimeout(() => window.enforcePasswordChange(), 600); }
+      }
+    };
+
+    // ---------- Quản trị: tạo tài khoản mới bằng ứng dụng phụ (không làm admin bị đăng xuất) ----------
+    window.authSecondary = function () {
+      let app; try { app = firebase.app('Secondary'); } catch (e) { app = firebase.initializeApp(JSON.parse(localStorage.getItem('firebase_config')), 'Secondary'); }
+      return app.auth();
+    };
+    window.authCreateAccount = async function (username, password, alias) {
+      const a2 = window.authSecondary();
+      const cred = await a2.createUserWithEmailAndPassword(window.authEmailFor(username, alias), password);
+      const uid = cred.user.uid; try { await a2.signOut(); } catch (e) { } return uid;
+    };
+    window.adminLoadUsers = async function (rerender) {
+      if (!(window.isAdmin && window.isAdmin()) || !fbFirestore) return;
+      if (window.__usersLoading) return; window.__usersLoading = true;
+      try {
+        const snap = await fbFirestore.collection('users').get();
+        data.users = snap.docs.map(d => Object.assign({ uid: d.id }, d.data()));
+        if (rerender && typeof render === 'function' && tab === 'users') render();
+      } catch (e) { console.warn('adminLoadUsers', e); if (rerender) alert('Không tải được danh sách tài khoản' + ((e && e.code) ? ' (' + e.code + ')' : '') + '.'); }
+      finally { window.__usersLoading = false; }
+    };
+
+(async () => {
       await initFirebase();
       await loadData();
       if (!getCurrentUser()) {
