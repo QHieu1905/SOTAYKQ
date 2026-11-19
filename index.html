@@ -6732,6 +6732,10 @@ ${monthFilterHtml}
         if (!log.date || !log.unitId) return;
         if (filterStartSL && log.date < filterStartSL) return;
         if (filterEndSL && log.date > filterEndSL) return;
+        // Module này chỉ thống kê tiền ĐỦ tiêu chuẩn lưu thông: loại các lượt lẫn loại/thừa/thiếu
+        // (cùng tiêu chí "Kiểm KĐTCLT" của Tổng quan) để Tổng lượt = Lượt kiểm tra − Kiểm KĐTCLT.
+        const __has2 = (Number(log.amount2) || 0) > 0;
+        if (['lan', 'thieu', 'thua'].includes(log.diff) || (__has2 && ['lan', 'thieu', 'thua'].includes(log.diff2))) return;
         const month = log.date.slice(0, 7);
         const logKey = log.id || ('#' + (__logSeq++));
         const process = (denom, qty, invQty) => {
@@ -6806,7 +6810,7 @@ ${monthFilterHtml}
 
       const summaryHtml = `
         <div style="margin-bottom: 20px; padding: 12px 18px; background: #f4fbf7; border-radius: 12px; border: 1px solid var(--mint-2); display: flex; gap: 24px; flex-wrap: wrap; align-items: center;">
-          <div style="font-size: 13.5px;"><span style="color:var(--gray); font-weight:600;">Tổng lượt kiểm tra:</span> <strong style="color:var(--ink);">${totalLuot.toLocaleString('vi-VN')}</strong> <span style="color:var(--gray-2); font-size:12px;" title="Mỗi dòng trong bảng gộp theo tháng × TCTD × mệnh giá">(${totalRows.toLocaleString('vi-VN')} dòng thống kê)</span></div>
+          <div style="font-size: 13.5px;"><span style="color:var(--gray); font-weight:600;">Tổng lượt kiểm tra (đủ TCLT):</span> <strong style="color:var(--ink);">${totalLuot.toLocaleString('vi-VN')}</strong> <span style="color:var(--gray-2); font-size:12px;" title="Mỗi dòng trong bảng gộp theo tháng × TCTD × mệnh giá">(${totalRows.toLocaleString('vi-VN')} dòng thống kê)</span></div>
           <div style="font-size: 13.5px; display: flex; align-items: center; gap: 8px;"><span style="color:var(--gray); font-weight:600;">Các mệnh giá kiểm tra:</span> <span>${denomsHtml || '<span style="color:var(--gray-2)">Không có</span>'}</span></div>
           <div style="font-size: 13.5px;"><span style="color:var(--gray); font-weight:600;">Tổng tiền:</span> <strong style="color:var(--main); font-size: 14.5px;">${fmtVND(sumTotalMoney)}</strong></div>
         </div>
