@@ -2259,6 +2259,11 @@
     .nk-desk td { padding: 12px 10px; }
     .nk-desk th:first-child, .nk-desk td:first-child { padding-left: 14px; }
     .nk-desk .unit-cell { min-width: 0; }
+    .nk-desk th:nth-child(3), .nk-desk td:nth-child(3) { min-width: 230px; width: 26%; }
+    .nk-desk td:nth-child(3) .unit-cell b { display: block; line-height: 1.4; }
+    .nk-desk .nk-unit-acts { margin-top: 8px; text-align: left; }
+    .nk-desk .nk-unit-acts .row-act { display: inline-flex; gap: 6px; }
+    .nk-desk .nk-unit-acts .row-act button { margin-left: 0; width: 34px; height: 34px; }
     .nk-desk .pill { white-space: normal; text-align: center; }
     @media (max-width: 1100px) {
       .nk-desk table { font-size: 12.5px; }
@@ -6625,8 +6630,9 @@ ${monthFilterHtml}
                 const syncBadge = typeof window.getSyncBadgeHtml === 'function' ? window.getSyncBadgeHtml('logs', r.id) : '';
 
                 const deskRow = [
-                  `<div style="text-align:center">${idx + 1}</div>`, fmtDate(r.date), unitCell(r.unitId), denomStr, amountStr, invStr, ratioStr,
-                  conclusionPill, syncBadge, fileHtml, rowActs(`openForm('log','${r.id}')`, `removeRec('logs','${r.id}')`)
+                  `<div style="text-align:center">${idx + 1}</div>`, fmtDate(r.date),
+                  unitCell(r.unitId) + `<div class="nk-unit-acts">${rowActs(`openForm('log','${r.id}')`, `removeRec('logs','${r.id}')`)}</div>`,
+                  denomStr, amountStr, invStr, ratioStr, conclusionPill, fileHtml
                 ];
 
                 const mobCard = `
@@ -6681,7 +6687,7 @@ ${monthFilterHtml}
                 return { deskRow, mobCard };
               });
 
-              const deskTable = tbl(['STT', 'Ngày kiểm tra', 'Đơn vị', 'Mệnh giá', 'Số tờ kiểm tra', 'Số tờ KĐTCLT', 'Tỷ lệ', 'Kết luận', 'Đồng bộ', 'File', ''], mappedData.map(d => d.deskRow));
+              const deskTable = tbl(['STT', 'Ngày kiểm tra', 'Đơn vị', 'Mệnh giá', 'Số tờ kiểm tra', 'Số tờ KĐTCLT', 'Tỷ lệ', 'Kết luận', 'File'], mappedData.map(d => d.deskRow));
               const mobList = mappedData.map(d => d.mobCard).join('');
 
               return `
