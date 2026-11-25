@@ -2313,8 +2313,10 @@
     body.theme-qd .tb { display: block; max-width: 1000px; margin: 0 auto 16px; padding: 0; gap: 0; border: 2px solid #f5c842; border-radius: 22px; overflow: hidden; background: #7a1218; box-shadow: 9px 9px 22px rgba(190,130,60,.16), -7px -7px 18px rgba(255,255,255,.6); }
     body.theme-qd .tb::after { display: none; }
     body.theme-qd .tb img { display: block; width: 100%; height: auto; }
-    .clay-ic { width: 30px; height: 30px; object-fit: contain; flex: none; filter: drop-shadow(0 3px 4px rgba(150,90,30,.28)); }
-    .navbtn { gap: 10px; }
+    .clay-ic { display: none; width: 30px; height: 30px; object-fit: contain; flex: none; filter: drop-shadow(0 3px 4px rgba(150,90,30,.28)); }
+    body.theme-qd .clay-ic { display: inline-block; }
+    body.theme-qd .navbtn > svg, body.theme-qd .fan-item > svg { display: none; }
+    body.theme-qd .navbtn { gap: 10px; }
     .navbtn .clay-ic { width: 32px; height: 32px; }
     .fan-item .clay-ic { width: 28px; height: 28px; }
     /* ===== Hết chủ đề ===== */
@@ -3255,7 +3257,7 @@ window.toggleTheme = function () { var on = !document.body.classList.contains('t
       const navEl = document.getElementById('nav');
       if(navEl) {
         navEl.innerHTML = [{ id: 'tongquan', label: 'Tổng quan', icon: 'dash' }, ...tabsToRender].map(t =>
-          `<button class="navbtn ${tab === t.id ? 'active' : ''}" onclick="switchTab('${t.id}', true)">${(window.clayIcon(t.id) || ICONS[t.icon]) || ''}<span>${String(t.label).replace(/^\d+\.\s*/, '')}</span></button>`).join('');
+          `<button class="navbtn ${tab === t.id ? 'active' : ''}" onclick="switchTab('${t.id}', true)">${(window.clayIcon(t.id) + ICONS[t.icon]) || ''}<span>${String(t.label).replace(/^\d+\.\s*/, '')}</span></button>`).join('');
       }
 
       const fanEl = document.getElementById('fan-items');
@@ -3334,7 +3336,7 @@ window.toggleTheme = function () { var on = !document.body.classList.contains('t
             const ln = (cls, extra) => `<line class="${cls}" pathLength="1" x1="${c(_ux * 36)}" y1="${c(_uy * 36)}" x2="${c(_ux * (_len - 30))}" y2="${c(_uy * (_len - 30))}" ${extra || ''}/>`;
             _rays.push(`<g class="fan-ray ${isActive ? 'active' : ''}" data-id="${t.id}">${ln('fan-ray-base')}${ln('fan-ray-glow', `style="animation-delay:${(index * 0.15).toFixed(2)}s"`)}</g>`);
           }
-          return `<button class="fan-item ${isActive ? 'active' : ''}" data-id="${t.id}" data-x="${x}" data-y="${y}" style="--x: ${x}px; --y: ${y}px;" onclick="${onclickStr}">${(window.clayIcon(t.id) || ICONS[t.icon]) || ''}<span>${shortLabel}</span></button>`;
+          return `<button class="fan-item ${isActive ? 'active' : ''}" data-id="${t.id}" data-x="${x}" data-y="${y}" style="--x: ${x}px; --y: ${y}px;" onclick="${onclickStr}">${(window.clayIcon(t.id) + ICONS[t.icon]) || ''}<span>${shortLabel}</span></button>`;
         }).join('');
         fanEl.innerHTML = `<svg class="fan-rays" aria-hidden="true">${_rays.join('')}</svg>` + _btns;
       }
